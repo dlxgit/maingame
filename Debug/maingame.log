@@ -1,0 +1,55 @@
+﻿Сборка начата 02.11.2015 20:51:39.
+     1>Проект "D:\game project\maingame\maingame\maingame.vcxproj" в узле 2 (целевые объекты Build).
+     1>ClCompile:
+         C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\CL.exe /c /I"D:\SFML-Visual_Studio2015RCx32\include" /ZI /nologo /W3 /WX- /sdl /Od /Oy- /D SFML_DYNAMIC /D _WIN32 /D _DEBUG /D _CONSOLE /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"Debug\\" /Fd"Debug\vc140.pdb" /Gd /TP /analyze- /errorReport:prompt main.cpp
+         main.cpp
+     1>d:\game project\maingame\maingame\main.cpp(185): warning C4305: +=: усечение из "double" к "float"
+     1>d:\game project\maingame\maingame\main.cpp(186): warning C4305: -=: усечение из "double" к "float"
+     1>d:\game project\maingame\maingame\main.cpp(192): warning C4305: +=: усечение из "double" к "float"
+     1>d:\game project\maingame\maingame\main.cpp(193): warning C4305: +=: усечение из "double" к "float"
+     1>d:\game project\maingame\maingame\main.cpp(199): warning C4305: -=: усечение из "double" к "float"
+     1>d:\game project\maingame\maingame\main.cpp(200): warning C4305: +=: усечение из "double" к "float"
+     1>d:\game project\maingame\maingame\main.cpp(206): warning C4305: -=: усечение из "double" к "float"
+     1>d:\game project\maingame\maingame\main.cpp(207): warning C4305: -=: усечение из "double" к "float"
+     1>d:\game project\maingame\maingame\main.cpp(361): warning C4244: =: преобразование "int" в "float", возможна потеря данных
+     1>d:\game project\maingame\maingame\main.cpp(369): warning C4244: =: преобразование "int" в "float", возможна потеря данных
+     1>d:\game project\maingame\maingame\main.cpp(418): warning C4244: =: преобразование "int" в "float", возможна потеря данных
+     1>d:\game project\maingame\maingame\main.cpp(429): warning C4244: =: преобразование "int" в "float", возможна потеря данных
+     1>d:\game project\maingame\maingame\main.cpp(436): warning C4244: =: преобразование "int" в "float", возможна потеря данных
+     1>d:\game project\maingame\maingame\main.cpp(440): warning C4244: =: преобразование "int" в "float", возможна потеря данных
+     1>d:\game project\maingame\maingame\main.cpp(520): warning C4244: инициализация: преобразование "int" в "float", возможна потеря данных
+     1>d:\game project\maingame\maingame\main.cpp(521): warning C4244: инициализация: преобразование "int" в "float", возможна потеря данных
+     1>d:\game project\maingame\maingame\main.cpp(537): warning C4244: =: преобразование "int" в "float", возможна потеря данных
+     1>d:\game project\maingame\maingame\main.cpp(546): warning C4244: =: преобразование "int" в "float", возможна потеря данных
+     1>d:\game project\maingame\maingame\main.cpp(604): warning C4244: =: преобразование "int" в "float", возможна потеря данных
+     1>d:\game project\maingame\maingame\main.cpp(617): warning C4244: =: преобразование "int" в "float", возможна потеря данных
+     1>d:\game project\maingame\maingame\main.cpp(625): warning C4244: =: преобразование "int" в "float", возможна потеря данных
+     1>d:\game project\maingame\maingame\main.cpp(630): warning C4244: =: преобразование "int" в "float", возможна потеря данных
+     1>d:\game project\maingame\maingame\main.cpp(644): warning C4244: =: преобразование "float" в "int", возможна потеря данных
+     1>d:\game project\maingame\maingame\main.cpp(645): warning C4244: =: преобразование "float" в "int", возможна потеря данных
+     1>d:\game project\maingame\maingame\main.cpp(655): warning C4244: инициализация: преобразование "int" в "float", возможна потеря данных
+     1>d:\game project\maingame\maingame\main.cpp(656): warning C4244: инициализация: преобразование "int" в "float", возможна потеря данных
+     1>d:\game project\maingame\maingame\main.cpp(674): warning C4244: инициализация: преобразование "int" в "float", возможна потеря данных
+     1>d:\game project\maingame\maingame\main.cpp(675): warning C4244: инициализация: преобразование "int" в "float", возможна потеря данных
+     1>d:\game project\maingame\maingame\main.cpp(692): warning C4305: -=: усечение из "double" к "float"
+     1>d:\game project\maingame\maingame\main.cpp(693): warning C4305: -=: усечение из "double" к "float"
+     1>d:\game project\maingame\maingame\main.cpp(696): warning C4305: +=: усечение из "double" к "float"
+     1>d:\game project\maingame\maingame\main.cpp(697): warning C4305: -=: усечение из "double" к "float"
+     1>d:\game project\maingame\maingame\main.cpp(700): warning C4305: -=: усечение из "double" к "float"
+     1>d:\game project\maingame\maingame\main.cpp(701): warning C4305: +=: усечение из "double" к "float"
+     1>d:\game project\maingame\maingame\main.cpp(704): warning C4305: +=: усечение из "double" к "float"
+     1>d:\game project\maingame\maingame\main.cpp(705): warning C4305: +=: усечение из "double" к "float"
+     1>d:\game project\maingame\maingame\main.cpp(710): warning C4244: =: преобразование "float" в "int", возможна потеря данных
+     1>d:\game project\maingame\maingame\main.cpp(711): warning C4244: =: преобразование "float" в "int", возможна потеря данных
+     1>d:\game project\maingame\maingame\main.cpp(715): warning C4244: аргумент: преобразование "int" в "float", возможна потеря данных
+     1>d:\game project\maingame\maingame\main.cpp(785): warning C4244: аргумент: преобразование "int" в "float", возможна потеря данных
+     1>d:\game project\maingame\maingame\main.cpp(864): warning C4244: аргумент: преобразование "int" в "float", возможна потеря данных
+     1>d:\game project\maingame\maingame\main.cpp(920): warning C4244: аргумент: преобразование "float" в "int", возможна потеря данных
+       Link:
+         C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"D:\game project\maingame\Debug\maingame.exe" /INCREMENTAL /NOLOGO /LIBPATH:"D:\SFML-Visual_Studio2015RCx32\lib" "sfml-graphics-d.lib" "sfml-window-d.lib" "sfml-system-d.lib" "sfml-audio-d.lib" kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /Debug /PDB:"D:\game project\maingame\Debug\maingame.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"D:\game project\maingame\Debug\maingame.lib" /MACHINE:X86 Debug\main.obj
+         maingame.vcxproj -> D:\game project\maingame\Debug\maingame.exe
+     1>Сборка проекта "D:\game project\maingame\maingame\maingame.vcxproj" завершена (целевые объекты Build).
+
+Сборка успешно завершена.
+
+Затраченное время: 00:00:02.50
