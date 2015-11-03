@@ -4,9 +4,20 @@
 
 #include "map.h"
 
+
 //delSoon
 //убийство зомби (удаление 1 элемента в структуре)
 //избавитьс€ от обхода по структуре через len_struct...
+
+//помен€ть SHOT MAX TIME на дистанцию выстрела. (если применимо к текущей механике)
+
+//помен€ть скорость при движении по диагонали у стены на равную обычной (а не 0.66)
+//сделать 2 шага зомби: 1 дл€ сагреного и другой дл€ обычного.
+
+
+//след. шаг - исправить направление зомби если блок(чтобы не упиралс€ в стену а передвигалс€ по другой координате (x/y))
+//new
+//сделать вычисление следующего направлени€ зомби если перед ним блок (опр. кратчайший путь)
 
 using namespace sf;
 using namespace std;
@@ -15,13 +26,13 @@ typedef enum
 {
 	NONE,
 	UP,
-	DOWN,
-	LEFT,
-	RIGHT,
 	UPRIGHT,
-	UPLEFT,
+	RIGHT,
 	DOWNRIGHT,
+	DOWN, 
 	DOWNLEFT,
+	LEFT,
+	UPLEFT,
 	FOLLOW
 } Direction;
 
@@ -40,7 +51,7 @@ const int STEPSHOT = 12;
 const int ZOMBIE_DAMAGE = 30;
 const int ZOMBIE_MAX_HP = 100;
 
-const int VISION_DISTANCE = 230;
+const int VISION_DISTANCE = 300;
 
 const int len_struct_shots = 15;
 const int len_struct_zombies = 3;
@@ -84,8 +95,8 @@ struct
 
 struct
 {
-	int x;
-	int y;
+	float x;
+	float y;
 	int HP;
 	Direction dir;
 	bool follow;
@@ -319,7 +330,7 @@ void ProcessEvents(RenderWindow & window, Direction & dir, Sprite & hero, float 
 	}
 }
 
-void InteractWithMap(Sprite & hero, Direction & dir) //ф-ци€ взаимодействи€ с картой      мб объединить с функцией update? чтобы сразу здесь вычисл€ть перемещение геро€ (проблема с коллизией при движении по диагонали
+void HeroCollision(Sprite & hero, Direction & dir) //ф-ци€ взаимодействи€ с картой      мб объединить с функцией update? чтобы сразу здесь вычисл€ть перемещение геро€ (проблема с коллизией при движении по диагонали
 {
 	float x = hero.getPosition().x;
 	float y = hero.getPosition().y;
@@ -329,120 +340,138 @@ void InteractWithMap(Sprite & hero, Direction & dir) //ф-ци€ взаимодействи€ с ка
 	float sizeY = hero.getGlobalBounds().height;
 
 
-	/*
-	if (TILEMAP[int(x) / STEP][int(y) / STEP] == 'b' || TILEMAP[int(x + sizeX) / STEP][int(y) / STEP] == 'b')
+	//проверка 4 угловых точек спрайта (верхн€€ лева€, права€, нижн€€ лева€, права€) на вхождение в блок карты
+	bool q = (TILEMAP[int(y) / STEP][int(x) / STEP] == 'b');
+	bool w = (TILEMAP[int(y) / STEP][int(x + sizeX - 1) / STEP] == 'b');
+	bool e = (TILEMAP[int(y + sizeY - 1) / STEP][int(x + sizeX - 1) / STEP] == 'b');
+	bool r = (TILEMAP[int(y + sizeY - 1) / STEP][int(x) / STEP] == 'b');
 
-	//right up and down
-	if (TILEMAP[int(x + sizeX) / STEP][int(y) / STEP] == 'b' || TILEMAP[int(x + sizeX) / STEP][int(y + sizeY) / STEP] == 'b')
-
-	//down left and right
-	if (TILEMAP[int(x) / STEP][int(y + sizeY) / STEP] == 'b' || TILEMAP[int(x + sizeX) / STEP][int(y + sizeY) / STEP] == 'b')
-
-	//left up and down
-	if (TILEMAP[int(x) / STEP][int(y) / STEP] == 'b' || TILEMAP[int(x + sizeX) / STEP][int(y) / STEP] == 'b')
-
-	//upright except downleft
-	if (TILEMAP[int(x) / STEP][int(y) / STEP] == 'b' || TILEMAP[int(x + sizeX) / STEP][int(y) / STEP] == 'b' || TILEMAP[int(x) / STEP][int(y) / STEP] == 'b')
-	//upleft except downright
-	if (TILEMAP[int(x) / STEP][int(y) / STEP] == 'b' || TILEMAP[int(x + sizeX) / STEP][int(y) / STEP] == 'b' || TILEMAP[int(x + sizeX) / STEP][int(y + sizeY) / STEP] == 'b')
-	//downright except upleft
-	if (TILEMAP[int(x) / STEP][int(y + sizeY) / STEP] == 'b' || TILEMAP[int(x + sizeX) / STEP][int(y + sizeY) / STEP] == 'b' || TILEMAP[int(x + sizeX) / STEP][int(y) / STEP] == 'b')
-	//downleft except upright
-	if (TILEMAP[int(x) / STEP][int(y + sizeY) / STEP] == 'b' || TILEMAP[int(x + sizeX) / STEP][int(y + sizeY) / STEP] == 'b' || TILEMAP[int(x) / STEP][int(y) / STEP] == 'b')
-
-	*/
+	cout << " BOOL !!  " << q << w << e << r << endl;
 
 	switch (dir)
 	{
 	case UP:
 		//up left and right
-		if (TILEMAP[int(y) / STEP][int(x) / STEP] == 'b' || TILEMAP[int(y) / STEP][int(x + sizeX) / STEP] == 'b')
+		if (q || w)
 		{
 			y = (int(y) / STEP) * STEP + STEP;
 		}
 		break;
 	case UPRIGHT:
 		//upright except downleft
-
-		if (TILEMAP[int(y) / STEP][int(x) / STEP] == 'b') //upleft
+		
+		if (w  && !(q || e))
 		{
 			y = (int(y) / STEP) * STEP + STEP;
+			x = x + 0.33* STEPHERO;
 		}
-		if (TILEMAP[int(y + sizeY) / STEP][int(x + sizeX) / STEP] == 'b') //upright
+		else if (q && e)
 		{
+			y = (int(y) / STEP) * STEP + STEP;
 			x = (int(x + sizeX) / STEP) * STEP - sizeX;
 		}
-		else if (TILEMAP[int(y + sizeY) / STEP][int(x) / STEP] == 'b')
+		else if (q && !e) //upleft
 		{
-
+			y = (int(y) / STEP) * STEP + STEP;
+			x = x + 0.33* STEPHERO;
+		}
+		else if (e && !q) //upright
+		{
+			x = (int(x + sizeX) / STEP) * STEP - sizeX;
+			y = y - 0.33* STEPHERO;
 		}
 		break;
 	case RIGHT:
 		//right up and down
-		if (TILEMAP[int(y) / STEP][int(x + sizeX) / STEP] == 'b' || TILEMAP[int(y + sizeY) / STEP][int(x + sizeX) / STEP] == 'b')
+		if (w || e)
 		{
 			x = (int(x + sizeX) / STEP) * STEP - sizeX;
 		}
 		break;
 	case DOWNRIGHT:
 		//downright except upleft
-		if (TILEMAP[int(y + sizeY) / STEP][int(x) / STEP] == 'b')  //downleft
+		if (e && !(w || r))
 		{
 			y = (int(y + sizeY) / STEP) * STEP - sizeY;
+			x = x + 0.33 * STEPHERO;
 		}
-		if (TILEMAP[int(y) / STEP][int(x + sizeX) / STEP] == 'b')  //upright
+		else if (w && r)  //downright
 		{
+			y = (int(y + sizeY) / STEP) * STEP - sizeY;
 			x = (int(x + sizeX) / STEP) * STEP - sizeX;
 		}
-		else if (TILEMAP[int(y + sizeY) / STEP][int(x + sizeX) / STEP] == 'b')  //downright
+		else if (r && !w) //downleft
 		{
-
+			y = (int(y + sizeY) / STEP) * STEP - sizeY;
+			x = x + 0.33 * STEPHERO;
+		}
+		else if (w && !r)  //upright
+		{
+			x = (int(x + sizeX) / STEP) * STEP - sizeX;
+			y = y + 0.33* STEPHERO;
 		}
 
 		break;
 	case DOWN:
 		//down left and right
-		if (TILEMAP[int(y + sizeY) / STEP][int(x) / STEP] == 'b' || TILEMAP[int(y + sizeY) / STEP][int(x + sizeX) / STEP] == 'b')
+		if (e || r)
 		{
 			y = (int(y + sizeY) / STEP) * STEP - sizeY;
 		}
 		break;
 	case DOWNLEFT:
 		//downleft except upright
-		if (TILEMAP[int(y + sizeY) / STEP][int(x + sizeX) / STEP] == 'b') //downright
+		if (r && !(q || e))
 		{
 			y = (int(y + sizeY) / STEP) * STEP - sizeY;
+			x = x - 0.33* STEPHERO;
 		}
-		if (TILEMAP[int(y) / STEP][int(x) / STEP] == 'b')  //upleft
+		else if ((q && e) || (r && !(q||e)))  //downleft
 		{
+			y = (int(y + sizeY) / STEP) * STEP - sizeY;
 			x = (int(x) / STEP) * STEP + STEP;
 		}
-		else if (TILEMAP[int(y + sizeY) / STEP][int(x) / STEP] == 'b')  //downleft
+		else if (e && !q) //downright
 		{
-
+			y = (int(y + sizeY) / STEP) * STEP - sizeY;
+			x = x - 0.33* STEPHERO;
+		}
+		else if (q && !e) //upleft
+		{
+			x = (int(x) / STEP) * STEP + STEP;
+			y = y + 0.33* STEPHERO;
 		}
 		break;
 	case LEFT:
 		//left up and down
-		if (TILEMAP[int(y) / STEP][int(x) / STEP] == 'b' || TILEMAP[int(y) / STEP][int(x + sizeX) / STEP] == 'b')
+		if (q || r)
 		{
 			x = (int(x) / STEP) * STEP + STEP;
 		}
 		break;
 	case UPLEFT:
 		//upleft except downright
-		if (TILEMAP[int(y) / STEP][int(x + sizeX) / STEP] == 'b') //upright
+		if (q && !(w || r))
 		{
 			y = (int(y) / STEP) * STEP + STEP;
+			x = x - 0.33* STEPHERO;
 		}
-		if (TILEMAP[int(y + sizeY) / STEP][int(x) / STEP] == 'b')  //downleft
+		else if ((w && r) || (q && !(w || r)))   //upleft
 		{
+			y = (int(y) / STEP) * STEP + STEP;
 			x = (int(x) / STEP) * STEP + STEP;
 		}
-		else if (TILEMAP[int(y) / STEP][int(x) / STEP] == 'b')   //upleft
+		else if (w && !r) //upright
 		{
-
+			y = (int(y) / STEP) * STEP + STEP;
+			x = x - 0.33* STEPHERO;
 		}
+		else if (r && !w)  //downleft
+		{
+			x = (int(x) / STEP) * STEP + STEP;
+			y = y - 0.33* STEPHERO;
+		}
+
 		break;
 	case NONE:
 		break;
@@ -481,7 +510,7 @@ void UpdateShots(float time) //обновление данных о пул€х
 
 			if (time - struct_shots[index_shot].time > SHOT_MAX_TIME)
 			{
-				cout << "CLEAR" << endl;
+				//cout << "CLEAR" << endl;
 				struct_shots[index_shot].x = 0;
 				struct_shots[index_shot].y = 0;
 				struct_shots[index_shot].dir = NONE;
@@ -508,144 +537,168 @@ void ZombieSpawn(int posX, int posY)
 	struct_zombies[i].sprite.setTexture(struct_zombies[i].texture);
 }
 
-void ZombieCollision(Sprite & sprite_zombie) //ф-ци€ взаимодействи€ с картой      мб объединить с функцией update? чтобы сразу здесь вычисл€ть перемещение геро€ (проблема с коллизией при движении по диагонали
+void ZombieCollision(int n, Sprite & sprite_zombie) //ф-ци€ взаимодействи€ с картой      мб объединить с функцией update? чтобы сразу здесь вычисл€ть перемещение геро€ (проблема с коллизией при движении по диагонали
 {
-	for (int i = 0; i < len_struct_zombies; i++)
-	{
-
 		//исправить чтобы дл€ всех а не только преследующих
-		if (struct_zombies[i].follow == true)
+		if (struct_zombies[n].follow == true)
 		{
 
-			float x = struct_zombies[i].x;
-			float y = struct_zombies[i].x;
-			Direction dir = struct_zombies[i].dir;
+			float x = struct_zombies[n].x;
+			float y = struct_zombies[n].y;
 
-			//herosize
+			//dunno
+			float x0 = x;
+			float y0 = y;
+
+			Direction dir = struct_zombies[n].dir;
+
+			//spritesize
 			float sizeX = sprite_zombie.getGlobalBounds().width;
 			float sizeY = sprite_zombie.getGlobalBounds().height;
 
 
-			cout << struct_zombies[i].follow << endl;
+			//проверка 4 угловых точек спрайта (верхн€€ лева€, права€, нижн€€ лева€, права€) на вхождение в блок карты
+			bool q = (TILEMAP[int(y) / STEP][int(x) / STEP] == 'b');
+			bool w = (TILEMAP[int(y) / STEP][int(x + sizeX - 1) / STEP] == 'b');
+			bool e = (TILEMAP[int(y + sizeY - 1) / STEP][int(x + sizeX - 1) / STEP] == 'b');
+			bool r = (TILEMAP[int(y + sizeY - 1) / STEP][int(x) / STEP] == 'b');
+
+			//cout << "  ZOMB !!  " << q << w << e << r << endl;
 
 			switch (dir)
 			{
 			case UP:
 				//up left and right
-				if (TILEMAP[int(y) / STEP][int(x) / STEP] == 'b' || TILEMAP[int(y) / STEP][int(x + sizeX) / STEP] == 'b')
+				if (q || w)
 				{
 					y = (int(y) / STEP) * STEP + STEP;
 				}
-				cout << " UP " << endl;
 				break;
 			case UPRIGHT:
 				//upright except downleft
 
-				if (TILEMAP[int(y) / STEP][int(x) / STEP] == 'b') //upleft
+				if (w  && !(q || e))
 				{
 					y = (int(y) / STEP) * STEP + STEP;
-					dir = RIGHT;
+					x = x + 0.33* STEPHERO;
 				}
-				if (TILEMAP[int(y + sizeY) / STEP][int(x + sizeX) / STEP] == 'b') //upright
+				else if (q && e)
+				{
+					y = (int(y) / STEP) * STEP + STEP;
+					x = (int(x + sizeX) / STEP) * STEP - sizeX;
+				}
+				else if (q && !e) //upleft
+				{
+					y = (int(y) / STEP) * STEP + STEP;
+					x = x + 0.33* STEPHERO;
+				}
+				else if (e && !q) //upright
 				{
 					x = (int(x + sizeX) / STEP) * STEP - sizeX;
-					dir = UP;
+					y = y - 0.33* STEPHERO;
 				}
-				else if (TILEMAP[int(y + sizeY) / STEP][int(x) / STEP] == 'b')
-				{
-
-				}
-
-				cout << " UPRIGHT " << endl;
 				break;
 			case RIGHT:
 				//right up and down
-				if (TILEMAP[int(y) / STEP][int(x + sizeX) / STEP] == 'b' || TILEMAP[int(y + sizeY) / STEP][int(x + sizeX) / STEP] == 'b')
+				if (w || e)
 				{
 					x = (int(x + sizeX) / STEP) * STEP - sizeX;
 				}
-				cout << "RIGHT " << endl;
 				break;
 			case DOWNRIGHT:
 				//downright except upleft
-				if (TILEMAP[int(y + sizeY) / STEP][int(x) / STEP] == 'b')  //downleft
+				if (e && !(w || r))
 				{
 					y = (int(y + sizeY) / STEP) * STEP - sizeY;
-					dir = RIGHT;
+					x = x + 0.33 * STEPHERO;
 				}
-				if (TILEMAP[int(y) / STEP][int(x + sizeX) / STEP] == 'b')  //upright
+				else if (w && r)  //downright
+				{
+					y = (int(y + sizeY) / STEP) * STEP - sizeY;
+					x = (int(x + sizeX) / STEP) * STEP - sizeX;
+				}
+				else if (r && !w) //downleft
+				{
+					y = (int(y + sizeY) / STEP) * STEP - sizeY;
+					x = x + 0.33 * STEPHERO;
+				}
+				else if (w && !r)  //upright
 				{
 					x = (int(x + sizeX) / STEP) * STEP - sizeX;
-					dir = DOWN;
+					y = y + 0.33* STEPHERO;
 				}
-				else if (TILEMAP[int(y + sizeY) / STEP][int(x + sizeX) / STEP] == 'b')  //downright
-				{
 
-				}
-				cout << " DOWNRIGHT " << endl;
 				break;
 			case DOWN:
 				//down left and right
-				if (TILEMAP[int(y + sizeY) / STEP][int(x) / STEP] == 'b' || TILEMAP[int(y + sizeY) / STEP][int(x + sizeX) / STEP] == 'b')
+				if (e || r)
 				{
 					y = (int(y + sizeY) / STEP) * STEP - sizeY;
 				}
-				cout << "DOWN " << endl;
 				break;
 			case DOWNLEFT:
 				//downleft except upright
-				if (TILEMAP[int(y + sizeY) / STEP][int(x + sizeX) / STEP] == 'b') //downright
+				if (r && !(q || e))
 				{
 					y = (int(y + sizeY) / STEP) * STEP - sizeY;
-					dir = LEFT;
+					x = x - 0.33* STEPHERO;
 				}
-				if (TILEMAP[int(y) / STEP][int(x) / STEP] == 'b')  //upleft
+				else if ((q && e) || (r && !(q || e)))  //downleft
+				{
+					y = (int(y + sizeY) / STEP) * STEP - sizeY;
+					x = (int(x) / STEP) * STEP + STEP;
+				}
+				else if (e && !q) //downright
+				{
+					y = (int(y + sizeY) / STEP) * STEP - sizeY;
+					x = x - 0.33* STEPHERO;
+				}
+				else if (q && !e) //upleft
 				{
 					x = (int(x) / STEP) * STEP + STEP;
-					dir = DOWN;
+					y = y + 0.33* STEPHERO;
 				}
-				else if (TILEMAP[int(y + sizeY) / STEP][int(x) / STEP] == 'b')  //downleft
-				{
-
-				}
-				cout << " DOWNLEFT" << endl;
 				break;
 			case LEFT:
 				//left up and down
-				if (TILEMAP[int(y) / STEP][int(x) / STEP] == 'b' || TILEMAP[int(y) / STEP][int(x + sizeX) / STEP] == 'b')
+				if (q || r)
 				{
 					x = (int(x) / STEP) * STEP + STEP;
 				}
-				cout << "LEFT" << endl;
 				break;
 			case UPLEFT:
 				//upleft except downright
-				if (TILEMAP[int(y) / STEP][int(x + sizeX) / STEP] == 'b') //upright
+				if (q && !(w || r))
 				{
 					y = (int(y) / STEP) * STEP + STEP;
-					dir = LEFT;
+					x = x - 0.33* STEPHERO;
 				}
-				if (TILEMAP[int(y + sizeY) / STEP][int(x) / STEP] == 'b')  //downleft
+				else if ((w && r) || (q && !(w || r)))   //upleft
+				{
+					y = (int(y) / STEP) * STEP + STEP;
+					x = (int(x) / STEP) * STEP + STEP;
+				}
+				else if (w && !r) //upright
+				{
+					y = (int(y) / STEP) * STEP + STEP;
+					x = x - 0.33* STEPHERO;
+				}
+				else if (r && !w)  //downleft
 				{
 					x = (int(x) / STEP) * STEP + STEP;
-					dir = UP;
+					y = y - 0.33* STEPHERO;
 				}
-				else if (TILEMAP[int(y) / STEP][int(x) / STEP] == 'b')   //upleft
-				{
 
-				}
-				cout << "UPLEFT " << endl;
 				break;
 			case NONE:
-				cout << "NONE " << endl;
 				break;
 			}
 			
-			struct_zombies[i].x = x;
-			struct_zombies[i].y = y;
-			struct_zombies[i].dir = dir;
+			struct_zombies[n].x = x;
+			struct_zombies[n].y = y;
+			struct_zombies[n].dir = dir;
+			struct_zombies[n].sprite.setPosition(struct_zombies[n].x, struct_zombies[n].y);
 		}
-	}
 }
 
 void ZombieCheckFollow(Sprite & hero, float xHero, float yHero)
@@ -665,50 +718,49 @@ void ZombieCheckFollow(Sprite & hero, float xHero, float yHero)
 			if (abs(xZombie - xHero) < VISION_DISTANCE && abs(yZombie - yHero) < VISION_DISTANCE)
 				struct_zombies[i].follow = true;
 		}
-
 	}
 }
 
 void ZombieUpdatePosition(int z)
 {
-	float x = struct_zombies[z].x;
-	float y = struct_zombies[z].y;
+	float xZombie = struct_zombies[z].x;
+	float yZombie = struct_zombies[z].y;
 
 	switch (struct_zombies[z].dir)
 	{
 	case UP:
-		y -= STEPZOMBIE;
+		yZombie -= STEPZOMBIE;
 		break;
 	case DOWN:
-		y += STEPZOMBIE;
+		yZombie += STEPZOMBIE;
 		break;
 	case LEFT:
-		x -= STEPZOMBIE;
+		xZombie -= STEPZOMBIE;
 		break;
 	case RIGHT:
-		x += STEPZOMBIE;
+		xZombie += STEPZOMBIE;
 		break;
 	case UPLEFT:
-		x -= STEPZOMBIE * 0.66;
-		y -= STEPZOMBIE * 0.66;
+		xZombie -= STEPZOMBIE * 0.66;
+		yZombie -= STEPZOMBIE * 0.66;
 		break;
 	case UPRIGHT:
-		x += STEPZOMBIE * 0.66;
-		y -= STEPZOMBIE * 0.66;
+		xZombie += STEPZOMBIE * 0.66;
+		yZombie -= STEPZOMBIE * 0.66;
 		break;
 	case DOWNLEFT:
-		x -= STEPZOMBIE * 0.66;
-		y += STEPZOMBIE * 0.66;
+		xZombie -= STEPZOMBIE * 0.66;
+		yZombie += STEPZOMBIE * 0.66;
 		break;
 	case DOWNRIGHT:
-		x += STEPZOMBIE * 0.66;
-		y += STEPZOMBIE * 0.66;
+		xZombie += STEPZOMBIE * 0.66;
+		yZombie += STEPZOMBIE * 0.66;
 		break;
 	}
 
 	//struct_zombies[z].sprite.setTextureRect(IntRect(5, 5, 30, 30));
-	struct_zombies[z].x = x;
-	struct_zombies[z].y = y;
+	struct_zombies[z].x = xZombie;
+	struct_zombies[z].y = yZombie;
 	//struct_zombies[z].sprite.setPosition(x, y);
 
 	//poka chto
@@ -730,19 +782,18 @@ void ZombieUpdateAttack(int n, float xZombie, float yZombie, float xHero, float 
 	}
 }
 
-void ZombieUpdate(Sprite & hero, float & time)
+void ZombieUpdate(Sprite & hero, Sprite & sprite_zombie, float & time)
 {
 	float xHero = hero.getPosition().x;
 	float yHero = hero.getPosition().y;
 
 	ZombieCheckFollow(hero, xHero, yHero);
 
-	for (int i = 0; i < len_struct_zombies; i++)
+	for (int i = 0; i < len_struct_zombies - 2; i++)
 	{
 		Direction dir = struct_zombies[i].dir;
 
-		if (struct_zombies[i].follow == true)
-		{
+
 
 			int xZombie = struct_zombies[i].x;
 			int yZombie = struct_zombies[i].y;
@@ -753,39 +804,48 @@ void ZombieUpdate(Sprite & hero, float & time)
 			//float di = sqrt(pow(dx,2) + pow(dy,2));
 
 
-			if ((dx / dy) > 0.85 && (dy / dx) < 1.15)
+			if (struct_zombies[i].follow)
 			{
-				if (xHero >= xZombie && yHero >= yZombie)
-					dir = DOWNRIGHT;
-				else if (xHero >= xZombie && yHero < yZombie)
-					dir = UPRIGHT;
-				else if (xHero < xZombie && yHero >= yZombie)
-					dir = DOWNLEFT;
-				else if (xHero < xZombie && yHero < yZombie)
-					dir = UPLEFT;
-			}
-			else if (dx >= dy)
-			{
-				if (xHero > xZombie)
-					dir = RIGHT;
-				else
-					dir = LEFT;
-			}
-			else if (dx < dy)
-			{
-				if (yHero > yZombie)
-					dir = DOWN;
-				else
-					dir = UP;
+				if ((dx / dy) > 0.85 && (dy / dx) < 1.15)
+				{
+					if (xHero >= xZombie && yHero >= yZombie)
+						dir = DOWNRIGHT;
+					else if (xHero >= xZombie && yHero < yZombie)
+						dir = UPRIGHT;
+					else if (xHero < xZombie && yHero >= yZombie)
+						dir = DOWNLEFT;
+					else if (xHero < xZombie && yHero < yZombie)
+						dir = UPLEFT;
+				}
+				else if (dx >= dy)
+				{
+					if (xHero > xZombie)
+						dir = RIGHT;
+					else
+						dir = LEFT;
+				}
+				else if (dx < dy)
+				{
+					if (yHero > yZombie)
+						dir = DOWN;
+					else
+						dir = UP;
+				}
 			}
 			if (xHero != xZombie || yHero != yZombie)
 				
 				ZombieUpdatePosition(i);
 			
+			ZombieCollision(i, sprite_zombie);
 			ZombieUpdateAttack(i, xZombie, yZombie, xHero, yHero, time);
-		}
+			cout << dir << "  dir" << endl;
+		
 		//UpdateZombiePosition(i);  make it for all zombies, not jsut for following ones
 		struct_zombies[i].dir = dir;
+
+		//remove soon
+		if (struct_zombies[i].follow == false) 
+			struct_zombies[i].dir = NONE;
 	}
 }
 
@@ -848,7 +908,6 @@ ZombieFollowHero(hero);
 //draw
 void DrawHero(Sprite & hero, RenderWindow & window)
 {
-	hero.setTextureRect(IntRect(5, 5, 30, 30));
 	window.draw(hero);
 }
 
@@ -945,6 +1004,7 @@ void CheckLoot(Sprite & hero)
 void main()
 {
 
+
 	//заполнить структуру выстрелов нул€ми (дл€ определени€ пустой €чейки(пока что))
 
 	/*
@@ -983,6 +1043,7 @@ void main()
 	texture_hero.loadFromFile("images/hero.png");
 	sf::Sprite hero;
 	hero.setTexture(texture_hero);
+	hero.setTextureRect(IntRect(4, 4, 32, 32));
 
 	//zombie
 	Texture texture_zombie;
@@ -1020,16 +1081,15 @@ void main()
 
 		ProcessEvents(window, dir, hero, time);    //main
 		Update(hero, dir);
+
+		HeroCollision(hero, dir);
 		UpdateView(window, hero, view);
 
-		InteractWithMap(hero, dir);
-
 		UpdateShots(time);
-		//ZombieCollision(sprite_zombie);
-		ZombieUpdate(hero, time);
+		ZombieUpdate(hero, sprite_zombie, time);
 		//zombie_follow_hero(zombie, hero);
 
-		ZombieCollision(sprite_zombie);
+		//ZombieCollision(sprite_zombie);
 		//getplayerpositionforWiew(hero, view);
 
 		DrawMap(mapSprite, window);    //draw
@@ -1038,8 +1098,10 @@ void main()
 		DrawZombies(sprite_zombie, window);
 		DrawBar(window, view);
 
-		cout << Health_Hero << endl;
+		//cout << Health_Hero << endl;
 
+		cout << struct_zombies[0].x << "  " << struct_zombies[0].y << endl;
+		cout << "HERO  " << hero.getPosition().x  << "  " << hero.getPosition().y << endl;
 		window.display();
 	}
 
