@@ -4,7 +4,7 @@ using namespace sf;
 
 
 
-const int weight = 640;
+const int width = 640;
 const int height = 480;
 
 const int HEIGHT_MAP = 20;
