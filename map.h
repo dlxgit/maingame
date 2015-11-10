@@ -1,38 +1,37 @@
 #include <SFML/Graphics.hpp>
-
-using namespace sf;
-
+#include "game.h"
 
 
-const int width = 640;
-const int height = 480;
 
-const int HEIGHT_MAP = 20;
-const int WIDTH_MAP = 38;
-
-const int STEP = 32;
-
-
-const String TILEMAP[HEIGHT_MAP] = {
-	"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
-	"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
-	"bb                                  bb",
-	"bb                                  bb",
-	"bb                                  bb",
-	"bb       b                          bb",
-	"bb   b b b                          bb",
-	"bb   b   b                          bb",
-	"bb                         bbbbb    bb",
-	"bb                         b        bb",
-	"bb                         bbbbb    bb",
-	"bb                        b         bb",
-	"bb                                  bb",
-	"bb                                  bb",
-	"bb              b                   bb",
-	"bb              b                   bb",
-	"bb              b                   bb",
-	"bb              b                   bb",
-	"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
-	"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+const sf::String TILEMAP[HEIGHT_MAP] = {
+	"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+	"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+	"bb                                                                        bb",
+	"bb                                                                        bb",
+	"bb         bbbbbbbbbbbbbbb                                                bb",
+	"bb         b             b                                                bb",
+	"bb         b                                                              bb",
+	"bb         b                                                              bb",
+	"bb         b             b                                                bb",
+	"bb         bbbbbbbbbbbbbbb                                                 bb",
+	"bb                                                                        bb",
+	"bb                                                                        bb",
+	"bb         b             b                                                bb",
+	"bb         b             b                                                bb",
+	"bb         bbbbb    bbbbbb   bbbbbbbb       b                             bb",
+	"bb         b                                b                             bb",
+	"bb         b                                b                             bb",
+	"bb                                          b                             bb",
+	"bb                                          b                             bb",
+	"bb         b             bbbbbbbb   bbbbbbbbb                             bb",
+	"bb         b             b                                                bb",
+	"bb         b             b                                                bb",
+	"bb         b             bbbbbbbb                                         bb",
+	"bb         b             b                                                bb",
+	"bb         b             b                                                bb",
+	"bb         bbbbbbbbbbbbbbb                                                bb",
+	"bb                                                                        bb",
+	"bb                                                                        bb",
+	"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+	"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
 };
-
