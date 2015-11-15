@@ -13,15 +13,15 @@ using namespace std;
 /*
 NEWBUGS:
 {
-	hero sprite diagonal collisions (+zombie?)
+hero sprite diagonal collisions on last block (+zombie?)
 }
-FOUNDBUGS: 
+FOUNDBUGS:
 {
 zombie doesnt change direction if it collides sometimes
 }
 
 NEXT: доработать движение зомби при коллизии  !STOP! + автономное.
-	add zombie behavour when it's near hero
+add zombie behavour when it's attacking hero
 
 calculate zombie's next direction if it collides
 add files and structures
@@ -29,7 +29,6 @@ add files and structures
 //question.
 //struct game for time
 */
-
 
 struct Inventory
 {
@@ -48,7 +47,6 @@ struct Loot
 	Sprite sprite;
 	bool isDrawn;
 };
-
 
 struct Game
 {
@@ -70,6 +68,9 @@ struct Hero
 	bool isBeastAttack;
 	float beastTimer;
 	float lastAttackTime;
+	bool isAmmo;
+	float lastReloadTime;
+	bool isReloading;
 };
 
 struct Zombie
@@ -104,13 +105,12 @@ struct Npc
 	int health;
 };
 
-//TODO: replace from global
+//TODO: remove from global
 std::vector<Inventory> inventoryList;
 std::vector<Loot> lootList;
 std::vector<Shot> shotList;
 std::vector<Zombie> zombieList;
 std::vector<Npc> NpcList;
-
 
 void DrawHero(Hero & hero, RenderWindow & window)
 {
@@ -119,6 +119,7 @@ void DrawHero(Hero & hero, RenderWindow & window)
 
 void CheckLoot(Hero & hero, Texture & texture_items)
 {
+	//TODO: refact.
 	float x = hero.sprite.getPosition().x;
 	float y = hero.sprite.getPosition().y;
 
@@ -177,14 +178,19 @@ void CheckLoot(Hero & hero, Texture & texture_items)
 					i->isDrawn = false;
 					int packed = 0;
 					while (packed < AMMO_PACKS)
+					{
 						//delSoon>??
 						for (std::vector<Inventory>::iterator iter = inventoryList.begin(); iter != inventoryList.end(); ++iter)
 						{
-							iter->quantity += MAX_AMMO[iter->name];
-							packed += 1;
+							if (iter->name != MIXTURE && iter->name != KEY && iter->name != DRINK)
+							{
+								iter->quantity += MAX_AMMO[iter->name];
+								packed += 1;
+							}
 						}
+						break;
+					}
 				}
-
 			}
 		}
 	}
@@ -220,7 +226,7 @@ void AddNewShot(Hero & hero, Sprite & sprite_shot) //adding new shot in list
 		dir = UP;
 		shot.sprite.setTextureRect(IntRect(3, 11, 7, 13));
 		break;
-	case UPRIGHT: case RIGHT: case DOWNRIGHT:  
+	case UPRIGHT: case RIGHT: case DOWNRIGHT:
 		dir = RIGHT;
 		shot.sprite.setTextureRect(IntRect(0, 0, 13, 7));
 		break;
@@ -228,13 +234,35 @@ void AddNewShot(Hero & hero, Sprite & sprite_shot) //adding new shot in list
 		dir = DOWN;
 		shot.sprite.setTextureRect(IntRect(19, 11, 7, 13));
 		break;
-	case DOWNLEFT: case LEFT: case UPLEFT: 
+	case DOWNLEFT: case LEFT: case UPLEFT:
 		dir = LEFT;
 		shot.sprite.setTextureRect(IntRect(16, 0, 13, 7));
 		break;
 	}
 	shot.dir = dir;
 	shotList.push_back(shot);
+}
+
+void UpdateInventory(Hero & hero, Game & game)
+{
+	//update items 
+	if (inventoryList[hero.slotNo].current == 0 && game.time - hero.lastReloadTime > WEAPON_RELOAD_TIME)
+	{
+		hero.lastReloadTime = game.time;
+		hero.isReloading = false;
+		if (inventoryList[hero.slotNo].quantity >= MAX_AMMO[inventoryList[hero.slotNo].name])
+		{
+			inventoryList[hero.slotNo].quantity -= MAX_AMMO[inventoryList[hero.slotNo].name];
+			inventoryList[hero.slotNo].current = MAX_AMMO[inventoryList[hero.slotNo].name];
+		}
+		else
+		{
+			inventoryList[hero.slotNo].current = inventoryList[hero.slotNo].quantity;
+			inventoryList[hero.slotNo].quantity = 0;
+		}
+		if (inventoryList[hero.slotNo].quantity <= 0)
+			inventoryList[hero.slotNo].quantity = 0;
+	}
 }
 
 void ProcessEvents(Hero & hero, RenderWindow & window, Game & game, bool & switch_status, float & shot_last_time, Sprite & sprite_shot)
@@ -275,9 +303,7 @@ void ProcessEvents(Hero & hero, RenderWindow & window, Game & game, bool & switc
 			{
 				switch_status = true;
 				hero.slotNo += 1;
-
 				if (hero.slotNo >= hero.nSlots) hero.slotNo = 0;
-
 			}
 			else if (Keyboard::isKeyPressed(Keyboard::Z))
 			{
@@ -307,7 +333,6 @@ void ProcessEvents(Hero & hero, RenderWindow & window, Game & game, bool & switc
 		//attack
 		if (Keyboard::isKeyPressed(Keyboard::A))
 		{
-
 			//question. should store current inventoryItem is hero struct? / just get item from list
 			if (hero.state == BEAST)
 			{
@@ -318,7 +343,11 @@ void ProcessEvents(Hero & hero, RenderWindow & window, Game & game, bool & switc
 					hero.currentFrame = 0;
 				}
 			}
-			else
+			else if (hero.state == TRANSFORMING)
+			{
+
+			}
+			else if(hero.state == NORMAL)
 			{
 				if (inventoryList[hero.slotNo].current > 0)
 				{
@@ -355,7 +384,8 @@ void ProcessEvents(Hero & hero, RenderWindow & window, Game & game, bool & switc
 					}
 					else if (inventoryList[hero.slotNo].name == MIXTURE)
 					{
-						if (game.time > shot_last_time + 0.35)
+						//if (game.time > shot_last_time + 0.35)
+						if (inventoryList[hero.slotNo].current > 0)
 						{
 							shot_last_time = game.time;
 							hero.health += HP_PER_DRINK;
@@ -396,12 +426,10 @@ void HeroCollision(Hero & hero)
 
 
 	//проверка 4 угловых точек спрайта (верхн€€ лева€, права€, нижн€€ лева€, права€) на вхождение в блок карты
-	bool q = (TILEMAP[int(y) / STEP][int(x) / STEP] == 'b');
-	bool w = (TILEMAP[int(y) / STEP][int(x + sizeX - 1) / STEP] == 'b');
+	bool q = (TILEMAP[int(y + sizeY  - STEP) / STEP][int(x) / STEP] == 'b');
+	bool w = (TILEMAP[int(y + sizeY  - STEP) / STEP][int(x + sizeX - 1) / STEP] == 'b');
 	bool e = (TILEMAP[int(y + sizeY - 1) / STEP][int(x + sizeX - 1) / STEP] == 'b');
 	bool r = (TILEMAP[int(y + sizeY - 1) / STEP][int(x) / STEP] == 'b');
-
-	//cout << " COLLISIONHERO  " << q << w << e << r << endl;
 
 	switch (hero.dir)
 	{
@@ -409,7 +437,7 @@ void HeroCollision(Hero & hero)
 		//up left and right
 		if (q || w)
 		{
-			y = (int(y) / STEP) * STEP + STEP;
+			y = (int(y) / STEP) * STEP + STEP - (sizeY - STEP);
 		}
 		break;
 	case UPRIGHT:
@@ -417,23 +445,23 @@ void HeroCollision(Hero & hero)
 
 		if (w  && !(q || e))
 		{
-			y = (int(y) / STEP) * STEP + STEP;
-			x = x + 0.33* STEPHERO;
+			y = (int(y) / STEP) * STEP + STEP - (sizeY - STEP);
+			x = x + 0.33* STEP_HERO;
 		}
 		else if (q && e)
 		{
-			y = (int(y) / STEP) * STEP + STEP;
+			y = (int(y) / STEP) * STEP + STEP - (sizeY - STEP);
 			x = (int(x + sizeX) / STEP) * STEP - sizeX;
 		}
 		else if (q && !e) //upleft
 		{
-			y = (int(y) / STEP) * STEP + STEP;
-			x = x + 0.33* STEPHERO;
+			y = (int(y) / STEP) * STEP + STEP - (sizeY - STEP);
+			x = x + 0.33* STEP_HERO;
 		}
 		else if (e && !q) //upright
 		{
 			x = (int(x + sizeX) / STEP) * STEP - sizeX;
-			y = y - 0.33* STEPHERO;
+			y = y - 0.33* STEP_HERO;
 		}
 		break;
 	case RIGHT:
@@ -448,7 +476,7 @@ void HeroCollision(Hero & hero)
 		if (e && !(w || r))
 		{
 			y = (int(y + sizeY) / STEP) * STEP - sizeY;
-			x = x + 0.33 * STEPHERO;
+			x = x + 0.33 * STEP_HERO;
 		}
 		else if (w && r)  //downright
 		{
@@ -458,12 +486,12 @@ void HeroCollision(Hero & hero)
 		else if (r && !w) //downleft
 		{
 			y = (int(y + sizeY) / STEP) * STEP - sizeY;
-			x = x + 0.33 * STEPHERO;
+			x = x + 0.33 * STEP_HERO;
 		}
 		else if (w && !r)  //upright
 		{
 			x = (int(x + sizeX) / STEP) * STEP - sizeX;
-			y = y + 0.33* STEPHERO;
+			y = y + 0.33* STEP_HERO;
 		}
 
 		break;
@@ -479,7 +507,7 @@ void HeroCollision(Hero & hero)
 		if (r && !(q || e))
 		{
 			y = (int(y + sizeY) / STEP) * STEP - sizeY;
-			x = x - 0.33* STEPHERO;
+			x = x - 0.33* STEP_HERO;
 		}
 		else if ((q && e) || (r && !(q || e)))  //downleft
 		{
@@ -489,12 +517,12 @@ void HeroCollision(Hero & hero)
 		else if (e && !q) //downright
 		{
 			y = (int(y + sizeY) / STEP) * STEP - sizeY;
-			x = x - 0.33* STEPHERO;
+			x = x - 0.33* STEP_HERO;
 		}
 		else if (q && !e) //upleft
 		{
 			x = (int(x) / STEP) * STEP + STEP;
-			y = y + 0.33* STEPHERO;
+			y = y + 0.33* STEP_HERO;
 		}
 		break;
 	case LEFT:
@@ -508,23 +536,23 @@ void HeroCollision(Hero & hero)
 		//upleft except downright
 		if (q && !(w || r))
 		{
-			y = (int(y) / STEP) * STEP + STEP;
-			x = x - 0.33* STEPHERO;
+			y = (int(y) / STEP) * STEP + STEP - (sizeY - STEP);
+			x = x - 0.33* STEP_HERO;
 		}
 		else if ((w && r) || (q && !(w || r)))   //upleft
 		{
-			y = (int(y) / STEP) * STEP + STEP;
+			y = (int(y) / STEP) * STEP + STEP - (sizeY - STEP);
 			x = (int(x) / STEP) * STEP + STEP;
 		}
 		else if (w && !r) //upright
 		{
-			y = (int(y) / STEP) * STEP + STEP;
-			x = x - 0.33* STEPHERO;
+			y = (int(y) / STEP) * STEP + STEP - (sizeY - STEP);
+			x = x - 0.33* STEP_HERO;
 		}
 		else if (r && !w)  //downleft
 		{
 			x = (int(x) / STEP) * STEP + STEP;
-			y = y - 0.33* STEPHERO;
+			y = y - 0.33* STEP_HERO;
 		}
 
 		break;
@@ -544,8 +572,9 @@ void UpdateHeroSprite(Hero & hero)
 
 		if (hero.currentFrame > 7)
 		{
-			hero.currentFrame = 0;
 			hero.state = BEAST;
+			hero.beastTimer = 0;
+			hero.currentFrame = 0;
 		}
 	}
 	else if (hero.state == BEAST)
@@ -689,36 +718,56 @@ void UpdateHero(Hero & hero, Game & game) //position + collision + sprite
 		switch (hero.dir)
 		{
 		case UP:
-			pos.y -= STEPHERO;
+			pos.y -= STEP_HERO;
 			break;
 		case UPRIGHT:
-			pos.x += (0.66 * STEPHERO);
-			pos.y -= (0.66 * STEPHERO);
+			pos.x += (0.66 * STEP_HERO);
+			pos.y -= (0.66 * STEP_HERO);
 			break;
 		case RIGHT:
-			pos.x += STEPHERO;
+			pos.x += STEP_HERO;
 			break;
 		case DOWNRIGHT:
-			pos.x += (0.66 * STEPHERO);
-			pos.y += (0.66 * STEPHERO);
+			pos.x += (0.66 * STEP_HERO);
+			pos.y += (0.66 * STEP_HERO);
 			break;
 		case DOWN:
-			pos.y += STEPHERO;
+			pos.y += STEP_HERO;
 			break;
 		case DOWNLEFT:
-			pos.x -= (0.66 * STEPHERO);
-			pos.y += (0.66 * STEPHERO);
+			pos.x -= (0.66 * STEP_HERO);
+			pos.y += (0.66 * STEP_HERO);
 			break;
 		case LEFT:
-			pos.x -= STEPHERO;
+			pos.x -= STEP_HERO;
 			break;
 		case UPLEFT:
-			pos.x -= (0.66 * STEPHERO);
-			pos.y -= (0.66 * STEPHERO);
+			pos.x -= (0.66 * STEP_HERO);
+			pos.y -= (0.66 * STEP_HERO);
 			break;
 		case NONE:
 			break;
 		}
+	}
+	if (hero.state == BEAST)
+	{
+		hero.beastTimer += (game.time - hero.beastTimer);
+
+		if (hero.beastTimer > BEAST_MAX_TIME)
+		{
+			hero.state = NORMAL;
+			hero.currentFrame = 0;
+		}
+	}
+
+	if (inventoryList[hero.slotNo].current == 0 && inventoryList[hero.slotNo].quantity > 0)
+	{
+		if (hero.isReloading == false)
+		{
+			hero.lastReloadTime = game.time;
+			hero.isReloading = true;
+		}
+		UpdateInventory(hero, game);
 	}
 
 	UpdateHeroSprite(hero);
@@ -766,20 +815,20 @@ void UpdateShots(Hero & hero) //shots position update and delete if need
 		switch (shot->dir)  //shot position update
 		{
 		case UP:
-			shot->pos.y -= STEPSHOT;
+			shot->pos.y -= STEP_SHOT;
 			break;
 		case RIGHT:
-			shot->pos.x += STEPSHOT;
+			shot->pos.x += STEP_SHOT;
 			break;
 		case DOWN:
-			shot->pos.y += STEPSHOT;
+			shot->pos.y += STEP_SHOT;
 			break;
 		case LEFT:
-			shot->pos.x -= STEPSHOT;
+			shot->pos.x -= STEP_SHOT;
 			break;
 
 		}
-		shot->distance += STEPSHOT;
+		shot->distance += STEP_SHOT;
 
 		if (IsShotCollision(shot, hero))  //shot delete
 			shot = shotList.erase(shot);
@@ -817,7 +866,6 @@ void ZombieCollision(vector<Zombie>::iterator & zombie) //мб объединить с функци
 	//исправить чтобы дл€ всех а не только преследующих
 	if (zombie->follow == true)
 	{
-
 		float x = zombie->pos.x;
 		float y = zombie->pos.y;
 
@@ -825,28 +873,23 @@ void ZombieCollision(vector<Zombie>::iterator & zombie) //мб объединить с функци
 		float x0 = x;
 		float y0 = y;
 
-		Direction dir = zombie->dir;
-
 		//spritesize
 		float sizeX = zombie->sprite.getGlobalBounds().width;
 		float sizeY = zombie->sprite.getGlobalBounds().height;
 
-
 		//проверка 4 угловых точек спрайта (верхн€€ лева€, права€, нижн€€ лева€, права€) на вхождение в блок карты
-		bool q = (TILEMAP[int(y) / STEP][int(x) / STEP] == 'b');
-		bool w = (TILEMAP[int(y) / STEP][int(x + sizeX - 1) / STEP] == 'b');
+		bool q = (TILEMAP[int(y + sizeY - STEP) / STEP][int(x) / STEP] == 'b');
+		bool w = (TILEMAP[int(y + sizeY - STEP) / STEP][int(x + sizeX - 1) / STEP] == 'b');
 		bool e = (TILEMAP[int(y + sizeY - 1) / STEP][int(x + sizeX - 1) / STEP] == 'b');
 		bool r = (TILEMAP[int(y + sizeY - 1) / STEP][int(x) / STEP] == 'b');
 
-		//cout << "  ZOMB !!  " << q << w << e << r << endl;
-
-		switch (dir)
+		switch (zombie->dir)
 		{
 		case UP:
 			//up left and right
 			if (q || w)
 			{
-				y = (int(y) / STEP) * STEP + STEP;
+				y = (int(y) / STEP) * STEP + STEP - (sizeY - STEP);
 			}
 			break;
 		case UPRIGHT:
@@ -854,23 +897,23 @@ void ZombieCollision(vector<Zombie>::iterator & zombie) //мб объединить с функци
 
 			if (w  && !(q || e))
 			{
-				y = (int(y) / STEP) * STEP + STEP;
-				x = x + 0.33* STEPHERO;
+				y = (int(y) / STEP) * STEP + STEP - (sizeY - STEP);
+				x = x + 0.33* STEP_HERO;
 			}
 			else if (q && e)
 			{
-				y = (int(y) / STEP) * STEP + STEP;
+				y = (int(y) / STEP) * STEP + STEP - (sizeY - STEP);
 				x = (int(x + sizeX) / STEP) * STEP - sizeX;
 			}
 			else if (q && !e) //upleft
 			{
-				y = (int(y) / STEP) * STEP + STEP;
-				x = x + 0.33* STEPHERO;
+				y = (int(y) / STEP) * STEP + STEP - (sizeY - STEP);
+				x = x + 0.33* STEP_HERO;
 			}
 			else if (e && !q) //upright
 			{
 				x = (int(x + sizeX) / STEP) * STEP - sizeX;
-				y = y - 0.33* STEPHERO;
+				y = y - 0.33* STEP_HERO;
 			}
 			break;
 		case RIGHT:
@@ -885,7 +928,7 @@ void ZombieCollision(vector<Zombie>::iterator & zombie) //мб объединить с функци
 			if (e && !(w || r))
 			{
 				y = (int(y + sizeY) / STEP) * STEP - sizeY;
-				x = x + 0.33 * STEPHERO;
+				x = x + 0.33 * STEP_HERO;
 			}
 			else if (w && r)  //downright
 			{
@@ -895,12 +938,12 @@ void ZombieCollision(vector<Zombie>::iterator & zombie) //мб объединить с функци
 			else if (r && !w) //downleft
 			{
 				y = (int(y + sizeY) / STEP) * STEP - sizeY;
-				x = x + 0.33 * STEPHERO;
+				x = x + 0.33 * STEP_HERO;
 			}
 			else if (w && !r)  //upright
 			{
 				x = (int(x + sizeX) / STEP) * STEP - sizeX;
-				y = y + 0.33* STEPHERO;
+				y = y + 0.33* STEP_HERO;
 			}
 
 			break;
@@ -916,7 +959,7 @@ void ZombieCollision(vector<Zombie>::iterator & zombie) //мб объединить с функци
 			if (r && !(q || e))
 			{
 				y = (int(y + sizeY) / STEP) * STEP - sizeY;
-				x = x - 0.33* STEPHERO;
+				x = x - 0.33* STEP_HERO;
 			}
 			else if ((q && e) || (r && !(q || e)))  //downleft
 			{
@@ -926,12 +969,12 @@ void ZombieCollision(vector<Zombie>::iterator & zombie) //мб объединить с функци
 			else if (e && !q) //downright
 			{
 				y = (int(y + sizeY) / STEP) * STEP - sizeY;
-				x = x - 0.33* STEPHERO;
+				x = x - 0.33* STEP_HERO;
 			}
 			else if (q && !e) //upleft
 			{
 				x = (int(x) / STEP) * STEP + STEP;
-				y = y + 0.33* STEPHERO;
+				y = y + 0.33* STEP_HERO;
 			}
 			break;
 		case LEFT:
@@ -945,23 +988,23 @@ void ZombieCollision(vector<Zombie>::iterator & zombie) //мб объединить с функци
 			//upleft except downright
 			if (q && !(w || r))
 			{
-				y = (int(y) / STEP) * STEP + STEP;
-				x = x - 0.33* STEPHERO;
+				y = (int(y) / STEP) * STEP + STEP - (sizeY - STEP);
+				x = x - 0.33* STEP_HERO;
 			}
 			else if ((w && r) || (q && !(w || r)))   //upleft
 			{
-				y = (int(y) / STEP) * STEP + STEP;
+				y = (int(y) / STEP) * STEP + STEP - (sizeY - STEP);
 				x = (int(x) / STEP) * STEP + STEP;
 			}
 			else if (w && !r) //upright
 			{
-				y = (int(y) / STEP) * STEP + STEP;
-				x = x - 0.33* STEPHERO;
+				y = (int(y) / STEP) * STEP + STEP - (sizeY - STEP);
+				x = x - 0.33* STEP_HERO;
 			}
 			else if (r && !w)  //downleft
 			{
 				x = (int(x) / STEP) * STEP + STEP;
-				y = y - 0.33* STEPHERO;
+				y = y - 0.33* STEP_HERO;
 			}
 
 			break;
@@ -971,7 +1014,6 @@ void ZombieCollision(vector<Zombie>::iterator & zombie) //мб объединить с функци
 
 		zombie->pos.x = x;
 		zombie->pos.y = y;
-		zombie->dir = dir;
 		zombie->sprite.setPosition(zombie->pos.x, zombie->pos.y);
 	}
 }
@@ -999,8 +1041,8 @@ void ZombieUpdatePosition(vector<Zombie>::iterator zombie)
 
 	int stepZ;
 	if (zombie->follow == true)
-		stepZ = STEPZOMBIE_ACTIVE;
-	else stepZ = STEPZOMBIE;
+		stepZ = STEP_ZOMBIE_ACTIVE;
+	else stepZ = STEP_ZOMBIE;
 	switch (zombie->dir)
 	{
 	case UP:
@@ -1070,7 +1112,7 @@ bool IsZombieNearHero(Hero & hero, vector<Zombie>::iterator & zombie)
 		return true;
 	}
 
-	switch(hero.dirLast)
+	switch (hero.dirLast)
 	{
 	case UP:
 		if (abs(heroCenter.x - zombieCenter.x) < dx_max && (heroCenter.y - zombieCenter.y >= 0 && heroCenter.y - zombieCenter.y < distanceY))
@@ -1080,14 +1122,14 @@ bool IsZombieNearHero(Hero & hero, vector<Zombie>::iterator & zombie)
 		}
 		break;
 	case RIGHT: case UPRIGHT: case DOWNRIGHT:
-		if ((zombieCenter.x - heroCenter.x >= 0 && zombieCenter.x - heroCenter.x < distanceX) && (abs(heroCenter.y  - zombieCenter.y) < dy_max))
+		if ((zombieCenter.x - heroCenter.x >= 0 && zombieCenter.x - heroCenter.x < distanceX) && (abs(heroCenter.y - zombieCenter.y) < dy_max))
 		{
 			//cout << "RIGHT" << endl;
 			return true;
 		}
 		break;
 	case DOWN:
-		if (abs(zombieCenter.x - heroCenter.x) < dx_max && (zombieCenter.y - heroCenter.y >= 0  && zombieCenter.x - heroCenter.x < distanceY))
+		if (abs(zombieCenter.x - heroCenter.x) < dx_max && (zombieCenter.y - heroCenter.y >= 0 && zombieCenter.x - heroCenter.x < distanceY))
 		{
 			//cout << "DOWN" << endl;
 			return true;
@@ -1157,46 +1199,49 @@ void ZombieUpdateSprite(vector<Zombie>::iterator & zombie)
 		{
 			zombie->state = DEAD;
 		}
-
-		//sprite change for active moving zombies
-		switch (zombie->dir)
+		else
 		{
-		case UP:
-			zombie->sprite.setTextureRect(IntRect(15 + 36 * int(zombie->currentFrame), 84 + 59 + 59, 27, 49));
-			if (zombie->currentFrame > 4)
+			//sprite change for active moving zombies
+			switch (zombie->dir)
 			{
-				zombie->currentFrame = 0;
+			case UP:
+				zombie->sprite.setTextureRect(IntRect(15 + 36 * int(zombie->currentFrame), 84 + 59 + 59, 27, 49));
+				if (zombie->currentFrame > 4)
+				{
+					zombie->currentFrame = 0;
+				}
+				break;
+			case UPRIGHT: case RIGHT: case DOWNRIGHT:
+				//21 38
+				zombie->sprite.setTextureRect(IntRect(15 + 36 * int(zombie->currentFrame), 84 + 59 * 3, 27, 49));
+				if (zombie->currentFrame > 2)
+				{
+					zombie->currentFrame = 0;
+				}
+				break;
+			case DOWN:
+				zombie->sprite.setTextureRect(IntRect(15 + 36 * int(zombie->currentFrame), 84, 27, 49));
+				if (zombie->currentFrame > 2)
+				{
+					zombie->currentFrame = 0;
+				}
+				break;
+			case DOWNLEFT: case LEFT: case UPLEFT:
+				zombie->sprite.setTextureRect(IntRect(15 + 36 * int(zombie->currentFrame), 84 + 59, 27, 49));
+				if (zombie->currentFrame > 2)
+				{
+					zombie->currentFrame = 0;
+				}
+				break;
+			case NONE:
+				//no need??
+				zombie->sprite.setTextureRect(IntRect(190, 84, 27, 48));
+				if (zombie->currentFrame > 4)
+				{
+					zombie->currentFrame = 0;
+				}
+				break;
 			}
-			break;
-		case UPRIGHT: case RIGHT: case DOWNRIGHT:
-			//21 38
-			zombie->sprite.setTextureRect(IntRect(15  + 36 * int(zombie->currentFrame), 84 + 59 * 3, 27, 49));
-			if (zombie->currentFrame > 2)
-			{
-				zombie->currentFrame = 0;
-			}
-			break;
-		case DOWN:
-			zombie->sprite.setTextureRect(IntRect(15 + 36 * int(zombie->currentFrame), 84, 27, 49));
-			if (zombie->currentFrame > 2)
-			{
-				zombie->currentFrame = 0;
-			}
-			break;
-		case DOWNLEFT: case LEFT: case UPLEFT:
-			zombie->sprite.setTextureRect(IntRect(15 + 36 * int(zombie->currentFrame), 84 + 59, 27, 49));
-			if (zombie->currentFrame > 4)
-			{
-				zombie->currentFrame = 0;
-			}
-			break;
-		case NONE:
-			//no need??
-			if (zombie->currentFrame > 4)
-			{
-				zombie->currentFrame = 0;
-			}
-			break;
 		}
 	}
 	zombie->currentFrame += 0.05;
@@ -1225,19 +1270,20 @@ void ZombieUpdate(Hero & hero, Game & game)
 		//compute distance and dir
 		float dx = abs(xHero - zombie->pos.x);  //distance x
 		float dy = abs(yHero - zombie->pos.y);  //distance y
-		//float di = sqrt(pow(dx,2) + pow(dy,2));  //distance
-
+												//float di = sqrt(pow(dx,2) + pow(dy,2));  //distance
 		if (zombie->state == ACTIVE)
 		{
 			ZombieCheckFollow(zombie, hero);
 			if (zombie->follow)
 			{
-				if (dx > 0 && dy > 0)
+				//TODO: ref
+				if (dx > 5 || dy > 5)
 				{
 					//TODO: check left-right dir zombie sprite bug (almost)
-					if ((dx / dy > 0.9) && (dy / dx < 1.1))
+					if ((dx > 3 && dy > 3) &&  (dx / dy > 0.9) && (dy / dx < 1.1))
 					{
-						cout << " <<<<<<<  " << endl;
+						cout << "MAIN" << endl;
+						//cout << zombie->dir << " DIR" <<  endl;
 						if (xHero >= zombie->pos.x && yHero >= zombie->pos.y)
 							dir = DOWNRIGHT;
 						else if (xHero >= zombie->pos.x && yHero < zombie->pos.y)
@@ -1249,6 +1295,7 @@ void ZombieUpdate(Hero & hero, Game & game)
 					}
 					else if (dx >= dy)
 					{
+						cout << "DX >+ DY " << endl;
 						if (xHero > zombie->pos.x)
 							dir = RIGHT;
 						else
@@ -1256,6 +1303,7 @@ void ZombieUpdate(Hero & hero, Game & game)
 					}
 					else if (dx < dy)
 					{
+						cout << " NO!!" << endl;
 						if (yHero > zombie->pos.y)
 							dir = DOWN;
 						else
@@ -1263,6 +1311,7 @@ void ZombieUpdate(Hero & hero, Game & game)
 					}
 				}
 			}
+
 			zombie->dir = dir;
 
 			ZombieCollision(zombie);
@@ -1275,7 +1324,6 @@ void ZombieUpdate(Hero & hero, Game & game)
 					CheckHeroBeastDamage(hero, zombie, game);
 				}
 			}
-
 			if (xHero != zombie->pos.x || yHero != zombie->pos.y)
 			{
 				ZombieUpdatePosition(zombie);
@@ -1305,7 +1353,6 @@ void ZombieUpdate(Hero & hero, Game & game)
 			zombie = zombieList.erase(zombie);
 		}
 		else zombie++;
-
 	}
 }
 
@@ -1338,7 +1385,6 @@ void ZombieMoveRandom()
 		}
 	}
 }
-
 //draw
 void DrawMap(Sprite & mapSprite, RenderWindow & window)
 {
@@ -1364,10 +1410,10 @@ void DrawMap(Sprite & mapSprite, RenderWindow & window)
 void DrawShots(RenderWindow & window)
 {
 	for (vector<Shot>::iterator shot = shotList.begin(); shot != shotList.end(); ++shot)
-		{
-			shot->sprite.setPosition(shot->pos.x, shot->pos.y);
-			window.draw(shot->sprite);
-		}
+	{
+		shot->sprite.setPosition(shot->pos.x, shot->pos.y);
+		window.draw(shot->sprite);
+	}
 }
 
 void DrawZombies(RenderWindow & window)
@@ -1389,9 +1435,24 @@ void DrawInventoryText(RenderWindow & window, Text & text, const Vector2f & posV
 	std::ostringstream toStringQuantity;
 	toStringQuantity << inventoryList[hero.slotNo].quantity;
 	text.setString(toStringCurrent.str() + "/" + toStringQuantity.str() + " " + ITEM_NAMES[inventoryList[hero.slotNo].name]);
-
 	window.draw(text);
-	window.draw(text);
+	if (hero.isReloading)
+	{
+		text.setPosition(posView.x + 40, posView.y + 70);
+		if (inventoryList[hero.slotNo].name == PISTOL || inventoryList[hero.slotNo].name == RIFLE)
+		{
+			text.setString("reloading");
+		}
+		else if (inventoryList[hero.slotNo].name == GRENADE)
+		{
+			text.setString("pulling");
+		}
+		else
+		{
+			text.setString("opening");
+		}
+		window.draw(text);
+	}
 }
 
 //TODO: change to structs
@@ -1422,7 +1483,7 @@ void DrawBar(RenderWindow & window, View & view, Text & text, Sprite & sprite_ba
 
 	window.draw(sprite_bar);
 	window.draw(sprite_health);
-	DrawInventoryText(window, text, posView,hero);
+	DrawInventoryText(window, text, posView, hero);
 }
 
 void GenerateLoot(int  num, NameItem  item, Texture & texture_items)
@@ -1549,30 +1610,6 @@ void DrawLoot(RenderWindow & window)
 	}
 }
 
-void UpdateInventory()
-{
-	//update items 
-	for (std::vector<Inventory>::iterator iter = inventoryList.begin(); iter != inventoryList.end(); ++iter)
-	{
-		if (iter->current == 0)
-		{
-			if (iter->quantity >= MAX_AMMO[iter->name])
-			{
-				iter->quantity -= MAX_AMMO[iter->name];
-				iter->current = MAX_AMMO[iter->name];
-			}
-			else
-			{
-				iter->current = iter->quantity;
-				iter->quantity = 0;
-			}
-			if (iter->quantity <= 0)
-				iter->quantity = 0;
-		}
-	}
-}
-
-
 void main()
 {
 	//map
@@ -1586,15 +1623,12 @@ void main()
 	texture_zombie.loadFromFile("images/zombie.png");
 	sf::Sprite sprite_zombie;
 	sprite_zombie.setTexture(texture_zombie);
-	//sprite_zombie.setTextureRect(IntRect(5, 5, 30, 30));
-	//sprite_zombie.setPosition(320, 320);
 
 	//shot
 	Texture texture_shot;
 	texture_shot.loadFromFile("images/shots.png");
 	Sprite sprite_shot;
 	sprite_shot.setTexture(texture_shot);
-	//shot.setPosition(position_hero)
 
 	//текст
 	Font font;
@@ -1651,6 +1685,7 @@ void main()
 	hero.state = NORMAL;
 	hero.isBeastAttack = false;
 	hero.lastAttackTime = 0;
+	hero.lastReloadTime = 0;
 
 	//bool is_game_over = false;
 
@@ -1672,7 +1707,7 @@ void main()
 	GenerateLoot(1, MIXTURE, texture_items);
 
 	bool switch_status = false; //for ProcessEvents(correct inventory-switch)
-	//bool fire_status = false; //дл€ стрельбы 
+								//bool fire_status = false; //дл€ стрельбы 
 	float shot_last_time = 0;
 
 	while (window.isOpen())
@@ -1680,14 +1715,13 @@ void main()
 		window.clear();
 
 
-
-		//cout << hero.lastAttackTime << "  lastAttack "  << endl;
-
 		game.time = clock.getElapsedTime().asSeconds();
 		float timeZ = clock2.getElapsedTime().asSeconds();
+
+		cout << hero.isReloading << endl;
 		//game.time = time;
 		//float timeMili = clock.getElapsedTime().asMilliseconds();
-		
+
 		//TODO: spawn zombie at definite time (and change SpawnZombie func (spawn only near hero))
 		if (timeZ > TIME_GAME_STEP)
 		{
@@ -1703,7 +1737,7 @@ void main()
 		ZombieUpdate(hero, game);
 
 		CheckLoot(hero, texture_items);
-		UpdateInventory();
+		UpdateInventory(hero,game);
 
 
 		//Drawing

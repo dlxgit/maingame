@@ -56,11 +56,11 @@ const int TIME_GAME_STEP = 10;
 
 
 //movespeed
-const int STEPHERO = 6;
+const int STEP_HERO = 6;
 const int STEP_HERO_HULK = 8;
-const int STEPZOMBIE = 2;
-const int STEPZOMBIE_ACTIVE = 2;
-const int STEPSHOT = 12;
+const int STEP_ZOMBIE = 2;
+const int STEP_ZOMBIE_ACTIVE = 2;
+const int STEP_SHOT = 12;
 
 const int ZOMBIE_DAMAGE = 30;
 const int ZOMBIE_MAX_HP = 100;
@@ -69,6 +69,8 @@ const int ZOMBIE_VISION_DISTANCE = 300;
 const int HP_PER_DRINK = 30;
 
 const int SHOT_MAX_DISTANCE = 400;
+
+const int WEAPON_RELOAD_TIME = 3;
 
 const int BEAST_MAX_TIME = 30;
 const int HERO_BEAST_DAMAGE = 100;
