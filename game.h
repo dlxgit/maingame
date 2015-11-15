@@ -31,6 +31,7 @@ enum NameItem
 
 enum HeroState
 {
+	DAMAGED,
 	NORMAL,
 	TRANSFORMING,  //changing from normal to beast
 	BEAST
@@ -43,7 +44,6 @@ enum ZombieState
 	DEAD,      //cant move (health = 0)
 	EXPLODED  //if animation has finished (for deleting from list)
 };
-
 
 //map
 const int width = 640;
@@ -69,6 +69,10 @@ const int ZOMBIE_VISION_DISTANCE = 300;
 const int HP_PER_DRINK = 30;
 
 const int SHOT_MAX_DISTANCE = 400;
+
+const int BEAST_MAX_TIME = 30;
+const int HERO_BEAST_DAMAGE = 100;
+const float HERO_BEAST_ATTACK_TIME = 0.7;
 
 const int DMG_ITEM[7] = { 0, 35, 50,0, 0,0,100 };
 const int AMMO_PACKS = 4;

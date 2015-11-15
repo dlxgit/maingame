@@ -17,22 +17,18 @@ NEWBUGS:
 }
 FOUNDBUGS: 
 {
-zombie doesnt change direction if it collides
-zombie doesnt follow hero sometimes
+zombie doesnt change direction if it collides sometimes
 }
 
 NEXT: доработать движение зомби при коллизии  !STOP! + автономное.
 	add zombie behavour when it's near hero
 
 calculate zombie's next direction if it collides
-add more files and structures
+add files and structures
 
 //question.
 //struct game for time
 */
-
-//86 4 109 157  -герой дв,   214 4 101 37 -стояние с оружием,   11 484 - юз микстуры,  
-
 
 
 struct Inventory
@@ -53,6 +49,12 @@ struct Loot
 	bool isDrawn;
 };
 
+
+struct Game
+{
+	float time;
+};
+
 struct Hero
 {
 	Vector2f pos;
@@ -66,6 +68,8 @@ struct Hero
 	float currentFrame;
 	HeroState state;
 	bool isBeastAttack;
+	float beastTimer;
+	float lastAttackTime;
 };
 
 struct Zombie
@@ -81,6 +85,7 @@ struct Zombie
 	bool collision;
 	float currentFrame;
 	ZombieState state;
+	bool isNear;  //side of zombie position relatively to hero
 };
 
 struct Shot
@@ -105,7 +110,6 @@ std::vector<Loot> lootList;
 std::vector<Shot> shotList;
 std::vector<Zombie> zombieList;
 std::vector<Npc> NpcList;
-
 
 
 void DrawHero(Hero & hero, RenderWindow & window)
@@ -199,37 +203,41 @@ View UpdateView(RenderWindow & window, Hero & hero, View & view)  //UpdateCamera
 	return view;
 }
 
-void AddNewShot(Hero & hero, float & time)
+void AddNewShot(Hero & hero, Sprite & sprite_shot) //adding new shot in list
 {
-	//if hero direction is UPRIGHT OR DOWNRIGHT -> he will watch(and shoot) to the left, same to RIGHT
-	cout << "SHOT!!" << endl;
+	//if hero direction is UPRIGHT OR DOWNRIGHT -> he will watch(and shoot) to the left, same for RIGHT
+
+	Shot shot;
+	shot.pos = hero.sprite.getPosition();
+	shot.distance = 0;
+	Texture texture;
+	shot.sprite = sprite_shot;
 
 	Direction dir;
 	switch (hero.dirLast)
 	{
 	case UP:
 		dir = UP;
+		shot.sprite.setTextureRect(IntRect(3, 11, 7, 13));
 		break;
 	case UPRIGHT: case RIGHT: case DOWNRIGHT:  
 		dir = RIGHT;
+		shot.sprite.setTextureRect(IntRect(0, 0, 13, 7));
 		break;
 	case DOWN:
 		dir = DOWN;
+		shot.sprite.setTextureRect(IntRect(19, 11, 7, 13));
 		break;
 	case DOWNLEFT: case LEFT: case UPLEFT: 
 		dir = LEFT;
+		shot.sprite.setTextureRect(IntRect(16, 0, 13, 7));
 		break;
 	}
-
-	//add shot in list
-	Shot shot;
-	shot.pos = hero.sprite.getPosition();
-	shot.distance = 0;
 	shot.dir = dir;
 	shotList.push_back(shot);
 }
 
-void ProcessEvents(Hero & hero, RenderWindow & window, float & time, bool & switch_status, float & shot_last_time)
+void ProcessEvents(Hero & hero, RenderWindow & window, Game & game, bool & switch_status, float & shot_last_time, Sprite & sprite_shot)
 {
 	Event event;
 	while (window.pollEvent(event))
@@ -303,8 +311,12 @@ void ProcessEvents(Hero & hero, RenderWindow & window, float & time, bool & swit
 			//question. should store current inventoryItem is hero struct? / just get item from list
 			if (hero.state == BEAST)
 			{
-				hero.isBeastAttack = true;
-				hero.currentFrame = 0;
+				if (game.time - hero.lastAttackTime > HERO_BEAST_ATTACK_TIME)
+				{
+					//hero.lastAttackTime = game.time;  (reminder)
+					hero.isBeastAttack = true;
+					hero.currentFrame = 0;
+				}
 			}
 			else
 			{
@@ -312,29 +324,27 @@ void ProcessEvents(Hero & hero, RenderWindow & window, float & time, bool & swit
 				{
 					if (inventoryList[hero.slotNo].name == PISTOL)
 					{
-						if (time > shot_last_time + 0.35)
+						if (game.time > shot_last_time + 0.35)
 						{
-							cout << " A!           A!" << endl;
-							AddNewShot(hero, time);
-							shot_last_time = time;
+							AddNewShot(hero, sprite_shot);
+							shot_last_time = game.time;
 							inventoryList[hero.slotNo].current -= 1;
 						}
 					}
 					else if (inventoryList[hero.slotNo].name == RIFLE)
 					{
-						if (time > shot_last_time + 0.15)
+						if (game.time > shot_last_time + 0.15)
 						{
-							cout << " A!           A!" << endl;
-							AddNewShot(hero, time);
-							shot_last_time = time;
+							AddNewShot(hero, sprite_shot);
+							shot_last_time = game.time;
 							inventoryList[hero.slotNo].current -= 1;
 						}
 					}
 					else if (inventoryList[hero.slotNo].name == DRINK)
 					{
-						if (time > shot_last_time + 0.35)
+						if (game.time > shot_last_time + 0.35)
 						{
-							shot_last_time = time;
+							shot_last_time = game.time;
 							hero.health += HP_PER_DRINK;
 							if (hero.health > 100)
 							{
@@ -345,9 +355,9 @@ void ProcessEvents(Hero & hero, RenderWindow & window, float & time, bool & swit
 					}
 					else if (inventoryList[hero.slotNo].name == MIXTURE)
 					{
-						if (time > shot_last_time + 0.35)
+						if (game.time > shot_last_time + 0.35)
 						{
-							shot_last_time = time;
+							shot_last_time = game.time;
 							hero.health += HP_PER_DRINK;
 							if (hero.health > 100)
 							{
@@ -391,7 +401,7 @@ void HeroCollision(Hero & hero)
 	bool e = (TILEMAP[int(y + sizeY - 1) / STEP][int(x + sizeX - 1) / STEP] == 'b');
 	bool r = (TILEMAP[int(y + sizeY - 1) / STEP][int(x) / STEP] == 'b');
 
-	//cout << " COLLISIONSPOTS  " << q << w << e << r << endl;
+	//cout << " COLLISIONHERO  " << q << w << e << r << endl;
 
 	switch (hero.dir)
 	{
@@ -540,7 +550,7 @@ void UpdateHeroSprite(Hero & hero)
 	}
 	else if (hero.state == BEAST)
 	{
-		if (hero.isBeastAttack)
+		if (hero.isBeastAttack)  //attacking beast animation
 		{
 			switch (hero.dirLast)
 			{
@@ -549,7 +559,7 @@ void UpdateHeroSprite(Hero & hero)
 				break;
 			case UPRIGHT: case RIGHT: case DOWNRIGHT:
 				//21 38
-				hero.sprite.setTextureRect(IntRect(182 + 44 * int(hero.currentFrame), 598, 48, 51));
+				hero.sprite.setTextureRect(IntRect(182 + 57 * int(hero.currentFrame), 598, 48, 52));
 				break;
 			case DOWN:
 				hero.sprite.setTextureRect(IntRect(42 + 35 * int(hero.currentFrame), 595, 35, 54));
@@ -561,7 +571,7 @@ void UpdateHeroSprite(Hero & hero)
 				break;
 			}
 
-			hero.currentFrame += 0.1;
+			hero.currentFrame += 0.2;
 			if (hero.currentFrame > 2)
 			{
 				//TODO: deal damage after this
@@ -569,7 +579,7 @@ void UpdateHeroSprite(Hero & hero)
 				hero.currentFrame = 0;
 			}
 		}
-		else
+		else  //moving beast animation
 		{
 			switch (hero.dir)
 			{
@@ -606,7 +616,7 @@ void UpdateHeroSprite(Hero & hero)
 				break;
 			}
 
-			hero.currentFrame += 0.05;
+			hero.currentFrame += 0.2;
 
 			if (hero.currentFrame > 3)
 			{
@@ -615,7 +625,7 @@ void UpdateHeroSprite(Hero & hero)
 			}
 		}
 	}
-	else if (hero.state == NORMAL)
+	else if (hero.state == NORMAL)  //normal moving animation
 	{
 		switch (hero.dir)
 		{
@@ -658,48 +668,61 @@ void UpdateHeroSprite(Hero & hero)
 			hero.currentFrame = 0;
 		}
 	}
+	else if (hero.state == DAMAGED)
+	{
+		hero.sprite.setTextureRect(IntRect(10 + 32 * int(hero.currentFrame), 179, 32, 45));
+		hero.currentFrame += 0.06;
+		if (hero.currentFrame > 2)
+		{
+			hero.currentFrame = 0;
+			hero.state = NORMAL;
+		}
+	}
 }
 
-void UpdateHero(Hero & hero) //position + collision + sprite
+void UpdateHero(Hero & hero, Game & game) //position + collision + sprite
 {
-	float x = hero.sprite.getPosition().x;
-	float y = hero.sprite.getPosition().y;
+	Vector2f pos = hero.sprite.getPosition();
 
-	switch (hero.dir)
+	if (hero.state == NORMAL || hero.state == BEAST)
 	{
-	case UP:
-		y -= STEPHERO;
-		break;
-	case UPRIGHT:
-		x += (0.66 * STEPHERO);
-		y -= (0.66 * STEPHERO);
-		break;
-	case RIGHT:
-		x += STEPHERO;
-		break;
-	case DOWNRIGHT:
-		x += (0.66 * STEPHERO);
-		y += (0.66 * STEPHERO);
-		break;
-	case DOWN:
-		y += STEPHERO;
-		break;
-	case DOWNLEFT:
-		x -= (0.66 * STEPHERO);
-		y += (0.66 * STEPHERO);
-		break;
-	case LEFT:
-		x -= STEPHERO;
-		break;
-	case UPLEFT:
-		x -= (0.66 * STEPHERO);
-		y -= (0.66 * STEPHERO);
-		break;
-	case NONE:
-		break;
+		switch (hero.dir)
+		{
+		case UP:
+			pos.y -= STEPHERO;
+			break;
+		case UPRIGHT:
+			pos.x += (0.66 * STEPHERO);
+			pos.y -= (0.66 * STEPHERO);
+			break;
+		case RIGHT:
+			pos.x += STEPHERO;
+			break;
+		case DOWNRIGHT:
+			pos.x += (0.66 * STEPHERO);
+			pos.y += (0.66 * STEPHERO);
+			break;
+		case DOWN:
+			pos.y += STEPHERO;
+			break;
+		case DOWNLEFT:
+			pos.x -= (0.66 * STEPHERO);
+			pos.y += (0.66 * STEPHERO);
+			break;
+		case LEFT:
+			pos.x -= STEPHERO;
+			break;
+		case UPLEFT:
+			pos.x -= (0.66 * STEPHERO);
+			pos.y -= (0.66 * STEPHERO);
+			break;
+		case NONE:
+			break;
+		}
 	}
+
 	UpdateHeroSprite(hero);
-	hero.sprite.setPosition(x, y);
+	hero.sprite.setPosition(pos);
 	//kostil
 	hero.pos = hero.sprite.getPosition();
 	HeroCollision(hero);
@@ -734,7 +757,7 @@ bool IsShotCollision(vector<Shot>::iterator shot, Hero & hero)
 	return false;
 }
 
-void UpdateShots(float time, Hero & hero) //shots position update and delete if need
+void UpdateShots(Hero & hero) //shots position update and delete if need
 {
 	for (vector<Shot>::iterator shot = shotList.begin(); shot != shotList.end();)
 	{
@@ -764,7 +787,6 @@ void UpdateShots(float time, Hero & hero) //shots position update and delete if 
 
 	}
 }
-
 //zombies
 void ZombieSpawn(int posX, int posY, Texture & texture_zombie)
 {
@@ -783,6 +805,8 @@ void ZombieSpawn(int posX, int posY, Texture & texture_zombie)
 	zombie.attack_time = 0;
 	zombie.dir = NONE;
 	zombie.dirLast = NONE;
+	zombie.follow = false;
+	zombie.isNear = false;
 	//zombie.sprite.setTextureRect(IntRect(5, 5, 30, 30));
 
 	zombieList.push_back(zombie);
@@ -1018,16 +1042,88 @@ void ZombieUpdatePosition(vector<Zombie>::iterator zombie)
 	zombie->sprite.setPosition(zombie->pos.x, zombie->pos.y);
 }
 
-void ZombieUpdateAttack(Hero & hero, vector<Zombie>::iterator zombie, float & time)
+//should i store it in zombieList>? if i can just keep it here (return true)
+bool IsZombieNearHero(Hero & hero, vector<Zombie>::iterator & zombie)
+{
+	//comparing distance between two nearest points of hero and zombie sprites    to define is zombie near or not
+	//TODO: refact
+
+	Vector2f zombieCenter;
+	zombieCenter.x = zombie->sprite.getPosition().x + zombie->sprite.getGlobalBounds().width / 2;
+	zombieCenter.y = zombie->sprite.getPosition().y + zombie->sprite.getGlobalBounds().height / 2;
+	Vector2f heroCenter;
+	heroCenter.x = hero.sprite.getPosition().x + hero.sprite.getGlobalBounds().width / 2;
+	heroCenter.y = hero.sprite.getPosition().y + hero.sprite.getGlobalBounds().height / 2;
+
+	int dx_max = 20;
+	int dy_max = 20;
+	int distanceX = 30;
+	int distanceY = 30;
+
+	//cout << "ZC " << zombieCenter.y  << " HC " << heroCenter.y << endl;
+	//cout << hero.dirLast << " DIRLAST" << endl;
+
+	//if hero and zombie sprites are very close - allow Beast to attack independeltly from its direction
+	if ((abs(zombieCenter.x - heroCenter.x) < distanceX) && (abs(zombieCenter.y - heroCenter.y) < distanceY))
+	{
+		//cout << " INDEP " << abs(zombieCenter.x - heroCenter.x) << "  XY  " << abs(zombieCenter.y - heroCenter.y) << endl;
+		return true;
+	}
+
+	switch(hero.dirLast)
+	{
+	case UP:
+		if (abs(heroCenter.x - zombieCenter.x) < dx_max && (heroCenter.y - zombieCenter.y >= 0 && heroCenter.y - zombieCenter.y < distanceY))
+		{
+			//cout << "UP" << endl;
+			return true;
+		}
+		break;
+	case RIGHT: case UPRIGHT: case DOWNRIGHT:
+		if ((zombieCenter.x - heroCenter.x >= 0 && zombieCenter.x - heroCenter.x < distanceX) && (abs(heroCenter.y  - zombieCenter.y) < dy_max))
+		{
+			//cout << "RIGHT" << endl;
+			return true;
+		}
+		break;
+	case DOWN:
+		if (abs(zombieCenter.x - heroCenter.x) < dx_max && (zombieCenter.y - heroCenter.y >= 0  && zombieCenter.x - heroCenter.x < distanceY))
+		{
+			//cout << "DOWN" << endl;
+			return true;
+		}
+		break;
+	case LEFT: case UPLEFT: case DOWNLEFT:
+		if ((heroCenter.x - zombieCenter.x >= 0 && zombieCenter.x - heroCenter.x < distanceX) && (abs(heroCenter.x - zombieCenter.x) < dy_max))
+		{
+			//cout << "LEFT" << endl;
+			return true;
+		}
+		break;
+	case NONE:
+		return false;  //TOCHECK: NEED?
+		break;
+	}
+	return false;
+}
+
+void ZombieUpdateAttack(Hero & hero, vector<Zombie>::iterator zombie, Game & game)
 {
 	//add correct xyHero xyZombie for detecting meleeAttack
-	if ((zombie->pos.x < hero.pos.x + 32) && (zombie->pos.x) >(hero.pos.x))
+	//TODO: change mechanics of zombie attack(depends on side from which it attacks), same for beast attack
+	if ((abs(zombie->pos.x - hero.pos.x) < 7) && (abs(zombie->pos.y - hero.pos.y) < 7))
 	{
 		//attack
-		if (zombie->attack_time < time - 1.5)
+		if (zombie->attack_time < game.time - 1.5)
 		{
 			hero.health -= ZOMBIE_DAMAGE;
-			zombie->attack_time = time;
+			if (hero.state != BEAST)
+			{
+				hero.state = DAMAGED;
+				hero.currentFrame = 0;
+			}
+			zombie->attack_time = game.time;
+			zombie->isNear = zombie->dir;  //for Beast melee attack
 		}
 	}
 }
@@ -1096,14 +1192,26 @@ void ZombieUpdateSprite(vector<Zombie>::iterator & zombie)
 			break;
 		case NONE:
 			//no need??
+			if (zombie->currentFrame > 4)
+			{
+				zombie->currentFrame = 0;
+			}
 			break;
 		}
 	}
 	zombie->currentFrame += 0.05;
-	cout << zombie->currentFrame << endl;
 }
 
-void ZombieUpdate(Hero & hero, float & time)
+void CheckHeroBeastDamage(Hero & hero, vector<Zombie>::iterator & zombie, Game & game)  //killing zombie with melee attack
+{
+	if (hero.isBeastAttack && ((game.time - hero.lastAttackTime) > HERO_BEAST_ATTACK_TIME))
+	{
+		zombie->health -= HERO_BEAST_DAMAGE;
+		hero.lastAttackTime = game.time;
+	}
+}
+
+void ZombieUpdate(Hero & hero, Game & game)
 {
 	//TODO: refact!
 	float xHero = hero.sprite.getPosition().x;
@@ -1115,8 +1223,8 @@ void ZombieUpdate(Hero & hero, float & time)
 		Direction dir = zombie->dir;
 
 		//compute distance and dir
-		int dx = abs(xHero - zombie->pos.x);  //distance x
-		int dy = abs(yHero - zombie->pos.y);  //distance y
+		float dx = abs(xHero - zombie->pos.x);  //distance x
+		float dy = abs(yHero - zombie->pos.y);  //distance y
 		//float di = sqrt(pow(dx,2) + pow(dy,2));  //distance
 
 		if (zombie->state == ACTIVE)
@@ -1124,11 +1232,12 @@ void ZombieUpdate(Hero & hero, float & time)
 			ZombieCheckFollow(zombie, hero);
 			if (zombie->follow)
 			{
-				if (dx > 3 && dy > 3)
+				if (dx > 0 && dy > 0)
 				{
-					//TODO: FIX BUG WITH TUDA SUDA PRIGAET ZOMBI PRI DIR = LEFT OR RIGHT
-					if ((dx / (dy + 1)) > 0.85 && (dy / dx + 1) < 1.15)
+					//TODO: check left-right dir zombie sprite bug (almost)
+					if ((dx / dy > 0.9) && (dy / dx < 1.1))
 					{
+						cout << " <<<<<<<  " << endl;
 						if (xHero >= zombie->pos.x && yHero >= zombie->pos.y)
 							dir = DOWNRIGHT;
 						else if (xHero >= zombie->pos.x && yHero < zombie->pos.y)
@@ -1154,9 +1263,18 @@ void ZombieUpdate(Hero & hero, float & time)
 					}
 				}
 			}
+			zombie->dir = dir;
 
 			ZombieCollision(zombie);
-			ZombieUpdateAttack(hero, zombie, time);
+			ZombieUpdateAttack(hero, zombie, game);
+
+			if (hero.state == BEAST)
+			{
+				if (IsZombieNearHero(hero, zombie))
+				{
+					CheckHeroBeastDamage(hero, zombie, game);
+				}
+			}
 
 			if (xHero != zombie->pos.x || yHero != zombie->pos.y)
 			{
@@ -1169,11 +1287,11 @@ void ZombieUpdate(Hero & hero, float & time)
 		//TOCHECK: why dir is here? is it needed below? 
 		if (dir != zombie->dirLast)
 		{
-			zombie->currentFrame = 0;
+			//zombie->currentFrame = 0;
 			zombie->dirLast = dir;
 		}
 
-		zombie->dir = dir;
+		//zombie->dir = dir;
 
 		//delSoon soon ???
 		if (zombie->follow == false)
@@ -1243,13 +1361,12 @@ void DrawMap(Sprite & mapSprite, RenderWindow & window)
 	}
 }
 
-void DrawShots(Sprite & sprite_shot, RenderWindow & window)
+void DrawShots(RenderWindow & window)
 {
 	for (vector<Shot>::iterator shot = shotList.begin(); shot != shotList.end(); ++shot)
-		if (shot->dir > 0)
 		{
-			sprite_shot.setPosition(shot->pos.x, shot->pos.y);
-			window.draw(sprite_shot);
+			shot->sprite.setPosition(shot->pos.x, shot->pos.y);
+			window.draw(shot->sprite);
 		}
 }
 
@@ -1474,7 +1591,7 @@ void main()
 
 	//shot
 	Texture texture_shot;
-	texture_shot.loadFromFile("images/shot.png");
+	texture_shot.loadFromFile("images/shots.png");
 	Sprite sprite_shot;
 	sprite_shot.setTexture(texture_shot);
 	//shot.setPosition(position_hero)
@@ -1516,6 +1633,9 @@ void main()
 	//ZombieSpawn(300, 700,texture_zombie);
 	//ZombieSpawn(500, 500,texture_zombie);
 
+	//initializeGame
+	Game game;
+	game.time = 0;
 	//initializeHero(hero);
 	Hero hero;
 	hero.slotNo = 0;
@@ -1529,8 +1649,8 @@ void main()
 	hero.currentFrame = 0;
 	hero.sprite.setPosition(6 * 32, 9 * 32);  //start position
 	hero.state = NORMAL;
-	hero.isBeastAttack = 0;
-
+	hero.isBeastAttack = false;
+	hero.lastAttackTime = 0;
 
 	//bool is_game_over = false;
 
@@ -1559,44 +1679,42 @@ void main()
 	{
 		window.clear();
 
-		cout << hero.isBeastAttack << " BEAST" << endl;
 
 
-		float time = clock.getElapsedTime().asSeconds();
+		//cout << hero.lastAttackTime << "  lastAttack "  << endl;
+
+		game.time = clock.getElapsedTime().asSeconds();
 		float timeZ = clock2.getElapsedTime().asSeconds();
+		//game.time = time;
 		//float timeMili = clock.getElapsedTime().asMilliseconds();
 		
 		//TODO: spawn zombie at definite time (and change SpawnZombie func (spawn only near hero))
 		if (timeZ > TIME_GAME_STEP)
 		{
 
-
 		}
 
-		ProcessEvents(hero, window, time, switch_status, shot_last_time);
-		UpdateHero(hero);
+		ProcessEvents(hero, window, game, switch_status, shot_last_time, sprite_shot);
+		UpdateHero(hero, game);
 
 		UpdateView(window, hero, view);
 
-		UpdateShots(time, hero);
-		ZombieUpdate(hero, time);
+		UpdateShots(hero);
+		ZombieUpdate(hero, game);
 
 		CheckLoot(hero, texture_items);
 		UpdateInventory();
 
-		//cout << zombieList[0].health << endl;
 
 		//Drawing
 		DrawMap(mapSprite, window);
 		DrawLoot(window);
-		DrawHero(hero, window);
-		DrawShots(sprite_shot, window);
+		DrawShots(window);
+
 		DrawZombies(window);
+		DrawHero(hero, window);
 		DrawBar(window, view, text, sprite_bar, sprite_health, sprite_items, hero);
 
-		//cout << hero.slotNo << hero.nSlots << "  " << hero.iCurrent.current << endl;
-		//cout << struct_zombies[0].x << "  " << struct_zombies[0].y << endl;
-		//cout << "HERO  " << hero.getPosition().x  << "  " << hero.getPosition().y << endl;
 		window.display();
 	}
 }
