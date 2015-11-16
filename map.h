@@ -1,7 +1,9 @@
 #include <SFML/Graphics.hpp>
-#include "game.h"
 
-
+//map
+const int HEIGHT_MAP = 30;
+const int WIDTH_MAP = 76;
+const int STEP = 32;
 
 const sf::String TILEMAP[HEIGHT_MAP] = {
 	"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
