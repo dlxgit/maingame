@@ -33,7 +33,7 @@ struct Hero
 	Direction dir;
 	Direction dirLast;
 	int slotNo;
-	int nSlots;		//total slots in inventory
+	int nSlots;		//number of slots in inventory
 	int health;
 	float currentFrame;
 	HeroState state;
@@ -43,6 +43,7 @@ struct Hero
 	bool isAmmo;
 	float lastReloadTime;
 	bool isReloading;
+	int savedNeighbors;
 };
 
 void InitializeHero(Hero & hero)
@@ -61,4 +62,5 @@ void InitializeHero(Hero & hero)
 	hero.isBeastAttack = false;
 	hero.lastAttackTime = 0;
 	hero.lastReloadTime = 0;
+	hero.savedNeighbors = 0;
 }
