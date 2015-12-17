@@ -1,8 +1,18 @@
 #pragma once
 #include <SFML/Graphics.hpp>
+
+#include "declarations.h"
+
 #include "map.h"
 #include "shot.h"
 #include "hero.h"
+
+#include "level.h"
+#include "npc.h"
+
+#include "zombie.h"
+
+#include "loot.h"
 
 using namespace sf;
 using namespace std;
@@ -10,102 +20,12 @@ using namespace std;
 const int W_WIDTH = 1280;
 const int W_HEIGHT = 1024;
 
-enum GameState
-{
-	START_GAME,
-	PLAY,
-	LEVEL_FINISH,
-	END_GAME,
-	RESTART,
-};
-
-enum NameItem
-{
-	DRINK,
-	PISTOL,
-	RIFLE,
-	AMMO,
-	KEY,
-	MIXTURE,
-	GRENADE,
-};
 
 
-enum ZombieState
-{
-	NOTSPAWNED,  //cant move (raising from the ground)
-	ACTIVE,
-	DEAD,      //cant move (health = 0)
-	EXPLODED  //if animation has finished (for deleting from list)
-};
-
-enum NpcState
-{
-	NPC_LIVING,
-	NPC_DEAD,
-	NPC_SURVIVED,
-};
-
-struct Inventory
-{
-	NameItem name;
-	int quantity;
-	int current;
-	Texture texture;
-	Sprite sprite;
-};
-
-struct Loot
-{
-	NameItem name;
-	int quantity;
-	Vector2f pos;
-	Texture texture;
-	Sprite sprite;
-	bool isDrawn;
-};
 
 
-struct Zombie
-{
-	Vector2f pos;
-	int health;
-	Direction dir;
-	Direction dirLast;
-	bool follow;
-	float attack_time;
-	Texture texture;
-	Sprite sprite;
-	bool collision;
-	float currentFrame;
-	ZombieState state;
-	bool isNear;  //side of zombie position relatively to hero
-	float spawnTime;
-	float dirChangeTime;
-};
 
-enum NpcType
-{
-	PHOTOGRAPHS,
-	BABY,
-	TEACHER,
-	GIRL,
-	DOG,
-	SOLDIER,
-	SEARCHER,
-	COOK,	
-};
 
-struct Npc
-{
-	Vector2f pos;
-	Texture texture;
-	Sprite sprite;
-	int health;
-	NpcState state;
-	float currentFrame;
-	NpcType type;
-};
 
 struct FinalDoor
 {
@@ -114,13 +34,7 @@ struct FinalDoor
 	int currentFrame;
 };
 
-struct Grenade
-{
-	Vector2f startPos;
-	Vector2f distance;
-	float startTime;
-	bool isExploded;
-};
+
 
 struct House
 {
@@ -146,12 +60,6 @@ struct FinalDoor1
 	bool isOpened;
 };
 
-struct Explosion
-{
-	Vector2f pos;
-	float currentFrame;
-	Sprite sprite;
-};
 
 struct Game
 {
@@ -166,6 +74,9 @@ struct Game
 	std::vector<Door> doorList;
 	std::vector<House> houseList;
 
+
+	View view;
+
 	Font font;
 	Text text;
 
@@ -179,59 +90,15 @@ struct Game
 
 //.CPP
 
-void InitializeNpc(Game & game, Texture & texture_npc)
-{
-	Npc npc;
-	npc.currentFrame = 0;
-	npc.health = 20;
-	npc.texture = texture_npc;
-	npc.sprite.setTexture(texture_npc);
-	npc.state = NPC_LIVING;
-
-	npc.type = PHOTOGRAPHS;
-	npc.pos = { 5 * STEP, 8 * STEP };
-	npc.sprite.setPosition(npc.pos);
-	game.npcList.push_back(npc);
-
-	npc.type = BABY;
-	npc.pos = { 50 * STEP, 10 * STEP };
-	npc.sprite.setPosition(npc.pos);
-	game.npcList.push_back(npc);
-
-	npc.type = TEACHER;
-	npc.pos = { 10 * STEP, 15 * STEP };
-	npc.sprite.setPosition(npc.pos);
-	game.npcList.push_back(npc);
-
-	npc.type = DOG;
-	npc.pos = { 53 * STEP, 15 * STEP };
-	npc.sprite.setPosition(npc.pos);
-	game.npcList.push_back(npc);
-
-	npc.type = SOLDIER;
-	npc.pos = { 28 * STEP, 23 * STEP };
-	npc.sprite.setPosition(npc.pos);
-	game.npcList.push_back(npc);
-
-	npc.type = SEARCHER;
-	npc.pos = { 55 * STEP, 4 * STEP };
-	npc.sprite.setPosition(npc.pos);
-	game.npcList.push_back(npc);
-
-	npc.type = COOK;
-	npc.pos = { 20 * STEP, 15 * STEP };
-	npc.sprite.setPosition(npc.pos);
-	game.npcList.push_back(npc);
-	npc.type = GIRL;
-	npc.pos = { 15 * STEP, 6 * STEP };
-	npc.sprite.setPosition(npc.pos);
-	game.npcList.push_back(npc);
-}
-
 void InitializeGame(Game & game)
 {
+	game.hero = new Hero();
+	InitializeHero(*game.hero);
+
+
 	game.time = 0;
 	game.window = new RenderWindow(VideoMode(W_WIDTH, W_HEIGHT), "Shoot and Run");
+	game.view.reset(sf::FloatRect(0, 0, 1280, 1024)); //camera
 
 	Inventory inventory;
 	inventory.name = PISTOL;
@@ -243,7 +110,9 @@ void InitializeGame(Game & game)
 	game.inventoryList.push_back(inventory);
 	game.inventoryList[0].sprite.setTexture(inventory.texture);
 	game.state = START_GAME;
-}
+
+};
+
 
 void CheckWindowClose(Game & game)
 {
@@ -255,7 +124,7 @@ void CheckWindowClose(Game & game)
 			game.window->close();
 		}
 	}
-}
+};
 
 void BeginEvent(Game & game, View & view)
 {
@@ -274,7 +143,7 @@ void BeginEvent(Game & game, View & view)
 		game.state = PLAY;
 	}
 	CheckWindowClose(game);
-}
+};
 
 void EndGameEvent(Game & game, View & view)
 {
@@ -301,7 +170,8 @@ void EndGameEvent(Game & game, View & view)
 	{
 		game.state = PLAY;
 	}
-}
+};
+
 
 void LevelFinishEvent(Game & game, View & view)
 {
@@ -311,47 +181,377 @@ void LevelFinishEvent(Game & game, View & view)
 	game.text.setPosition(posView.x - 100, posView.y - 100);
 	game.window->draw(game.text);
 	CheckWindowClose(game);
+};
+
+
+void DrawShots(RenderWindow & window, vector<Shot> & shotList, vector<Explosion> & explosionList, Hero & hero)
+{
+	for (vector<Shot>::iterator shot = shotList.begin(); shot != shotList.end(); ++shot)
+	{
+		shot->sprite.setPosition(shot->pos.x, shot->pos.y);
+		window.draw(shot->sprite);
+	}
+
+	for (vector<Explosion>::iterator explosion = explosionList.begin(); explosion != explosionList.end();)
+	{
+		explosion->sprite.setTextureRect(IntRect(0 + 250 * int(explosion->currentFrame), 0, 250, 140));
+		explosion->currentFrame += 0.7;
+		window.draw(explosion->sprite);
+	}
+};
+
+
+void DrawZombies(RenderWindow & window, vector<Zombie> & zombieList)
+{
+	for (vector<Zombie>::iterator zombie = zombieList.begin(); zombie != zombieList.end(); ++zombie)
+	{
+		window.draw(zombie->sprite);
+	}
+};
+
+
+void DrawDoors(RenderWindow & window, vector<Door> & doorList)
+{
+	for (vector<Door>::iterator door = doorList.begin(); door != doorList.end(); door++)
+	{
+		if (door->isOpened)
+		{
+			door->sprite.setTextureRect(sf::IntRect(78, 0, 78, 72));
+		}
+		else
+			door->sprite.setTextureRect(sf::IntRect(0, 0, 78, 72));
+		window.draw(door->sprite);
+	}
+};
+
+
+void DrawNpc(RenderWindow & window, vector<Npc> & npcList)
+{
+	for (vector<Npc>::iterator npc = npcList.begin(); npc != npcList.end(); npc++)
+	{
+		window.draw(npc->sprite);
+	}
+};
+
+
+void CheckHeroBeastDamage(Hero & hero, vector<Zombie>::iterator & zombie, float & time)  //killing zombie with melee attack
+{
+	if (hero.isBeastAttack && ((time - hero.lastAttackTime) > HERO_BEAST_ATTACK_TIME))
+	{
+		zombie->health -= HERO_BEAST_DAMAGE;
+		hero.lastAttackTime = time;
+	}
+}
+
+bool IsShotCollision(vector<Zombie> & zombieList, Hero & hero, vector<Shot>::iterator shot)
+{
+	Vector2f shotCenter;
+	shotCenter.x = shot->sprite.getGlobalBounds().width / 2 + shot->pos.x;
+	shotCenter.y = shot->sprite.getGlobalBounds().height / 2 + shot->pos.y;
+
+	//checkDeleteShot
+	if (shot->distance > SHOT_MAX_DISTANCE)
+	{
+		return true;
+	}
+	else if (TILEMAP[int(shotCenter.y) / STEP][int(shotCenter.x) / STEP] != ' ')
+	{
+		return true;
+	}
+	else
+	{
+		for (vector<Zombie>::iterator zombie = zombieList.begin(); zombie != zombieList.end(); ++zombie)
+		{
+			if (zombie->sprite.getGlobalBounds().contains(shotCenter))
+			{
+				zombie->health -= DMG_ITEM[hero.item.name];
+				return true;
+			}
+		}
+	}
+	return false;
+}
+void UpdateShots(Game & game, Hero & hero, Sprite & sprite_explosion) //shots position update and delete if need
+{
+	for (vector<Shot>::iterator shot = game.shotList.begin(); shot != game.shotList.end();)
+	{
+		if (shot->type == BULLET)
+		{
+			switch (shot->dir)  //shot position update
+			{
+			case UP:
+				shot->pos.y -= STEP_SHOT;
+				break;
+			case RIGHT:
+				shot->pos.x += STEP_SHOT;
+				break;
+			case DOWN:
+				shot->pos.y += STEP_SHOT;
+				break;
+			case LEFT:
+				shot->pos.x -= STEP_SHOT;
+				break;
+			}
+
+			shot->distance += STEP_SHOT;
+
+			if (IsShotCollision(game.zombieList, hero, shot))  //shot delete
+			{
+				shot = game.shotList.erase(shot);
+			}
+			else shot++;
+		}
+
+
+		else if (shot->type == USED_GRENADE)
+		{
+			Vector2f pos = shot->sprite.getPosition();
+			switch (shot->dir)
+			{
+			case UP:
+				pos.y -= STEP_GRENADE;
+				break;
+			case DOWN:
+				pos.y += STEP_GRENADE;
+				break;
+			case RIGHT:
+				pos.x += STEP_GRENADE;
+				if ((game.time - shot->startTime) < (GRENADE_MAX_TIME / float(2)))
+				{
+					pos.y -= 2;
+				}
+				else
+				{
+					pos.y += 2;
+				}
+				break;
+			case LEFT:
+				pos.x -= STEP_GRENADE;
+				if (game.time - shot->startTime < GRENADE_MAX_TIME / 2)
+				{
+					pos.y -= 2;
+				}
+				else
+				{
+					pos.y += 2;
+				}
+				break;
+			}
+			cout << pos.x << endl;
+			shot->pos = pos;
+			shot->sprite.setPosition(pos);
+
+			if (game.time - shot->startTime > GRENADE_MAX_TIME)
+			{
+				shot->isExploded = true;
+
+				Explosion explosion;
+				explosion.sprite = sprite_explosion;
+				//explosion.sprite.setTextureRect(IntRect(0, 0, 250, 140));  250 - width  140 - height (/2)
+				explosion.pos = { shot->sprite.getPosition().x - 125,shot->sprite.getPosition().y - 70 };
+				explosion.sprite.setPosition(explosion.pos);
+				explosion.currentFrame = 0;
+				game.explosionList.push_back(explosion);
+
+				shot = game.shotList.erase(shot);
+			}
+			else shot++;
+
+		}
+	}
 }
 
 
-//movespeed of objects
-const int STEP_HERO = 5;
-const int STEP_HERO_HULK = 7;
-const int STEP_ZOMBIE = 2;
-const int STEP_ZOMBIE_ACTIVE = 3;
-const int STEP_SHOT = 12;
-const int STEP_GRENADE = 5;
+void UpdateZombies(vector<Zombie> & zombieList, Hero & hero, vector<Npc> & npcList, float & time)
+{
+	//TODO: ref
+	float xHero = hero.sprite.getPosition().x;
+	float yHero = hero.sprite.getPosition().y;
 
-//damage of objects
-const int ZOMBIE_DAMAGE = 30;
-const int DMG_ITEM[7] = { 0, 35, 50,0, 0,0,100 };
-const int HERO_BEAST_DAMAGE = 100;
+	//iterating zombieList
+	for (vector<Zombie>::iterator zombie = zombieList.begin(); zombie != zombieList.end();)
+	{
+		Direction dir = zombie->dir;
 
-//distance
-const int SHOT_MAX_DISTANCE = 400;
-const int ZOMBIE_VISION_DISTANCE = 300;
+		//compute distance and dir
+		float dx = abs(xHero - zombie->pos.x);  //distance x
+		float dy = abs(yHero - zombie->pos.y);  //distance y
+												//float di = sqrt(pow(dx,2) + pow(dy,2));  //distance
+		if (zombie->state == ACTIVE)
+		{
+			ZombieCheckFollow(zombie, hero);
+			if (zombie->follow)
+			{
+				//TODO: ref
+				if (dx > 5 || dy > 5)
+				{
+					//TODO: check left-right dir zombie sprite bug (almost)
+					if ((dx > 3 && dy > 3) && (dx / dy > 0.9) && (dy / dx < 1.1))
+					{
+						if (xHero >= zombie->pos.x && yHero >= zombie->pos.y)
+							dir = DOWNRIGHT;
+						else if (xHero >= zombie->pos.x && yHero < zombie->pos.y)
+							dir = UPRIGHT;
+						else if (xHero < zombie->pos.x && yHero >= zombie->pos.y)
+							dir = DOWNLEFT;
+						else if (xHero < zombie->pos.x && yHero < zombie->pos.y)
+							dir = UPLEFT;
+					}
+					else if (dx >= dy)
+					{
+						if (xHero > zombie->pos.x)
+							dir = RIGHT;
+						else
+							dir = LEFT;
+					}
+					else if (dx < dy)
+					{
+						if (yHero > zombie->pos.y)
+							dir = DOWN;
+						else
+							dir = UP;
+					}
+				}
+				CheckNpcDeath(npcList, zombie);
+				zombie->dir = dir;
+			}
+			else
+			{
+				ZombieCheckDir(zombie, time);
+			}
 
-//health of objects
-const int ZOMBIE_MAX_HP = 100;
-const int HP_PER_DRINK = 30;
-const int NPC_MAX_HEALTH = 50;
+			CheckZombieCollision(zombie);
+			ZombieUpdateAttack(hero, zombie, time);
 
-//time 
-const int BEAST_MAX_TIME = 30;
-const float HERO_BEAST_ATTACK_TIME = 0.7;
-const float WEAPON_RELOAD_TIME = 1.5;
-const int TIME_GAME_STEP = 10;
-const float SCREEN_UPDATE_TIME = 15;
-const float GRENADE_MAX_TIME = 1;  //throwtime
-const int ZOMBIE_DIR_CHANGE_TIME = 5;
+			if (hero.state == BEAST)
+			{
+				if (IsZombieNearHero(hero, zombie))
+				{
+					CheckHeroBeastDamage(hero, zombie, time);
+				}
+			}
+			if (xHero != zombie->pos.x || yHero != zombie->pos.y)
+			{
+				if (zombie->follow)
+				{
+					ZombieUpdatePosition(zombie);
+				}
+			}
+		}
+		ZombieUpdateSprite(zombie);
+		//UpdateZombiePosition(i);  TODO: make it for all zombies, not jsut for following ones
 
-//item quantity settings
-const int AMMO_PACKS = 4;
-const int MAX_AMMO[7] = { 1,12,30,1,1,1,1 };
+		//TOCHECK: why dir is here? is it needed below? 
+		if (dir != zombie->dirLast)
+		{
+			//zombie->currentFrame = 0;
+			zombie->dirLast = dir;
+		}
 
-//counts
-const int MAX_NUMBER_OF_NEIGHBORS = 8;
+		if (zombie->state == EXPLODED)  //deleting
+		{
+			zombie = zombieList.erase(zombie);
+		}
+		else zombie++;
+	}
+}
 
 
-//names
-const string ITEM_NAMES[7] = { "drink", "pistol", "rifle", "ammo", "key", "mixture", "grenade"};
+void UpdateHero(Game & game) //position + collision + sprite
+{
+	Vector2f pos = game.hero->sprite.getPosition();
+
+	if (game.hero->state == NORMAL || game.hero->state == BEAST)
+	{
+		switch (game.hero->dir)
+		{
+		case UP:
+			pos.y -= STEP_HERO;
+			break;
+		case UPRIGHT:
+			pos.x += (0.66 * STEP_HERO);
+			pos.y -= (0.66 * STEP_HERO);
+			break;
+		case RIGHT:
+			pos.x += STEP_HERO;
+			break;
+		case DOWNRIGHT:
+			pos.x += (0.66 * STEP_HERO);
+			pos.y += (0.66 * STEP_HERO);
+			break;
+		case DOWN:
+			pos.y += STEP_HERO;
+			break;
+		case DOWNLEFT:
+			pos.x -= (0.66 * STEP_HERO);
+			pos.y += (0.66 * STEP_HERO);
+			break;
+		case LEFT:
+			pos.x -= STEP_HERO;
+			break;
+		case UPLEFT:
+			pos.x -= (0.66 * STEP_HERO);
+			pos.y -= (0.66 * STEP_HERO);
+			break;
+		case NONE:
+			break;
+		}
+	}
+	if (game.hero->state == BEAST)
+	{
+		if (game.time - game.hero->beastTimer > BEAST_MAX_TIME)
+		{
+			game.hero->state = NORMAL;
+			game.hero->currentFrame = 0;
+			game.hero->beastTimer = 0;
+		}
+	}
+
+	if ((game.inventoryList[game.hero->slotNo].name == PISTOL || game.inventoryList[game.hero->slotNo].name == RIFLE) && game.inventoryList[game.hero->slotNo].current == 0 && game.inventoryList[game.hero->slotNo].quantity > 0)
+	{
+		if (game.hero->isReloading == false)
+		{
+			game.hero->lastReloadTime = game.time;
+			game.hero->isReloading = true;
+		}
+	}
+
+	UpdateHeroSprite(*game.hero, game.time);
+	game.hero->sprite.setPosition(pos);
+	game.hero->pos = game.hero->sprite.getPosition();  //#for
+	CheckHeroCollision(*game.hero);
+}
+
+void ProcessEvents(Game & game, Sprite & sprite_shot, Sprite & sprite_grenade)
+{
+	Event event;
+	while (game.window->pollEvent(event))
+	{
+		UpdateDirection(*game.hero);
+
+
+		//inventorySwitch
+		if (IsInventorySwitch(*game.hero))
+		{
+			game.hero->item = game.inventoryList[game.hero->slotNo];
+		}
+		CheckUsingItems(*game.hero, game.inventoryList, game.shotList, game.time, sprite_shot, sprite_grenade);
+
+		//Window close event
+		if (Keyboard::isKeyPressed(Keyboard::Escape) || event.type == Event::Closed)
+			game.window->close();
+	}
+}
+
+
+void Render(Game & game, Hero & hero)
+{
+	DrawLoot(*game.window, game.lootList);
+	DrawShots(*game.window, game.shotList, game.explosionList,hero);
+	//DrawHouses(*game);
+	DrawDoors(*game.window, game.doorList);
+	DrawNpc(*game.window, game.npcList);
+	DrawZombies(*game.window, game.zombieList);
+	DrawHero(*game.window, hero);
+};
+

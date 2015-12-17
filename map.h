@@ -1,4 +1,6 @@
+#pragma once
 #include <SFML/Graphics.hpp>
+#include "declarations.h"
 
 //map
 const int HEIGHT_MAP = 30;
