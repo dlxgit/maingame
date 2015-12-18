@@ -12,6 +12,7 @@ void InitiazlizeSprites(Sprites & sprites)
 	texture_zombie.loadFromFile("images/zombie.png");
 	sprites.texture_zombie = texture_zombie;
 	sprites.zombie.setTexture(sprites.texture_zombie);
+
 	//shot
 	Texture texture_shot;
 	texture_shot.loadFromFile("images/shots.png");
