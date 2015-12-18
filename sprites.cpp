@@ -32,6 +32,7 @@ void InitiazlizeSprites(Sprites & sprites)
 	texture_health.loadFromFile("images/health.png");
 	sprites.texture_health = texture_health;
 	sprites.health.setTexture(sprites.texture_health);
+
 	//Npc
 	Texture texture_npc;
 	texture_npc.loadFromFile("images/npcs.png");
