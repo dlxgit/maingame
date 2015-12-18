@@ -32,5 +32,4 @@ struct Sprites
 	Texture texture_door;
 };
 
-
 void InitiazlizeSprites(Sprites & sprites);
