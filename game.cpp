@@ -1,62 +1,4 @@
-#pragma once
-#include <SFML/Graphics.hpp>
-#include "map.h"
-#include "shot.h"
-#include "hero.h"
-#include "level.h"
-#include "npc.h"
-#include "zombie.h"
-#include "loot.h"
-#include "explosion.h"
-#include "sprites.h"
-#include "view.h"
-
-using namespace sf;
-using namespace std;
-
-struct Door
-{
-	Texture texture;
-	Sprite sprite;
-	Vector2f pos;
-	bool isOpened;
-};
-
-struct FinalDoor //not using yet
-{
-	Texture texture;
-	Sprite sprite;
-	Vector2f pos;
-	int currentFrame;
-	bool isOpened;
-};
-
-
-struct Game
-{
-	Hero * hero;
-	float time;
-	RenderWindow * window;
-	std::vector<Inventory> inventoryList;
-	std::vector<Loot> lootList;
-	std::vector<Shot> shotList;
-	std::vector<Zombie> zombieList;
-	std::vector<Npc> npcList;
-	std::vector<Door> doorList;
-	//std::vector<House> houseList;
-	std::vector<Explosion> explosionList;
-	View view;
-	GameState state;
-
-	Font font;
-	Text text;
-
-	Sprites sprites;
-	Texture explosionTexture;
-	Sprite explosionSprite;
-
-	Level lvl;
-};
+#include "game.h"
 
 void InitializeGame(Game & game)
 {
@@ -684,8 +626,8 @@ void StartGame(Game * game)
 				CheckGameOver(game->state, *game->hero);
 
 				//Drawing
-				//DrawMap(*game, game->sprites.map);
-				game->lvl.Draw(*game->window);//рисуем новую карту
+				DrawMap(*game, game->sprites.map);
+				//game->lvl.Draw(*game->window);//рисуем новую карту
 
 				DrawInventoryText(*game->window, game->inventoryList, *game->hero, game->view, game->text);
 

@@ -240,7 +240,7 @@ bool Level::LoadFromFile(std::string filename)//двоеточия-обраще�
 				sf::Sprite sprite;
 				sprite.setTexture(tilesetImage);
 				sprite.setTextureRect(sf::Rect<int>(0, 0, 0, 0));
-				sprite.setPosition(x, y);
+				sprite.setPosition(float(x), float(y));
 
 				if (objectElement->Attribute("width") != NULL)
 				{

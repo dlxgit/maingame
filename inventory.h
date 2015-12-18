@@ -2,8 +2,6 @@
 #include <vector>
 #include "SFML\Graphics.hpp"
 #include "declarations.h"
-#include "hero.h"
-
 #include "map.h"
 
 using namespace sf;
@@ -28,17 +26,4 @@ struct Grenade
 	bool isExploded;
 };
 
-struct Explosion
-{
-	Vector2f pos;
-	float currentFrame;
-	Sprite sprite;
-};
-
-Vector2f GetInterfacePosition(View & view)
-{
-	Vector2f posView;
-	posView.x = view.getCenter().x - 600;
-	posView.y = view.getCenter().y - 450;
-	return posView;
-};
+int GetMaxQuantity(NameItem & name);
