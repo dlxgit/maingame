@@ -3,6 +3,7 @@
 #include "declarations.h"
 #include "map.h"
 #include "hero.h"
+#include "sprites.h"
 
 using namespace sf;
 using namespace std;

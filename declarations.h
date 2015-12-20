@@ -105,6 +105,7 @@ const int HP_PER_DRINK = 30;
 const int NPC_MAX_HEALTH = 50;
 
 //time 
+const float ITEM_REUSE_COOLDOWN[7] = { 0.35f, 0.35f,0.15f,0.15f,0.15f,0.15f };
 const int BEAST_MAX_TIME = 30;
 const float HERO_BEAST_ATTACK_TIME = 0.7f;
 const float WEAPON_RELOAD_TIME = 1.5f;

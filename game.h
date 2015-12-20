@@ -63,30 +63,29 @@ void InitializeGame(Game & game)
 	game.hero = new Hero();
 	InitializeHero(*game.hero);
 
-
 	game.time = 0;
 	game.window = new RenderWindow(VideoMode(W_WIDTH, W_HEIGHT), "Shoot and Run");
 	game.view.reset(sf::FloatRect(0, 0, 1280, 1024)); //camera
+
+	InitiazlizeSprites(game.sprites);
 
 	Inventory inventory;
 	inventory.name = PISTOL;
 	inventory.current = 0;
 	inventory.quantity = 7;
-	inventory.texture.loadFromFile("images/items.png");
-	inventory.sprite.setTexture(inventory.texture);
+
+	inventory.sprite = game.sprites.items;
 	inventory.sprite.setTextureRect(IntRect(32, 0, 32, 32));
 	game.inventoryList.push_back(inventory);
 	game.inventoryList[0].sprite.setTexture(inventory.texture);
 	game.state = START_GAME;
 
 	//text
-	game.font.loadFromFile("Font/Arialbd.ttf");
+	game.font.loadFromFile("resources/font/Arialbd.ttf");
 	game.text.setString("");
 	game.text.setFont(game.font);
 	game.text.setCharacterSize(20);
 	game.text.setColor(Color::White);
-
-	InitiazlizeSprites(game.sprites);
 
 	game.view.reset(sf::FloatRect(0, 0, 1280, 1024)); //camera
 
@@ -94,7 +93,6 @@ void InitializeGame(Game & game)
 	game.inventoryList[0].sprite.setTextureRect(IntRect(32, 0, 32, 32));
 	game.explosionSprite = game.sprites.explosion;
 	game.hero->item = game.inventoryList[0];
-
 
 	//initializeZombie
 	ZombieSpawn(game.zombieList, game.time, 100, 100, game.sprites.zombie);
@@ -266,7 +264,6 @@ void UpdateShots(Game & game, Hero & hero, Sprite & sprite_explosion) //shots po
 				shot->pos.x -= STEP_SHOT;
 				break;
 			}
-
 			shot->distance += STEP_SHOT;
 
 			if (IsShotCollision(game.zombieList, hero, shot))  //shot delete
@@ -275,55 +272,48 @@ void UpdateShots(Game & game, Hero & hero, Sprite & sprite_explosion) //shots po
 			}
 			else shot++;
 		}
-
-
 		else if (shot->type == USED_GRENADE)
 		{
-			Vector2f pos = shot->sprite.getPosition();
 			switch (shot->dir)
 			{
 			case UP:
-				pos.y -= STEP_GRENADE;
+				shot->pos.y -= STEP_GRENADE;
 				break;
 			case DOWN:
-				pos.y += STEP_GRENADE;
+				shot->pos.y += STEP_GRENADE;
 				break;
 			case RIGHT:
-				pos.x += STEP_GRENADE;
+				shot->pos.x += STEP_GRENADE;
 				if ((game.time - shot->startTime) < (GRENADE_MAX_TIME / float(2)))
 				{
-					pos.y -= 2;
+					shot->pos.y -= 2;
 				}
 				else
 				{
-					pos.y += 2;
+					shot->pos.y += 2;
 				}
 				break;
 			case LEFT:
-				pos.x -= STEP_GRENADE;
+				shot->pos.x -= STEP_GRENADE;
 				if (game.time - shot->startTime < GRENADE_MAX_TIME / 2)
 				{
-					pos.y -= 2;
+					shot->pos.y -= 2;
 				}
 				else
 				{
-					pos.y += 2;
+					shot->pos.y += 2;
 				}
 				break;
 			}
-			cout << pos.x << endl;
-			shot->pos = pos;
-			shot->sprite.setPosition(pos);
 
+			shot->sprite.setPosition(shot->pos);
 
 			if (game.time - shot->startTime > GRENADE_MAX_TIME)
 			{
 				shot->isExploded = true;
 
-				cout << "DICH" << endl;
 				Explosion explosion;
 				explosion.sprite = sprite_explosion;
-				//explosion.sprite.setTextureRect(IntRect(0, 0, 250, 140));  250 - width  140 - height (/2)
 				explosion.pos = { shot->sprite.getPosition().x - 125,shot->sprite.getPosition().y - 70 };
 				explosion.sprite.setPosition(explosion.pos);
 				explosion.currentFrame = 0;
@@ -332,7 +322,6 @@ void UpdateShots(Game & game, Hero & hero, Sprite & sprite_explosion) //shots po
 				shot = game.shotList.erase(shot);
 			}
 			else shot++;
-
 		}
 	}
 }
@@ -524,8 +513,6 @@ void Render(Game & game)
 {
 	DrawLoot(*game.window, game.lootList);
 	DrawShots(*game.window, game.shotList, game.explosionList, *game.hero);
-	//DrawHouses(*game);
-	//DrawDoors(*game.window, game.doorList);
 	DrawNpc(*game.window, game.npcList);
 	DrawZombies(*game.window, game.zombieList);
 	DrawHero(*game.window, *game.hero);
@@ -614,14 +601,7 @@ void DrawBar(RenderWindow & window, vector<Inventory> & inventoryList, Hero & he
 	sprites.bar.setTextureRect(IntRect(0, 0, 170, 35));
 	sprites.bar.setPosition(posView);
 
-	//TODO NOT NOW: hero.death
-	if (hero.health < 0)
-	{
-		hero.health = 0;
-	}
 	sprites.health.setTextureRect(IntRect(1, 0, 146 * (float(hero.health) / 100), 29));
-
-	//changeSoon(конкретные цифры вместо плюсов?)
 	sprites.health.setPosition(posView.x + 10, posView.y + 1);
 
 	inventoryList[hero.slotNo].sprite.setPosition(posView.x + 5, posView.y + 40);
@@ -634,7 +614,6 @@ void DrawBar(RenderWindow & window, vector<Inventory> & inventoryList, Hero & he
 
 void StartGame(Game * game)
 {
-
 	Clock clock;
 	Clock gameSpeedClock;
 	float gameSpeedTime = 0;
@@ -662,7 +641,7 @@ void StartGame(Game * game)
 
 				//TODO: spawn zombie at definite time (and change SpawnZombie func (spawn only near hero))
 
-				cout << "TIME  " << game->time << endl;
+				//cout << "TIME  " << game->time << endl;
 
 				CheckSpawnZombiesAndLoot(*game, game->sprites.items, game->sprites.zombie);
 				ProcessEvents(*game, game->sprites);
@@ -684,13 +663,12 @@ void StartGame(Game * game)
 				CheckGameOver(game->state, *game->hero);
 
 				//Drawing
-				//DrawMap(*game, game->sprites.map);
-				game->lvl.Draw(*game->window);//рисуем новую карту
+				DrawMap(*game, game->sprites.map);
+				//game->lvl.Draw(*game->window);//рисуем новую карту
 
 				DrawInventoryText(*game->window, game->inventoryList, *game->hero, game->view, game->text);
 
 				Render(*game);
-				//DrawNpc(*game);
 				DrawBar(*game->window, game->inventoryList, *game->hero, game->view, game->text, game->sprites);
 				break;
 			}

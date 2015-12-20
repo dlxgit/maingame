@@ -117,7 +117,7 @@ void ComputeNpcFrame(vector<Npc> & npcList)
 				break;
 			}
 		}
-		else if (npc->state == DEAD)
+		else if (npc->state == KILLED)
 		{
 			npc->sprite.setTextureRect(IntRect(4 + 45 * int(npc->currentFrame), 593, 53, 45));
 			npc->currentFrame += 0.06;
@@ -128,46 +128,33 @@ void ComputeNpcFrame(vector<Npc> & npcList)
 
 void CheckEventNpc(vector<Npc> & npcList, Hero & hero)
 {
-	Vector2f itemCenter;
-	Vector2f heroCenter;
-	heroCenter.x = hero.pos.x + hero.sprite.getGlobalBounds().width / 2;
-	heroCenter.y = hero.pos.y + hero.sprite.getGlobalBounds().height / 2;
-	bool needDeleteNpc;
+	Vector2f npcCenter;
+	Vector2f heroCenter = GetSpriteCenter(hero.sprite);
+	bool needDeleteNpc = false;
 	for (vector<Npc>::iterator npc = npcList.begin(); npc != npcList.end();)
 	{
 		needDeleteNpc = false;
 
 		if (npc->state == LIVING)  //if loot.item.center contains heroSprite  -> add new item in inventory
 		{
-			itemCenter.x = npc->sprite.getPosition().x + npc->sprite.getGlobalBounds().width / 2;
-			itemCenter.y = npc->sprite.getPosition().y + npc->sprite.getGlobalBounds().height / 2;
-			if ((abs(heroCenter.x - itemCenter.x) < 15) && (abs(heroCenter.y - itemCenter.y)) < 15)
+			npcCenter.x = npc->sprite.getPosition().x + npc->sprite.getGlobalBounds().width / 2;
+			npcCenter.y = npc->sprite.getPosition().y + npc->sprite.getGlobalBounds().height / 2;
+			if (npc->type == COOK)
+				cout << (abs(npcCenter.x - heroCenter.x)) << " CENTER " << abs(npcCenter.y - heroCenter.y) << "  STATE " << npc->state << endl;
+			if ((abs(npcCenter.x - heroCenter.x) < 35) && (abs(npcCenter.y - heroCenter.y)) < 35)
 			{
 				//cout << "NEAR" << endl;
 				npc->state = SURVIVED;
 				hero.savedNeighbors += 1;
-				npc->currentFrame = 0;
-			}
-			if (npc->health <= 0)
-			{
-				npc->state = KILLED;
-			}
-		}
-		if (npc->state == DEAD)
-		{
-			if (npc->currentFrame > 8)
-			{
 				needDeleteNpc = true;
 			}
 		}
-		if (npc->state == SURVIVED)
+		if (npc->health <= 0)
 		{
-			//if (npc->currentFrame > 5)
-			{
-				needDeleteNpc = true;
-			}
+			npc->state = KILLED;
 		}
-
+		if (npc->state == KILLED && npc->currentFrame > 8)
+			needDeleteNpc = true;
 		//deleting Npc from List
 		if (needDeleteNpc)
 		{
@@ -179,4 +166,3 @@ void CheckEventNpc(vector<Npc> & npcList, Hero & hero)
 		}
 	}
 };
-

@@ -9,7 +9,7 @@ void InitializeHero(Hero & hero)
 	hero.slotNo = 0;
 	hero.nSlots = 1;
 	hero.health = 100;
-	hero.texture.loadFromFile("images/hero.png");
+	hero.texture.loadFromFile("resources/images/hero.png");
 	hero.sprite.setTexture(hero.texture);
 	hero.sprite.setTextureRect(IntRect(4, 4, 32, 32));
 	hero.dir = NONE;
@@ -119,10 +119,8 @@ bool UpdateInventory(Hero & hero, vector<Inventory> & inventoryList, float & tim
 
 void CheckUsingItems(Hero & hero, vector<Inventory> & inventoryList, vector<Shot> & shotList, float & time, Sprite & sprite_shot, Sprite & sprite_grenade)
 {
-	//item-using events
 	if (Keyboard::isKeyPressed(Keyboard::A))
 	{
-		//question. should store current inventoryItem is hero struct? / just get item from list
 		if (hero.state == BEAST)
 		{
 			if (time - hero.lastAttackTime > HERO_BEAST_ATTACK_TIME)
@@ -132,74 +130,33 @@ void CheckUsingItems(Hero & hero, vector<Inventory> & inventoryList, vector<Shot
 				hero.currentFrame = 0;
 			}
 		}
-		else if (hero.state == TRANSFORMING)
+		else if (hero.state == NORMAL && inventoryList[hero.slotNo].current > 0)
 		{
-
-		}
-		else if (hero.state == NORMAL)
-		{
-			if (inventoryList[hero.slotNo].current > 0)
+			if (time > hero.shotLastTime + ITEM_REUSE_COOLDOWN[inventoryList[hero.slotNo].name])
 			{
-				if (inventoryList[hero.slotNo].name == PISTOL)
+				hero.shotLastTime = time;
+				inventoryList[hero.slotNo].current -= 1;
+				if (inventoryList[hero.slotNo].name == PISTOL || inventoryList[hero.slotNo].name == RIFLE)
 				{
-					if (time > hero.shotLastTime + 0.35)
-					{
-						AddNewShot(shotList, hero.dirLast, hero.pos, time, sprite_shot, sprite_grenade, BULLET);
-						hero.shotLastTime = time;
-						inventoryList[hero.slotNo].current -= 1;
-					}
-				}
-				else if (inventoryList[hero.slotNo].name == RIFLE)
-				{
-					if (time > hero.shotLastTime + 0.15)
-					{
-						AddNewShot(shotList, hero.dirLast, hero.pos, time, sprite_shot, sprite_grenade, BULLET);
-						hero.shotLastTime = time;
-						inventoryList[hero.slotNo].current -= 1;
-					}
+					AddNewShot(shotList, hero.dirLast, hero.pos, time, sprite_shot, sprite_grenade, BULLET);
 				}
 				else if (inventoryList[hero.slotNo].name == DRINK)
 				{
-					if (time > hero.shotLastTime + 0.35)
+					hero.health += HP_PER_DRINK;
+					if (hero.health > 100)
 					{
-						hero.shotLastTime = time;
-						hero.health += HP_PER_DRINK;
-						if (hero.health > 100)
-						{
-							hero.health = 100;  //replace
-						}
-						inventoryList[hero.slotNo].current -= 1;
+						hero.health = 100;
 					}
 				}
 				else if (inventoryList[hero.slotNo].name == MIXTURE)
 				{
-					//if (game.time > hero.shotLastTime + 0.35)
-					if (inventoryList[hero.slotNo].current > 0)
-					{
-						hero.shotLastTime = time;
-						hero.health += HP_PER_DRINK;
-						if (hero.health > 100)
-						{
-							hero.health = 100;  //replace
-						}
-						inventoryList[hero.slotNo].current -= 1;
-						hero.state = TRANSFORMING;
-						hero.dir = NONE;
-						hero.dirLast = DOWN;
-					}
+					hero.state = TRANSFORMING;
+					hero.dir = NONE;
+					hero.dirLast = DOWN;
 				}
 				else if (inventoryList[hero.slotNo].name == GRENADE)
 				{
-					if (time > hero.shotLastTime + 0.15)
-					{
-						AddNewShot(shotList, hero.dirLast, hero.pos, time, sprite_shot, sprite_grenade, USED_GRENADE);
-						hero.shotLastTime = time;
-						inventoryList[hero.slotNo].current -= 1;
-					}
-				}
-				else if (inventoryList[hero.slotNo].name == KEY)
-				{
-					//UpdateDoors(game, hero);
+					AddNewShot(shotList, hero.dirLast, hero.pos, time, sprite_shot, sprite_grenade, USED_GRENADE);
 				}
 			}
 		}

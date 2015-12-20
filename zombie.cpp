@@ -29,13 +29,12 @@ void ZombieSpawn(vector<Zombie> & zombieList, float time, int posX, int posY, Sp
 	zombieList.push_back(zombie);
 };
 
-
 void CheckNpcDeath(vector<Npc> & npcList, vector<Zombie>::iterator & zombie)
 {
 	Vector2f npcCenter;
 	Vector2f zombieCenter;
-	zombieCenter.x = zombie->pos.x + zombie->sprite.getGlobalBounds().width / 2;
-	zombieCenter.y = zombie->pos.y + zombie->sprite.getGlobalBounds().height / 2;
+	zombieCenter.x = zombie->sprite.getPosition().x + zombie->sprite.getGlobalBounds().width / 2;
+	zombieCenter.y = zombie->sprite.getPosition().y + zombie->sprite.getGlobalBounds().height / 2;
 
 	for (vector<Npc>::iterator npc = npcList.begin(); npc != npcList.end();)
 	{
@@ -43,7 +42,8 @@ void CheckNpcDeath(vector<Npc> & npcList, vector<Zombie>::iterator & zombie)
 		{
 			npcCenter.x = npc->sprite.getPosition().x + npc->sprite.getGlobalBounds().width / 2;
 			npcCenter.y = npc->sprite.getPosition().y + npc->sprite.getGlobalBounds().height / 2;
-			if ((abs(zombieCenter.x - npcCenter.x) < 15) && (abs(zombieCenter.y - npcCenter.y)) < 15)
+			//cout << (abs(zombieCenter.x - npcCenter.x)) << " CENTER " << abs(zombieCenter.y - npcCenter.y) << endl;
+			if ((abs(zombieCenter.x - npcCenter.x) < 35) && (abs(zombieCenter.y - npcCenter.y)) < 35)
 			{
 				npc->state = KILLED;
 			}
@@ -81,12 +81,12 @@ void ZombieCheckDir(vector<Zombie>::iterator & zombie, float &time)
 	{
 		if (zombie->dirChangeTime == 0)
 		{
-			cout << " 1 IS " << endl;
+			//cout << " 1 IS " << endl;
 			zombie->dir = ComputeRandDir(zombie);
 		}
 		if (time - zombie->dirChangeTime > ZOMBIE_DIR_CHANGE_TIME)
 		{
-			cout << " 2 IS " << endl;
+			//cout << " 2 IS " << endl;
 			zombie->dirChangeTime = 0;
 		}
 	}
@@ -630,6 +630,7 @@ void CheckZombieExplosion(vector<Explosion> & explosionList, vector<Zombie> & zo
 	}
 }
 
+
 /*
 void UpdateZombies(vector<Zombie> & zombieList, Hero & hero, vector<Npc> & npcList,const float & time)
 {
@@ -681,6 +682,7 @@ else
 dir = UP;
 }
 }
+
 CheckNpcDeath(npcList, zombie);
 zombie->dir = dir;
 }

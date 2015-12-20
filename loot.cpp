@@ -52,8 +52,8 @@ void GenerateLoot(vector<Loot> & lootList, int ItemsRemaining, NameItem  item, S
 				loot.quantity = GetMaxQuantity(loot.name);
 				//checkifNeedIt??
 				loot.pos = { float(x),float(y) };
-				loot.sprite.setPosition(loot.pos);
 				loot.sprite = texture_items;
+				loot.sprite.setPosition(loot.pos);
 				loot.sprite.setTextureRect(sf::IntRect(item * 32, 0, 32, 32));
 				loot.isDrawn = true;
 
