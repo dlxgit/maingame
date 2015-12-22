@@ -36,13 +36,13 @@ Direction ComputeRandDir(vector<Zombie>::iterator & zombie);
 
 void ZombieCheckDir(vector<Zombie>::iterator & zombie, float &time);
 
-void CheckZombieCollision(vector<Zombie>::iterator & zombie);
-
 void ZombieCheckFollow(vector<Zombie>::iterator & zombie, Hero & hero);
 
 void ZombieUpdatePosition(vector<Zombie>::iterator & zombie);
 
 bool IsZombieNearHero(Hero & hero, vector<Zombie>::iterator & zombie);
+
+void ComputeZombieDirection(vector<Zombie>::iterator zombie, Vector2f & heroPos);
 
 void ZombieUpdateAttack(Hero & hero, vector<Zombie>::iterator zombie, const float& time);
 
@@ -52,8 +52,10 @@ void ZombieUpdateAttack(Hero & hero, vector<Zombie>::iterator zombie, float & ti
 
 void ZombieMoveRandom(vector<Zombie> & zombieList);
 
-void SpawnZombieRandomly(vector<Zombie>&zombieList, int zombiesRemaining, float & time, Sprite & sprite_zombie);
+void SpawnZombieRandomly(vector<Zombie>&zombieList, vector<Object> & objects, int zombiesRemaining, float & time, Sprite & sprite_zombie);
 
 void ZombieCheckDir(float & time, vector<Zombie>::iterator & zombie);
 
 void CheckZombieExplosion(vector<Explosion> & explosionList, vector<Zombie> & zombieList);
+
+void DeleteZombieList(vector<Zombie> & zombies);

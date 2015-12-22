@@ -7,3 +7,5 @@ struct Explosion
 	float currentFrame;
 	Sprite sprite;
 };
+
+void DeleteExplosionList(vector<Explosion> & explosions);

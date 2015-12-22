@@ -1,7 +1,6 @@
 #pragma once
 #include <SFML/Graphics.hpp>
 #include "declarations.h"
-#include "map.h"
 #include "shot.h"
 #include "hero.h"
 #include "level.h"
@@ -11,6 +10,7 @@
 #include "explosion.h"
 #include "sprites.h"
 #include "view.h"
+#include "text.h"
 
 using namespace sf;
 using namespace std;
@@ -43,8 +43,7 @@ struct Game
 	std::vector<Shot> shotList;
 	std::vector<Zombie> zombieList;
 	std::vector<Npc> npcList;
-	std::vector<Door> doorList;
-	//std::vector<House> houseList;
+	//std::vector<Door> doorList;  //not using
 	std::vector<Explosion> explosionList;
 	View view;
 	GameState state;
@@ -59,6 +58,8 @@ struct Game
 	Level lvl;
 	vector<Object> solidObjects;
 };
+
+void InitializeLoot(Game & game);
 
 void InitializeGame(Game & game);
 
@@ -92,10 +93,8 @@ void Render(Game & game);
 
 void CheckSpawnZombiesAndLoot(Game & game, Sprite & items, Sprite & sprite_zombie);
 
-void DrawMap(Game & game, Sprite & mapSprite);
-
 void DrawBar(RenderWindow & window, vector<Inventory> & inventoryList, Hero & hero, View & view, Text & text, Sprites & sprites);
 
 void StartGame(Game * game);
 
-void DestroyGame(Game * game);
+void DeleteGame(Game * game);

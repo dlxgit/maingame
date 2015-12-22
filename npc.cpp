@@ -164,3 +164,11 @@ void CheckEventNpc(vector<Npc> & npcList, Hero & hero)
 		}
 	}
 };
+
+void DeleteNpcList(vector<Npc> & npcs)
+{
+	for (vector<Npc>::iterator it = npcs.begin(); it != npcs.end();)
+	{
+		it = npcs.erase(it);
+	}
+}

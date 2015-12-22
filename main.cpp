@@ -16,5 +16,5 @@ void main()
 	InitializeGame(*game);
 
 	StartGame(game);
-	DestroyGame(game);
+	DeleteGame(game);
 }

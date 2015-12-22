@@ -1,58 +1,35 @@
 #include "game.h"
 
+
+void InitializeLoot(Game & game)
+{
+	GenerateLoot(game.lootList, game.lvl.GetAllObjects(), 5, DRINK, game.sprites.items);
+	GenerateLoot(game.lootList, game.lvl.GetAllObjects(), 3, PISTOL, game.sprites.items);
+	GenerateLoot(game.lootList, game.lvl.GetAllObjects(), 2, AMMO, game.sprites.items);
+	GenerateLoot(game.lootList, game.lvl.GetAllObjects(), 1, RIFLE, game.sprites.items);
+	GenerateLoot(game.lootList, game.lvl.GetAllObjects(), 1, KEY, game.sprites.items);
+	GenerateLoot(game.lootList, game.lvl.GetAllObjects(), 1, MIXTURE, game.sprites.items);
+	GenerateLoot(game.lootList, game.lvl.GetAllObjects(), 2, GRENADE, game.sprites.items);
+}
+
 void InitializeGame(Game & game)
 {
 	game.hero = new Hero();
+	InitializeInventory(game.inventoryList, game.sprites);
 	InitializeHero(*game.hero);
-
-	game.time = 0;
-	game.window = new RenderWindow(VideoMode(W_WIDTH, W_HEIGHT), "Shoot and Run");
-	game.view.reset(sf::FloatRect(0, 0, 1280, 1024)); //camera
-
-	InitiazlizeSprites(game.sprites);
-
-	Inventory inventory;
-	inventory.name = PISTOL;
-	inventory.current = 0;
-	inventory.quantity = 7;
-
-	inventory.sprite = game.sprites.items;
-	inventory.sprite.setTextureRect(IntRect(32, 0, 32, 32));
-	game.inventoryList.push_back(inventory);
-	game.inventoryList[0].sprite.setTexture(inventory.texture);
-	game.state = START_GAME;
-
-	//text
-	game.font.loadFromFile("resources/font/Arialbd.ttf");
-	game.text.setString("");
-	game.text.setFont(game.font);
-	game.text.setCharacterSize(20);
-	game.text.setColor(Color::White);
-
-	game.view.reset(sf::FloatRect(0, 0, 1280, 1024)); //camera
-
-	game.inventoryList[0].sprite = game.sprites.items;
-	game.inventoryList[0].sprite.setTextureRect(IntRect(32, 0, 32, 32));
-	game.explosionSprite = game.sprites.explosion;
 	game.hero->item = game.inventoryList[0];
-
-	//initializeZombie
-	ZombieSpawn(game.zombieList, game.time, 100, 100, game.sprites.zombie);
-
-	//bool is_game_over = false;
-	//initializeLoot
-	GenerateLoot(game.lootList, 5, DRINK, game.sprites.items);
-	GenerateLoot(game.lootList, 3, PISTOL, game.sprites.items);
-	GenerateLoot(game.lootList, 2, AMMO, game.sprites.items);
-	GenerateLoot(game.lootList, 1, RIFLE, game.sprites.items);
-	GenerateLoot(game.lootList, 1, KEY, game.sprites.items);
-	GenerateLoot(game.lootList, 1, MIXTURE, game.sprites.items);
-	GenerateLoot(game.lootList, 2, GRENADE, game.sprites.items);
-
-	InitializeNpc(game.npcList, game.sprites.npc);
-
-	game.lvl.LoadFromFile("level0.tmx");//создали экземпл€р класса уровень, загрузили в него карту
+	game.window = new RenderWindow(VideoMode(W_WIDTH, W_HEIGHT), "Shoot and Run");
+	InitializeView(game.view);
+	InitiazlizeSprites(game.sprites);
+	InitializeText(game.font,game.text);
+	game.lvl.LoadFromFile("level0.tmx");
 	game.solidObjects = game.lvl.GetObjects("solid");
+
+	ZombieSpawn(game.zombieList, game.time, 100, 100, game.sprites.zombie);
+	InitializeLoot(game);
+	InitializeNpc(game.npcList, game.sprites.npc);
+	game.time = 0;
+	game.state = START_GAME;
 };
 
 
@@ -284,281 +261,54 @@ void CheckCollisionWithMap(Sprite & sprite, Direction & dir, const float & speed
 	bool e = false; //is BottomRight position collide
 	bool r = false; //is BottomLeft position collide
 
+	for (size_t i = 0; i < objects.size(); ++i)
 	{
-		for (size_t i = 0; i < objects.size(); ++i) {
-			if (spriteRect.intersects(objects[i].rect)) {
-				if (objects[i].name == "solid") {
-					//cout << "ASDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD" << endl;
-					//cout << "SPRITE " << obj[i].sprite.getPosition().x << " " << obj[i].sprite.getPosition().y<< endl;
-					switch (dir)
-					{
-					case UP:
-						//cout << "WE DID IT" << endl;
-						sprite.setPosition(spriteRect.left, spriteRect.top + speed);
-						break;
-					case RIGHT:
-						//cout << "WE DID IT" << endl;
-						sprite.setPosition(spriteRect.left - speed, spriteRect.top);
-						break;
-					case DOWN:
-						//cout << "WE DID IT" << endl;
-						sprite.setPosition(spriteRect.left, spriteRect.top - speed);
-						break;
-					case LEFT:
-						//cout << "WE DID IT" << endl;
-						sprite.setPosition(spriteRect.left + speed, spriteRect.top);
-						break;
-					default:
-						break;
-					}
-
-
-					/*
-					if (obj[i].sprite.getGlobalBounds().contains(spriteRect.left, spriteRect.top))
-					{
-					cout << "ASDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD" << endl;
-					q = true;
-					}
-					if (obj[i].sprite.getGlobalBounds().contains(spriteRect.left + spriteRect.width, spriteRect.top))
-					{
-					cout << "ASDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD" << endl;
-					w = true;
-					}
-					if (obj[i].sprite.getGlobalBounds().contains(spriteRect.left + spriteRect.width, spriteRect.top + spriteRect.height))
-					{
-					cout << "ASDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD" << endl;
-					e = true;
-					}
-					if (obj[i].sprite.getGlobalBounds().contains(spriteRect.left, spriteRect.top + spriteRect.height))
-					{
-					cout << "ASDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD" << endl;
-					r = true;
-					}
-					*/
-					/*
-					Vector2f coord = { spriteRect.left,spriteRect.top };
-
-					if (hero.dir == DOWN > 0) {
-					coordinates.y = obj[i].rect.top - h;
-					diraction.y = 0;
-					}
-					if (Dy < 0) {
-					coordinates.y = obj[i].rect.top + obj[i].rect.height;
-					diraction.y = 0;
-					}
-					if (Dx > 0) {
-					coordinates.x = obj[i].rect.left - w;
-					}
-					if (Dx < 0) {
-					coordinates.x = obj[i].rect.left + obj[i].rect.width;
-					}
-					*/
-
+		if (spriteRect.intersects(objects[i].rect))
+		{
+			if (objects[i].name == "solid")
+			{
+				//cout << "ASDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD" << endl;
+				//cout << "SPRITE " << obj[i].sprite.getPosition().x << " " << obj[i].sprite.getPosition().y<< endl;
+				switch (dir)
+				{
+				case UP:
+					//cout << "WE DID IT" << endl;
+					sprite.setPosition(spriteRect.left, spriteRect.top + speed);
+					break;
+				case RIGHT:
+					//cout << "WE DID IT" << endl;
+					sprite.setPosition(spriteRect.left - speed, spriteRect.top);
+					break;
+				case DOWN:
+					//cout << "WE DID IT" << endl;
+					sprite.setPosition(spriteRect.left, spriteRect.top - speed);
+					break;
+				case LEFT:
+					//cout << "WE DID IT" << endl;
+					sprite.setPosition(spriteRect.left + speed, spriteRect.top);
+					break;
+				default:
+					break;
 				}
 			}
 		}
+
 	}
-
-	/*
-	//herosize
-	float sizeX = hero.sprite.getGlobalBounds().width;
-	float sizeY = hero.sprite.getGlobalBounds().height;
-
-	/*
-	bool q = (TILEMAP[int(y) / STEP][int(x) / STEP] != ' ');
-	bool w = (TILEMAP[int(y) / STEP][int(x + sizeX - 1) / STEP] != ' ');
-	bool e = (TILEMAP[int(y + sizeY - 1) / STEP][int(x + sizeX - 1) / STEP] != ' ');
-	bool r = (TILEMAP[int(y + sizeY - 1) / STEP][int(x) / STEP] != ' ');
-	*/
-
-	/*
-	switch (hero.dir)
-	{
-	case UP:
-		//up left and right
-		if (q || w)
-		{
-			y = (int(y) / STEP) * STEP + STEP;
-			cout << "_______________________________________" << endl;
-		}
-		break;
-	case UPRIGHT:
-		//upright except downleft
-
-		if (w  && !(q || e))
-		{
-			y = (int(y) / STEP) * STEP + STEP;
-			x = x + 0.33* STEP_HERO;
-		}
-		else if (q && e)
-		{
-			y = (int(y) / STEP) * STEP + STEP;
-			x = (int(x + sizeX) / STEP) * STEP - sizeX;
-		}
-		else if (q && !e) //upleft
-		{
-			y = (int(y) / STEP) * STEP + STEP;
-			x = x + 0.33* STEP_HERO;
-		}
-		else if (e && !q) //upright
-		{
-			x = (int(x + sizeX) / STEP) * STEP - sizeX;
-			y = y - 0.33* STEP_HERO;
-		}
-		break;
-	case RIGHT:
-		//right up and down
-		if (w || e)
-		{
-			x = (int(x + sizeX) / STEP) * STEP - sizeX;
-		}
-		break;
-	case DOWNRIGHT:
-		//downright except upleft
-		if (e && !(w || r))
-		{
-			y = (int(y + sizeY) / STEP) * STEP - sizeY;
-			x = x + 0.33 * STEP_HERO;
-		}
-		else if (w && r)  //downright
-		{
-			y = (int(y + sizeY) / STEP) * STEP - sizeY;
-			x = (int(x + sizeX) / STEP) * STEP - sizeX;
-		}
-		else if (r && !w) //downleft
-		{
-			y = (int(y + sizeY) / STEP) * STEP - sizeY;
-			x = x + 0.33 * STEP_HERO;
-		}
-		else if (w && !r)  //upright
-		{
-			x = (int(x + sizeX) / STEP) * STEP - sizeX;
-			y = y + 0.33* STEP_HERO;
-		}
-
-		break;
-	case DOWN:
-		//down left and right
-		if (e || r)
-		{
-			y = (int(y + sizeY) / STEP) * STEP - sizeY;
-		}
-		break;
-	case DOWNLEFT:
-		//downleft except upright
-		if (r && !(q || e))
-		{
-			y = (int(y + sizeY) / STEP) * STEP - sizeY;
-			x = x - 0.33* STEP_HERO;
-		}
-		else if ((q && e) || (r && !(q || e)))  //downleft
-		{
-			y = (int(y + sizeY) / STEP) * STEP - sizeY;
-			x = (int(x) / STEP) * STEP + STEP;
-		}
-		else if (e && !q) //downright
-		{
-			y = (int(y + sizeY) / STEP) * STEP - sizeY;
-			x = x - 0.33* STEP_HERO;
-		}
-		else if (q && !e) //upleft
-		{
-			x = (int(x) / STEP) * STEP + STEP;
-			y = y + 0.33* STEP_HERO;
-		}
-		break;
-	case LEFT:
-		//left up and down
-		if (q || r)
-		{
-			x = (int(x) / STEP) * STEP + STEP;
-		}
-		break;
-	case UPLEFT:
-		//upleft except downright
-		if (q && !(w || r))
-		{
-			y = (int(y) / STEP) * STEP + STEP;
-			x = x - 0.33* STEP_HERO;
-		}
-		else if ((w && r) || (q && !(w || r)))   //upleft
-		{
-			y = (int(y) / STEP) * STEP + STEP;
-			x = (int(x) / STEP) * STEP + STEP;
-		}
-		else if (w && !r) //upright
-		{
-			y = (int(y) / STEP) * STEP + STEP;
-			x = x - 0.33* STEP_HERO;
-		}
-		else if (r && !w)  //downleft
-		{
-			x = (int(x) / STEP) * STEP + STEP;
-			y = y - 0.33* STEP_HERO;
-		}
-
-		break;
-	case NONE:
-		break;
-	}
-	*/
-	//hero.sprite.setPosition(x, y);
 };
-
-
 
 void UpdateZombies(vector<Zombie> & zombieList, Hero & hero, vector<Npc> & npcList, vector<Object> & objects, float & time)
 {
-	//TODO: ref
-	float xHero = hero.sprite.getPosition().x;
-	float yHero = hero.sprite.getPosition().y;
-
-	//iterating zombieList
+	Vector2f heroPos = hero.sprite.getPosition();
 	for (vector<Zombie>::iterator zombie = zombieList.begin(); zombie != zombieList.end();)
 	{
-		Direction dir = zombie->dir;
-
-		//compute distance and dir
-		float dx = abs(xHero - zombie->pos.x);  //distance x
-		float dy = abs(yHero - zombie->pos.y);  //distance y
-												//float di = sqrt(pow(dx,2) + pow(dy,2));  //distance
+		//float di = sqrt(pow(dx,2) + pow(dy,2));  //distance
 		if (zombie->state == ACTIVE)
 		{
 			ZombieCheckFollow(zombie, hero);
 			if (zombie->follow)
 			{
-				//TODO: ref
-				if (dx > 5 || dy > 5)
-				{
-					//TODO: check left-right dir zombie sprite bug (almost)
-					if ((dx > 3 && dy > 3) && (dx / dy > 0.9) && (dy / dx < 1.1))
-					{
-						if (xHero >= zombie->pos.x && yHero >= zombie->pos.y)
-							dir = DOWNRIGHT;
-						else if (xHero >= zombie->pos.x && yHero < zombie->pos.y)
-							dir = UPRIGHT;
-						else if (xHero < zombie->pos.x && yHero >= zombie->pos.y)
-							dir = DOWNLEFT;
-						else if (xHero < zombie->pos.x && yHero < zombie->pos.y)
-							dir = UPLEFT;
-					}
-					else if (dx >= dy)
-					{
-						if (xHero > zombie->pos.x)
-							dir = RIGHT;
-						else
-							dir = LEFT;
-					}
-					else if (dx < dy)
-					{
-						if (yHero > zombie->pos.y)
-							dir = DOWN;
-						else
-							dir = UP;
-					}
-				}
+				ComputeZombieDirection(zombie,heroPos);  //direction relatively to hero
 				CheckNpcDeath(npcList, zombie);
-				zombie->dir = dir;
 			}
 			else
 			{
@@ -575,7 +325,7 @@ void UpdateZombies(vector<Zombie> & zombieList, Hero & hero, vector<Npc> & npcLi
 					CheckHeroBeastDamage(hero, zombie, time);
 				}
 			}
-			if (xHero != zombie->pos.x || yHero != zombie->pos.y)
+			if (heroPos.x != zombie->pos.x || heroPos.y != zombie->pos.y)
 			{
 				if (zombie->follow)
 				{
@@ -585,14 +335,12 @@ void UpdateZombies(vector<Zombie> & zombieList, Hero & hero, vector<Npc> & npcLi
 		}
 		ZombieUpdateSprite(zombie);
 		//UpdateZombiePosition(i);  TODO: make it for all zombies, not jsut for following ones
-
-		//TOCHECK: why dir is here? is it needed below? 
-		if (dir != zombie->dirLast)
+ 
+		if (zombie->dir != zombie->dirLast)
 		{
 			//zombie->currentFrame = 0;
-			zombie->dirLast = dir;
+			zombie->dirLast = zombie->dir;
 		}
-
 		if (zombie->state == EXPLODED)  //deleting
 		{
 			zombie = zombieList.erase(zombie);
@@ -652,7 +400,7 @@ void UpdateHero(Game & game) //position + collision + sprite
 		}
 	}
 
-	if ((game.inventoryList[game.hero->slotNo].name == PISTOL || game.inventoryList[game.hero->slotNo].name == RIFLE) && game.inventoryList[game.hero->slotNo].current == 0 && game.inventoryList[game.hero->slotNo].quantity > 0)
+	if ((game.inventoryList[game.hero->slotNo].quantity > 0 && game.inventoryList[game.hero->slotNo].current == 0 && (game.inventoryList[game.hero->slotNo].name == PISTOL || game.inventoryList[game.hero->slotNo].name == RIFLE)))
 	{
 		if (game.hero->isReloading == false)
 		{
@@ -681,7 +429,7 @@ void ProcessEvents(Game & game, Sprites & sprites)
 		}
 		CheckUsingItems(*game.hero, game.inventoryList, game.shotList, game.time, sprites.shot, sprites.grenade);
 
-		//Window close event
+		//CheckWindowClose
 		if (Keyboard::isKeyPressed(Keyboard::Escape) || event.type == Event::Closed)
 			game.window->close();
 	}
@@ -719,57 +467,11 @@ void CheckSpawnZombiesAndLoot(Game & game, Sprite & items, Sprite & sprite_zombi
 			item = MIXTURE;
 			break;
 		}
-		GenerateLoot(game.lootList, 1, item, items);
+		GenerateLoot(game.lootList, game.lvl.GetAllObjects(), 1, item, items);
 	}
 	if (game.zombieList.size() < 10)
 	{
-		SpawnZombieRandomly(game.zombieList, 1, game.time, sprite_zombie);
-	}
-}
-
-
-void DrawMap(Game & game, Sprite & mapSprite)  //from old map(array of string)
-{
-	for (int i = HEIGHT_MAP - 1; i >= 0; i--)
-	{
-		for (int j = WIDTH_MAP - 1; j >= 0; j--)
-		{
-			if (TILEMAP[i][j] == ' ')
-			{
-				mapSprite.setTextureRect(IntRect(48, 0, 48, 48));    //block (horizontal)
-				mapSprite.setPosition(j * STEP, i * STEP);
-			}
-			else if (TILEMAP[i][j] == 'b')
-			{
-				mapSprite.setTextureRect(IntRect(0, 0, 48, 48));    //block (horizontal)
-				mapSprite.setPosition(j * STEP, i * STEP);
-			}
-			else if (TILEMAP[i][j] == 'v')                           //block (vertical)
-			{
-				mapSprite.setTextureRect(IntRect(48, 0, 48, 48));   //grass
-				mapSprite.setPosition(j * STEP, i * STEP);
-				game.window->draw(mapSprite);
-
-				mapSprite.setTextureRect(IntRect(96, 0, 16, 48));
-				mapSprite.setPosition(j * STEP, i * STEP);
-			}
-			else if (TILEMAP[i][j] == 'L')                           //block (horisontal left)
-			{
-				mapSprite.setTextureRect(IntRect(192, 96, 48, 48));
-				mapSprite.setPosition(j * STEP, i * STEP);
-			}
-			else if (TILEMAP[i][j] == 'R')                           //block(horisontal right)
-			{
-				mapSprite.setTextureRect(IntRect(192, 48, 64, 48));
-				mapSprite.setPosition(j * STEP, i * STEP);
-			}
-			else if (TILEMAP[i][j] == 'r')                           //block(horisontal right)
-			{
-				mapSprite.setTextureRect(IntRect(192, 0, 64, 48));
-				mapSprite.setPosition(j * STEP, i * STEP);
-			}
-			game.window->draw(mapSprite);
-		}
+		SpawnZombieRandomly(game.zombieList,game.lvl.GetAllObjects(), 1, game.time, sprite_zombie);
 	}
 }
 
@@ -839,7 +541,6 @@ void StartGame(Game * game)
 				CheckGameOver(game->state, *game->hero);
 
 				//Drawing
-				//DrawMap(*game, game->sprites.map);
 				game->lvl.Draw(*game->window);//рисуем новую карту
 
 				DrawInventoryText(*game->window, game->inventoryList, *game->hero, game->view, game->text);
@@ -853,7 +554,16 @@ void StartGame(Game * game)
 	}
 };
 
-void DestroyGame(Game * game)
+
+void DeleteGame(Game * game)
 {
+	delete(game->hero);
+	delete(game->window);
+	DeleteExplosionList(game->explosionList);
+	DeleteLoot(game->lootList);
+	DeleteNpcList(game->npcList);
+	DeleteShots(game->shotList);
+	DeleteZombieList(game->zombieList);
+	DeleteInventory(game->inventoryList);
 	delete(game);
 }

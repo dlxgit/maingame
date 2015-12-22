@@ -78,9 +78,18 @@ enum NpcState
 	SURVIVED,
 };
 
+
+//spawn settings
+const float ZOMBIE_SPAWN_RADIUS_COLLISION = 80.f;
+
 //window
 const int W_WIDTH = 1280;
 const int W_HEIGHT = 1024;
+
+//map
+const int HEIGHT_MAP = 30;
+const int WIDTH_MAP = 76;
+const int STEP = 48;
 
 //movespeed of objects
 const float STEP_HERO = 5.f;

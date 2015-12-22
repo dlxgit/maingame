@@ -1,7 +1,6 @@
 #pragma once
 #include <vector>
 #include "declarations.h"
-#include "map.h"
 #include "hero.h"
 #include "sprites.h"
 
@@ -25,3 +24,5 @@ void InitializeNpc(vector<Npc> & npcList, Sprite & sprite_npc);
 void ComputeNpcFrame(vector<Npc> & npcList);
 
 void CheckEventNpc(vector<Npc> & npcList, Hero & hero);
+
+void DeleteNpcList(vector<Npc> & npcs);

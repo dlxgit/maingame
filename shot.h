@@ -21,3 +21,5 @@ struct Shot
 };
 
 void AddNewShot(std::vector<Shot> & shotList, Direction & dirLast, Vector2f & pos, float & time, Sprite & sprite_shot, Sprite & sprite_grenade, ShotType  shotType);
+
+void DeleteShots(vector<Shot> & shot);

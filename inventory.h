@@ -1,8 +1,8 @@
 #pragma once
 #include <vector>
 #include "SFML\Graphics.hpp"
+#include "sprites.h"
 #include "declarations.h"
-#include "map.h"
 
 using namespace sf;
 using namespace std;
@@ -27,3 +27,7 @@ struct Grenade
 };
 
 int GetMaxQuantity(NameItem & name);
+
+void InitializeInventory(vector<Inventory> & inventoryList, Sprites & gameSprites);
+
+void DeleteInventory(vector<Inventory> & inventory);

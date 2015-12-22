@@ -1,6 +1,8 @@
 #pragma once
 #include "loot.h"
 
+
+
 void DrawLoot(RenderWindow & window, vector<Loot> & lootList)
 {
 	for (vector<Loot>::iterator i = lootList.begin(); i != lootList.end(); ++i)
@@ -25,17 +27,25 @@ bool IsItemInInventory(vector<Loot>::iterator out, vector<Inventory> & inventory
 	return false;
 }
 
-void GenerateLoot(vector<Loot> & lootList, int ItemsRemaining, NameItem  item, Sprite & texture_items)
+void GenerateLoot(vector<Loot> & lootList, vector<Object> & objects, int ItemsRemaining, NameItem  item, Sprite & texture_items)
 {
-	bool needNewBlock = false;
 	do
 	{
-		int x = (rand() % WIDTH_MAP) * STEP;
-		int y = (rand() % HEIGHT_MAP) * STEP;
-		needNewBlock = false;
+		bool needNewBlock = false;
+		float x = (rand() % WIDTH_MAP) * STEP;
+		float y = (rand() % HEIGHT_MAP) * STEP;
 
-		if (TILEMAP[y / STEP][x / STEP] == 'b') needNewBlock = true;
-		else
+		FloatRect lootRect = { x,y,texture_items.getGlobalBounds().height,texture_items.getGlobalBounds().height };
+		bool isIntersected = false;
+		for (size_t i = 0; i < objects.size(); ++i)
+		{
+			if (lootRect.intersects(objects[i].rect))
+			{
+				needNewBlock = true;
+				break;
+			}
+		}
+		if(!needNewBlock)
 		{
 			for (vector<Loot>::iterator i = lootList.begin(); i != lootList.end(); ++i)
 				if (abs(i->pos.x - x) < 100 && abs(i->pos.y - y) < 100)
@@ -63,4 +73,12 @@ void GenerateLoot(vector<Loot> & lootList, int ItemsRemaining, NameItem  item, S
 		}
 
 	} while (ItemsRemaining > 0);
+}
+
+void DeleteLoot(vector<Loot> & loot)
+{
+	for (vector<Loot>::iterator it = loot.begin(); it != loot.end();)
+	{
+		it = loot.erase(it);
+	}
 }
