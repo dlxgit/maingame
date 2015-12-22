@@ -83,12 +83,12 @@ const int W_WIDTH = 1280;
 const int W_HEIGHT = 1024;
 
 //movespeed of objects
-const int STEP_HERO = 5;
-const int STEP_HERO_HULK = 7;
-const int STEP_ZOMBIE = 2;
-const int STEP_ZOMBIE_ACTIVE = 3;
-const int STEP_SHOT = 12;
-const int STEP_GRENADE = 5;
+const float STEP_HERO = 5.f;
+const float STEP_HERO_HULK = 7.f;
+const float STEP_ZOMBIE = 2.f;
+const float STEP_ZOMBIE_ACTIVE = 3.f;
+const float STEP_SHOT = 12.f;
+const float STEP_GRENADE = 5.f;
 
 //damage
 const int ZOMBIE_DAMAGE = 30;

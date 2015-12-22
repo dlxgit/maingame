@@ -1,0 +1,9 @@
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+*.vcxproj
+*.vcxproj.filters
+*Debug/
+*.tlog/

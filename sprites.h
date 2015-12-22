@@ -32,6 +32,9 @@ struct Sprites
 	Texture texture_door;
 };
 
+
+const FloatRect GetSpriteRect(const Sprite & sprite);
+
 const Vector2f GetSpriteCenter(const Sprite & sprite);
 
 void InitiazlizeSprites(Sprites & sprites);

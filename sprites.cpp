@@ -2,7 +2,14 @@
 
 const Vector2f GetSpriteCenter(const Sprite & sprite)
 {
-	return { sprite.getPosition().x + sprite.getGlobalBounds().width,sprite.getPosition().y + sprite.getGlobalBounds().height };
+	return { sprite.getPosition().x + sprite.getGlobalBounds().width / 2.f,sprite.getPosition().y + sprite.getGlobalBounds().height / 2.f };
+}
+
+const FloatRect GetSpriteRect(const Sprite & sprite)
+{
+	const Vector2f pos = sprite.getPosition();
+	const Vector2f size = { sprite.getGlobalBounds().width, sprite.getGlobalBounds().height };
+	return FloatRect(pos, size);
 }
 
 void InitiazlizeSprites(Sprites & sprites)
@@ -37,7 +44,6 @@ void InitiazlizeSprites(Sprites & sprites)
 	texture_health.loadFromFile("resources/images/health.png");
 	sprites.texture_health = texture_health;
 	sprites.health.setTexture(sprites.texture_health);
-
 	//Npc
 	Texture texture_npc;
 	texture_npc.loadFromFile("resources/images/npcs.png");

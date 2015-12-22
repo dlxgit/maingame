@@ -31,17 +31,13 @@ void ZombieSpawn(vector<Zombie> & zombieList, float time, int posX, int posY, Sp
 
 void CheckNpcDeath(vector<Npc> & npcList, vector<Zombie>::iterator & zombie)
 {
-	Vector2f npcCenter;
-	Vector2f zombieCenter;
-	zombieCenter.x = zombie->sprite.getPosition().x + zombie->sprite.getGlobalBounds().width / 2;
-	zombieCenter.y = zombie->sprite.getPosition().y + zombie->sprite.getGlobalBounds().height / 2;
+	Vector2f zombieCenter = GetSpriteCenter(zombie->sprite);
 
 	for (vector<Npc>::iterator npc = npcList.begin(); npc != npcList.end();)
 	{
 		if (npc->state == LIVING)  //if loot.item.center contains heroSprite  -> add new item in inventory
 		{
-			npcCenter.x = npc->sprite.getPosition().x + npc->sprite.getGlobalBounds().width / 2;
-			npcCenter.y = npc->sprite.getPosition().y + npc->sprite.getGlobalBounds().height / 2;
+			Vector2f npcCenter = GetSpriteCenter(npc->sprite);
 			//cout << (abs(zombieCenter.x - npcCenter.x)) << " CENTER " << abs(zombieCenter.y - npcCenter.y) << endl;
 			if ((abs(zombieCenter.x - npcCenter.x) < 35) && (abs(zombieCenter.y - npcCenter.y)) < 35)
 			{
@@ -351,12 +347,8 @@ bool IsZombieNearHero(Hero & hero, vector<Zombie>::iterator & zombie)
 	//comparing distance between two nearest points of hero and zombie sprites    to define is zombie near or not
 	//TODO: ref
 
-	Vector2f zombieCenter;
-	zombieCenter.x = zombie->sprite.getPosition().x + zombie->sprite.getGlobalBounds().width / 2;
-	zombieCenter.y = zombie->sprite.getPosition().y + zombie->sprite.getGlobalBounds().height / 2;
-	Vector2f heroCenter;
-	heroCenter.x = hero.sprite.getPosition().x + hero.sprite.getGlobalBounds().width / 2;
-	heroCenter.y = hero.sprite.getPosition().y + hero.sprite.getGlobalBounds().height / 2;
+	Vector2f zombieCenter = GetSpriteCenter(zombie->sprite);
+	Vector2f heroCenter = GetSpriteCenter(hero.sprite);
 
 	int dx_max = 20;
 	int dy_max = 20;

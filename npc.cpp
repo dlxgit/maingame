@@ -128,7 +128,6 @@ void ComputeNpcFrame(vector<Npc> & npcList)
 
 void CheckEventNpc(vector<Npc> & npcList, Hero & hero)
 {
-	Vector2f npcCenter;
 	Vector2f heroCenter = GetSpriteCenter(hero.sprite);
 	bool needDeleteNpc = false;
 	for (vector<Npc>::iterator npc = npcList.begin(); npc != npcList.end();)
@@ -137,8 +136,7 @@ void CheckEventNpc(vector<Npc> & npcList, Hero & hero)
 
 		if (npc->state == LIVING)  //if loot.item.center contains heroSprite  -> add new item in inventory
 		{
-			npcCenter.x = npc->sprite.getPosition().x + npc->sprite.getGlobalBounds().width / 2;
-			npcCenter.y = npc->sprite.getPosition().y + npc->sprite.getGlobalBounds().height / 2;
+			Vector2f npcCenter = GetSpriteCenter(npc->sprite);
 			if (npc->type == COOK)
 				cout << (abs(npcCenter.x - heroCenter.x)) << " CENTER " << abs(npcCenter.y - heroCenter.y) << "  STATE " << npc->state << endl;
 			if ((abs(npcCenter.x - heroCenter.x) < 35) && (abs(npcCenter.y - heroCenter.y)) < 35)
