@@ -116,153 +116,6 @@ bool UpdateInventory(Hero & hero, vector<Inventory> & inventoryList, float & tim
 
 	}
 };
-/*
-void CheckHeroCollision(Hero & hero)
-{
-	float x = hero.sprite.getPosition().x;
-	float y = hero.sprite.getPosition().y;
-
-	//herosize
-	float sizeX = hero.sprite.getGlobalBounds().width;
-	float sizeY = hero.sprite.getGlobalBounds().height;
-
-	bool q = (TILEMAP[int(y) / STEP][int(x) / STEP] != ' ');
-	bool w = (TILEMAP[int(y) / STEP][int(x + sizeX - 1) / STEP] != ' ');
-	bool e = (TILEMAP[int(y + sizeY - 1) / STEP][int(x + sizeX - 1) / STEP] != ' ');
-	bool r = (TILEMAP[int(y + sizeY - 1) / STEP][int(x) / STEP] != ' ');
-
-	switch (hero.dir)
-	{
-	case UP:
-		//up left and right
-		if (q || w)
-		{
-			y = (int(y) / STEP) * STEP + STEP;
-		}
-		break;
-	case UPRIGHT:
-		//upright except downleft
-
-		if (w  && !(q || e))
-		{
-			y = (int(y) / STEP) * STEP + STEP;
-			x = x + 0.33* STEP_HERO;
-		}
-		else if (q && e)
-		{
-			y = (int(y) / STEP) * STEP + STEP;
-			x = (int(x + sizeX) / STEP) * STEP - sizeX;
-		}
-		else if (q && !e) //upleft
-		{
-			y = (int(y) / STEP) * STEP + STEP;
-			x = x + 0.33* STEP_HERO;
-		}
-		else if (e && !q) //upright
-		{
-			x = (int(x + sizeX) / STEP) * STEP - sizeX;
-			y = y - 0.33* STEP_HERO;
-		}
-		break;
-	case RIGHT:
-		//right up and down
-		if (w || e)
-		{
-			x = (int(x + sizeX) / STEP) * STEP - sizeX;
-		}
-		break;
-	case DOWNRIGHT:
-		//downright except upleft
-		if (e && !(w || r))
-		{
-			y = (int(y + sizeY) / STEP) * STEP - sizeY;
-			x = x + 0.33 * STEP_HERO;
-		}
-		else if (w && r)  //downright
-		{
-			y = (int(y + sizeY) / STEP) * STEP - sizeY;
-			x = (int(x + sizeX) / STEP) * STEP - sizeX;
-		}
-		else if (r && !w) //downleft
-		{
-			y = (int(y + sizeY) / STEP) * STEP - sizeY;
-			x = x + 0.33 * STEP_HERO;
-		}
-		else if (w && !r)  //upright
-		{
-			x = (int(x + sizeX) / STEP) * STEP - sizeX;
-			y = y + 0.33* STEP_HERO;
-		}
-
-		break;
-	case DOWN:
-		//down left and right
-		if (e || r)
-		{
-			y = (int(y + sizeY) / STEP) * STEP - sizeY;
-		}
-		break;
-	case DOWNLEFT:
-		//downleft except upright
-		if (r && !(q || e))
-		{
-			y = (int(y + sizeY) / STEP) * STEP - sizeY;
-			x = x - 0.33* STEP_HERO;
-		}
-		else if ((q && e) || (r && !(q || e)))  //downleft
-		{
-			y = (int(y + sizeY) / STEP) * STEP - sizeY;
-			x = (int(x) / STEP) * STEP + STEP;
-		}
-		else if (e && !q) //downright
-		{
-			y = (int(y + sizeY) / STEP) * STEP - sizeY;
-			x = x - 0.33* STEP_HERO;
-		}
-		else if (q && !e) //upleft
-		{
-			x = (int(x) / STEP) * STEP + STEP;
-			y = y + 0.33* STEP_HERO;
-		}
-		break;
-	case LEFT:
-		//left up and down
-		if (q || r)
-		{
-			x = (int(x) / STEP) * STEP + STEP;
-		}
-		break;
-	case UPLEFT:
-		//upleft except downright
-		if (q && !(w || r))
-		{
-			y = (int(y) / STEP) * STEP + STEP;
-			x = x - 0.33* STEP_HERO;
-		}
-		else if ((w && r) || (q && !(w || r)))   //upleft
-		{
-			y = (int(y) / STEP) * STEP + STEP;
-			x = (int(x) / STEP) * STEP + STEP;
-		}
-		else if (w && !r) //upright
-		{
-			y = (int(y) / STEP) * STEP + STEP;
-			x = x - 0.33* STEP_HERO;
-		}
-		else if (r && !w)  //downleft
-		{
-			x = (int(x) / STEP) * STEP + STEP;
-			y = y - 0.33* STEP_HERO;
-		}
-
-		break;
-	case NONE:
-		break;
-	}
-
-	hero.sprite.setPosition(x, y);
-};
-*/
 
 void CheckUsingItems(Hero & hero, vector<Inventory> & inventoryList, vector<Shot> & shotList, float & time, Sprite & sprite_shot, Sprite & sprite_grenade)
 {
@@ -520,6 +373,16 @@ void DrawInventoryText(RenderWindow & window, vector<Inventory> & inventoryList,
 	window.draw(text);
 }
 
+Inventory GetNewInventoryItem(Loot & loot, Sprite & items)
+{
+	Inventory inventory;
+	inventory.name = loot.name;
+	inventory.quantity = loot.quantity;
+	inventory.current = 0;
+	inventory.sprite = items;
+	inventory.sprite.setTextureRect(sf::IntRect(loot.name * 32, 0, 32, 32));
+	return inventory;
+}
 
 void CheckLoot(Hero & hero, vector<Loot> & lootList, vector<Inventory> & inventoryList, Sprite & items)
 {
@@ -542,24 +405,20 @@ void CheckLoot(Hero & hero, vector<Loot> & lootList, vector<Inventory> & invento
 					//check if this item exists in inventory, and if so - upload it
 					if (IsItemInInventory(out, inventoryList, items))
 					{
+						inventoryList[hero.slotNo].quantity += out->quantity;
+						inventoryList[hero.slotNo].sprite = items;
+						inventoryList[hero.slotNo].sprite.setTextureRect(sf::IntRect(out->name * 32, 0, 32, 32));
 						out->isDrawn = false;
 						isItemAlreadyIn = true;
 					}
-
 					if (isItemAlreadyIn == false) //adding new item to inventory List
 					{
-						Inventory inventory;
-						inventory.name = out->name;
-						inventory.quantity = out->quantity;
-						inventory.current = 0;
-						inventory.sprite = items;
-						inventory.sprite.setTextureRect(sf::IntRect(out->name * 32, 0, 32, 32));
+						Inventory inventory = GetNewInventoryItem(*out, items);
 						inventoryList.push_back(inventory);
 
-						//che za 
 						out->isDrawn = false;
-						hero.nSlots += 1;
 						isItemAlreadyIn = true;
+						hero.nSlots += 1;
 					}
 				}
 				else
@@ -569,11 +428,11 @@ void CheckLoot(Hero & hero, vector<Loot> & lootList, vector<Inventory> & invento
 					while (nWeaponAmmoAdded < AMMO_PACKS)
 					{
 						//delSoon>??
-						for (std::vector<Inventory>::iterator iter = inventoryList.begin(); iter != inventoryList.end(); ++iter)
+						for (Inventory itm : inventoryList)
 						{
-							if (iter->name != MIXTURE && iter->name != KEY && iter->name != DRINK)
+							if (itm.name != MIXTURE && itm.name != KEY && itm.name != DRINK)
 							{
-								iter->quantity += MAX_AMMO[iter->name];
+								itm.quantity += MAX_AMMO[itm.name];
 								nWeaponAmmoAdded += 1;
 							}
 						}

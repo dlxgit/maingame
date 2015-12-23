@@ -36,8 +36,5 @@ void InitializeInventory(vector<Inventory> & inventoryList, Sprites & gameSprite
 
 void DeleteInventory(vector<Inventory> & inventory)
 {
-	for (vector<Inventory>::iterator it = inventory.begin(); it != inventory.end();)
-	{
-		it = inventory.erase(it);
-	}
+	inventory.clear();
 }

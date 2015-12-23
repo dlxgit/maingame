@@ -44,6 +44,8 @@ bool IsInventorySwitch(Hero & hero);
 
 bool UpdateInventory(Hero & hero, vector<Inventory> & inventoryList, float & time);
 
+Inventory GetNewInventoryItem(Loot & loot, Sprite & items);
+
 void CheckUsingItems(Hero & hero, vector<Inventory> & inventoryList, vector<Shot> & shotList, float & time, Sprite & sprite_shot, Sprite & sprite_grenade);
 
 void UpdateHeroSprite(Hero & hero, float & time);

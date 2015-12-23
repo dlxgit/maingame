@@ -5,10 +5,10 @@
 
 void DrawLoot(RenderWindow & window, vector<Loot> & lootList)
 {
-	for (vector<Loot>::iterator i = lootList.begin(); i != lootList.end(); ++i)
+	for (Loot & item:lootList)
 	{
-		if (i->isDrawn == true)
-			window.draw(i->sprite);
+		if (item.isDrawn == true)
+			window.draw(item.sprite);
 	}
 };
 
@@ -18,13 +18,23 @@ bool IsItemInInventory(vector<Loot>::iterator out, vector<Inventory> & inventory
 	{
 		if (in->name == out->name)
 		{
-			in->quantity += out->quantity;
-			in->sprite = items;
-			in->sprite.setTextureRect(sf::IntRect(out->name * 32, 0, 32, 32));
 			return true;
 		}
 	}
 	return false;
+}
+
+Loot GetNewLootItem(NameItem & item, Sprite & sprite, float & x, float & y)
+{
+	Loot loot;
+	loot.name = item;
+	loot.quantity = GetMaxQuantity(loot.name);
+	loot.pos = {x,y};
+	loot.sprite = sprite;
+	loot.sprite.setPosition(loot.pos);
+	loot.sprite.setTextureRect(sf::IntRect(item * 32, 0, 32, 32));
+	loot.isDrawn = true;
+	return loot;
 }
 
 void GenerateLoot(vector<Loot> & lootList, vector<Object> & objects, int ItemsRemaining, NameItem  item, Sprite & texture_items)
@@ -38,45 +48,33 @@ void GenerateLoot(vector<Loot> & lootList, vector<Object> & objects, int ItemsRe
 
 		FloatRect lootRect = { x,y,texture_items.getGlobalBounds().height,texture_items.getGlobalBounds().height };
 		bool isIntersected = false;
-		for (size_t i = 0; i < objects.size(); ++i)
+		for (size_t i = 0; i < objects.size() &&  needNewBlock == false; ++i)
 		{
 			if (lootRect.intersects(objects[i].rect))
 			{
 				needNewBlock = true;
+			}
+		}
+		if (needNewBlock)
+		{
+			continue;
+		}
+		for (Loot & item : lootList)
+			if (abs(item.pos.x - x) < 100 && abs(item.pos.y - y) < 100)
+			{
+				needNewBlock = true;
 				break;
 			}
-		}
-		if(!needNewBlock)
+		if (needNewBlock == false)
 		{
-			for (vector<Loot>::iterator i = lootList.begin(); i != lootList.end(); ++i)
-				if (abs(i->pos.x - x) < 100 && abs(i->pos.y - y) < 100)
-				{
-					needNewBlock = true;
-					break;
-				}
-			if (needNewBlock == false)
-			{
-				Loot loot;
-				loot.name = item;
-				loot.quantity = GetMaxQuantity(loot.name);
-				loot.pos = { float(x),float(y) };
-				loot.sprite = texture_items;
-				loot.sprite.setPosition(loot.pos);
-				loot.sprite.setTextureRect(sf::IntRect(item * 32, 0, 32, 32));
-				loot.isDrawn = true;
-
-				lootList.push_back(loot);
-				ItemsRemaining -= 1;
-			}
+			Loot loot = GetNewLootItem(item, texture_items, x, y);
+			lootList.push_back(loot);
+			ItemsRemaining -= 1;
 		}
-
 	} while (ItemsRemaining > 0);
 }
 
-void DeleteLoot(vector<Loot> & loot)
+void DeleteLoot(vector<Loot> & loots)
 {
-	for (vector<Loot>::iterator it = loot.begin(); it != loot.end();)
-	{
-		it = loot.erase(it);
-	}
+	loots.clear();
 }

@@ -299,23 +299,23 @@ void UpdateZombies(vector<Zombie> & zombieList, Hero & hero, vector<Npc> & npcLi
 		//float di = sqrt(pow(dx,2) + pow(dy,2));  //distance
 		if (zombie->state == ACTIVE)
 		{
-			ZombieCheckFollow(zombie, hero);
+			ZombieCheckFollow(*zombie, hero);
 			if (zombie->follow)
 			{
-				ComputeZombieDirection(zombie,heroPos);  //direction relatively to hero
-				CheckNpcDeath(npcList, zombie);
+				ComputeZombieDirection(*zombie,heroPos);  //direction relatively to hero
+				CheckNpcDeath(npcList, *zombie);
 			}
 			else
 			{
-				ZombieCheckDir(zombie, time);
+				ZombieCheckDir(*zombie, time);
 			}
 
 			CheckCollisionWithMap(zombie->sprite,zombie->dirLast,STEP_ZOMBIE_ACTIVE, objects);
-			ZombieUpdateAttack(hero, zombie, time);
+			ZombieUpdateAttack(hero, *zombie, time);
 
 			if (hero.state == BEAST)
 			{
-				if (IsZombieNearHero(hero, zombie))
+				if (IsZombieNearHero(hero, *zombie))
 				{
 					CheckHeroBeastDamage(hero, zombie, time);
 				}
@@ -324,11 +324,11 @@ void UpdateZombies(vector<Zombie> & zombieList, Hero & hero, vector<Npc> & npcLi
 			{
 				if (zombie->follow)
 				{
-					ZombieUpdatePosition(zombie);
+					ZombieUpdatePosition(*zombie);
 				}
 			}
 		}
-		ZombieUpdateSprite(zombie);
+		ZombieUpdateSprite(*zombie);
 		//UpdateZombiePosition(i);  TODO: make it for all zombies, not jsut for following ones
  
 		if (zombie->dir != zombie->dirLast)

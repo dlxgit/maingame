@@ -49,80 +49,79 @@ void InitializeNpc(vector<Npc> & npcList, Sprite & sprite_npc)
 	npcList.push_back(npc);
 };
 
-
 void ComputeNpcFrame(vector<Npc> & npcList)
 {
-	for (vector<Npc>::iterator npc = npcList.begin(); npc != npcList.end(); npc++)
+	for (Npc & npc:npcList)
 	{
-		if (npc->state == LIVING)
+		if (npc.state == LIVING)
 		{
-			switch (npc->type)
+			switch (npc.type)
 			{
 			case PHOTOGRAPHS:
-				if (npc->currentFrame > 12)
+				if (npc.currentFrame > 12)
 				{
-					npc->currentFrame = 0;
+					npc.currentFrame = 0;
 				}
-				npc->sprite.setTextureRect(IntRect(2 + 41 * int(npc->currentFrame), 350, 41, 50));
+				npc.sprite.setTextureRect(IntRect(2 + 41 * int(npc.currentFrame), 350, 41, 50));
 				break;
 			case BABY:
-				if (npc->currentFrame > 7)
+				if (npc.currentFrame > 7)
 				{
-					npc->currentFrame = 0;
+					npc.currentFrame = 0;
 				}
-				npc->sprite.setTextureRect(IntRect(4 + 28 * int(npc->currentFrame), 213, 23, 32));
+				npc.sprite.setTextureRect(IntRect(4 + 28 * int(npc.currentFrame), 213, 23, 32));
 				break;
 			case TEACHER:
-				if (npc->currentFrame > 2)
+				if (npc.currentFrame > 2)
 				{
-					npc->currentFrame = 0;
+					npc.currentFrame = 0;
 				}
-				npc->sprite.setTextureRect(IntRect(3 + 37 * int(npc->currentFrame), 2, 37, 41));
+				npc.sprite.setTextureRect(IntRect(3 + 37 * int(npc.currentFrame), 2, 37, 41));
 				break;
 			case GIRL:
-				if (npc->currentFrame > 7)
+				if (npc.currentFrame > 7)
 				{
-					npc->currentFrame = 0;
+					npc.currentFrame = 0;
 				}
-				npc->sprite.setTextureRect(IntRect(0 + 50 * int(npc->currentFrame), 92, 50, 67));
-				npc->currentFrame += 0.08;
+				npc.sprite.setTextureRect(IntRect(0 + 50 * int(npc.currentFrame), 92, 50, 67));
+				npc.currentFrame += 0.08;
 				break;
 			case DOG:
-				if (npc->currentFrame > 4)
+				if (npc.currentFrame > 4)
 				{
-					npc->currentFrame = 0;
+					npc.currentFrame = 0;
 				}
-				npc->sprite.setTextureRect(IntRect(2 + 34 * int(npc->currentFrame), 49, 31, 34));
+				npc.sprite.setTextureRect(IntRect(2 + 34 * int(npc.currentFrame), 49, 31, 34));
 				break;
 			case SOLDIER:
-				if (npc->currentFrame > 3)
+				if (npc.currentFrame > 3)
 				{
-					npc->currentFrame = 0;
+					npc.currentFrame = 0;
 				}
-				npc->sprite.setTextureRect(IntRect(4 + 36 * int(npc->currentFrame), 252, 35, 46));
+				npc.sprite.setTextureRect(IntRect(4 + 36 * int(npc.currentFrame), 252, 35, 46));
 				break;
 			case SEARCHER:
-				if (npc->currentFrame > 3)
+				if (npc.currentFrame > 3)
 				{
-					npc->currentFrame = 0;
+					npc.currentFrame = 0;
 				}
-				npc->sprite.setTextureRect(IntRect(4 + 31 * int(npc->currentFrame), 306, 29, 39));
+				npc.sprite.setTextureRect(IntRect(4 + 31 * int(npc.currentFrame), 306, 29, 39));
 				break;
 			case COOK:
-				if (npc->currentFrame > 9)
+				if (npc.currentFrame > 9)
 				{
-					npc->currentFrame = 0;
+					npc.currentFrame = 0;
 				}
-				npc->sprite.setTextureRect(IntRect(3 + 54 * int(npc->currentFrame), 454, 52, 66));
+				npc.sprite.setTextureRect(IntRect(3 + 54 * int(npc.currentFrame), 454, 52, 66));
 				break;
 			}
 		}
-		else if (npc->state == KILLED)
+		else if (npc.state == KILLED)
 		{
-			npc->sprite.setTextureRect(IntRect(4 + 45 * int(npc->currentFrame), 593, 53, 45));
-			npc->currentFrame += 0.06;
+			npc.sprite.setTextureRect(IntRect(4 + 45 * int(npc.currentFrame), 593, 53, 45));
+			npc.currentFrame += 0.06;
 		}
-		npc->currentFrame += 0.02;
+		npc.currentFrame += 0.02;
 	}
 };
 
@@ -167,8 +166,5 @@ void CheckEventNpc(vector<Npc> & npcList, Hero & hero)
 
 void DeleteNpcList(vector<Npc> & npcs)
 {
-	for (vector<Npc>::iterator it = npcs.begin(); it != npcs.end();)
-	{
-		it = npcs.erase(it);
-	}
+	npcs.clear();
 }

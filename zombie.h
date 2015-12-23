@@ -30,31 +30,29 @@ struct Zombie
 
 void ZombieSpawn(vector<Zombie> & zombieList, float time, int posX, int posY, Sprite & sprite_zombie);
 
-void CheckNpcDeath(vector<Npc> & npcList, vector<Zombie>::iterator & zombie);
+void CheckNpcDeath(vector<Npc> & npcList, Zombie & zombie);
 
-Direction ComputeRandDir(vector<Zombie>::iterator & zombie);
+Direction ComputeRandDir(Zombie & zombie);
 
-void ZombieCheckDir(vector<Zombie>::iterator & zombie, float &time);
+void ZombieCheckDir(Zombie & zombie, float &time);
 
-void ZombieCheckFollow(vector<Zombie>::iterator & zombie, Hero & hero);
+void ZombieCheckFollow(Zombie & zombie, Hero & hero);
 
-void ZombieUpdatePosition(vector<Zombie>::iterator & zombie);
+void ZombieUpdatePosition(Zombie & zombie);
 
-bool IsZombieNearHero(Hero & hero, vector<Zombie>::iterator & zombie);
+bool IsZombieNearHero(Hero & hero, Zombie & zombie);
 
-void ComputeZombieDirection(vector<Zombie>::iterator zombie, Vector2f & heroPos);
+void ComputeZombieDirection(Zombie  & zombie, Vector2f & heroPos);
 
-void ZombieUpdateAttack(Hero & hero, vector<Zombie>::iterator zombie, const float& time);
+void ZombieUpdateAttack(Hero & hero, Zombie & zombie, const float & time);
 
-void ZombieUpdateSprite(vector<Zombie>::iterator & zombie);
-
-void ZombieUpdateAttack(Hero & hero, vector<Zombie>::iterator zombie, float & time);
+void ZombieUpdateSprite(Zombie & zombie);
 
 void ZombieMoveRandom(vector<Zombie> & zombieList);
 
 void SpawnZombieRandomly(vector<Zombie>&zombieList, vector<Object> & objects, int zombiesRemaining, float & time, Sprite & sprite_zombie);
 
-void ZombieCheckDir(float & time, vector<Zombie>::iterator & zombie);
+void ZombieCheckDir(float & time, Zombie & zombie);
 
 void CheckZombieExplosion(vector<Explosion> & explosionList, vector<Zombie> & zombieList);
 

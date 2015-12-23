@@ -68,8 +68,5 @@ void AddNewShot(std::vector<Shot> & shotList, Direction & dirLast, Vector2f & po
 
 void DeleteShots(vector<Shot> & shots)
 {
-	for (vector<Shot>::iterator it = shots.begin(); it != shots.end();)
-	{
-		it = shots.erase(it);
-	}
+	shots.clear();
 }

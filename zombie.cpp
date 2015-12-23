@@ -29,9 +29,9 @@ void ZombieSpawn(vector<Zombie> & zombieList, float time, int posX, int posY, Sp
 	zombieList.push_back(zombie);
 };
 
-void CheckNpcDeath(vector<Npc> & npcList, vector<Zombie>::iterator & zombie)
+void CheckNpcDeath(vector<Npc> & npcList, Zombie & zombie)
 {
-	Vector2f zombieCenter = GetSpriteCenter(zombie->sprite);
+	Vector2f zombieCenter = GetSpriteCenter(zombie.sprite);
 
 	for (vector<Npc>::iterator npc = npcList.begin(); npc != npcList.end();)
 	{
@@ -49,9 +49,9 @@ void CheckNpcDeath(vector<Npc> & npcList, vector<Zombie>::iterator & zombie)
 };
 
 
-Direction ComputeRandDir(vector<Zombie>::iterator & zombie)
+Direction ComputeRandDir(Zombie & zombie)
 {
-	Direction dir = zombie->dir;
+	Direction dir = zombie.dir;
 
 	switch (dir)
 	{
@@ -71,46 +71,46 @@ Direction ComputeRandDir(vector<Zombie>::iterator & zombie)
 	return dir;
 };
 
-void ZombieCheckDir(vector<Zombie>::iterator & zombie, float &time)
+void ZombieCheckDir(Zombie & zombie, float &time)
 {
-	if (zombie->follow == false)
+	if (zombie.follow == false)
 	{
-		if (zombie->dirChangeTime == 0)
+		if (zombie.dirChangeTime == 0)
 		{
 			//cout << " 1 IS " << endl;
-			zombie->dir = ComputeRandDir(zombie);
+			zombie.dir = ComputeRandDir(zombie);
 		}
-		if (time - zombie->dirChangeTime > ZOMBIE_DIR_CHANGE_TIME)
+		if (time - zombie.dirChangeTime > ZOMBIE_DIR_CHANGE_TIME)
 		{
 			//cout << " 2 IS " << endl;
-			zombie->dirChangeTime = 0;
+			zombie.dirChangeTime = 0;
 		}
 	}
 };
 
-void ZombieCheckFollow(vector<Zombie>::iterator & zombie, Hero & hero)
+void ZombieCheckFollow(Zombie & zombie, Hero & hero)
 {
-	if (abs(zombie->pos.x - hero.pos.x) > ZOMBIE_VISION_DISTANCE || abs(zombie->pos.y - hero.pos.y) > ZOMBIE_VISION_DISTANCE)
+	if (abs(zombie.pos.x - hero.pos.x) > ZOMBIE_VISION_DISTANCE || abs(zombie.pos.y - hero.pos.y) > ZOMBIE_VISION_DISTANCE)
 	{
-		zombie->follow = false;
+		zombie.follow = false;
 	}
-	if (zombie->follow == false)
+	if (zombie.follow == false)
 	{
-		if (abs(zombie->pos.x - hero.pos.x) < ZOMBIE_VISION_DISTANCE && abs(zombie->pos.y - hero.pos.y) < ZOMBIE_VISION_DISTANCE)
+		if (abs(zombie.pos.x - hero.pos.x) < ZOMBIE_VISION_DISTANCE && abs(zombie.pos.y - hero.pos.y) < ZOMBIE_VISION_DISTANCE)
 		{
-			zombie->follow = true;
+			zombie.follow = true;
 		}
 	}
 };
 
-void ZombieUpdatePosition(vector<Zombie>::iterator & zombie)
+void ZombieUpdatePosition(Zombie & zombie)
 {
 	//TODO:vec2f
-	float xZombie = zombie->sprite.getPosition().x;
-	float yZombie = zombie->sprite.getPosition().y;
+	float xZombie = zombie.sprite.getPosition().x;
+	float yZombie = zombie.sprite.getPosition().y;
 
 	int stepZ;
-	if (zombie->follow == true)
+	if (zombie.follow == true)
 	{
 		stepZ = STEP_ZOMBIE_ACTIVE;
 	}
@@ -119,7 +119,7 @@ void ZombieUpdatePosition(vector<Zombie>::iterator & zombie)
 		stepZ = STEP_ZOMBIE;
 	}
 
-	switch (zombie->dir)
+	switch (zombie.dir)
 	{
 	case UP:
 		yZombie -= stepZ;
@@ -152,19 +152,19 @@ void ZombieUpdatePosition(vector<Zombie>::iterator & zombie)
 	}
 
 	//struct_zombies[z].sprite.setTextureRect(IntRect(5, 5, 30, 30));
-	zombie->pos = { xZombie, yZombie };
+	zombie.pos = { xZombie, yZombie };
 	//struct_zombies[z].sprite.setPosition(x, y);
 	//zametka
-	zombie->sprite.setPosition(zombie->pos.x, zombie->pos.y);
+	zombie.sprite.setPosition(zombie.pos.x, zombie.pos.y);
 };
 
 //should i store it in zombieList>? if i can just keep it here (return true)
-bool IsZombieNearHero(Hero & hero, vector<Zombie>::iterator & zombie)
+bool IsZombieNearHero(Hero & hero, Zombie & zombie)
 {
 	//comparing distance between two nearest points of hero and zombie sprites    to define is zombie near or not
 	//TODO: ref
 
-	Vector2f zombieCenter = GetSpriteCenter(zombie->sprite);
+	Vector2f zombieCenter = GetSpriteCenter(zombie.sprite);
 	Vector2f heroCenter = GetSpriteCenter(hero.sprite);
 
 	int dx_max = 20;
@@ -208,14 +208,14 @@ bool IsZombieNearHero(Hero & hero, vector<Zombie>::iterator & zombie)
 	return false;
 };
 
-void ZombieUpdateAttack(Hero & hero, vector<Zombie>::iterator zombie, const float& time)
+void ZombieUpdateAttack(Hero & hero, Zombie & zombie, const float & time)
 {
 	//add correct xyHero xyZombie for detecting meleeAttack
 	//TODO: change mechanics of zombie attack(depends on side from which it attacks), same for beast attack
-	if ((abs(zombie->pos.x - hero.pos.x) < 7) && (abs(zombie->pos.y - hero.pos.y) < 7))
+	if ((abs(zombie.pos.x - hero.pos.x) < 7) && (abs(zombie.pos.y - hero.pos.y) < 7))
 	{
 		//attack
-		if (zombie->attack_time < time - 1.5)
+		if (zombie.attack_time < time - 1.5)
 		{
 			if (hero.state == BEAST)
 				hero.health -= (ZOMBIE_DAMAGE / 3);
@@ -226,136 +226,108 @@ void ZombieUpdateAttack(Hero & hero, vector<Zombie>::iterator zombie, const floa
 				hero.state = DAMAGED;
 				hero.currentFrame = 0;
 			}
-			zombie->attack_time = time;
-			zombie->isNear = zombie->dir;  //for Beast melee attack
+			zombie.attack_time = time;
+			zombie.isNear = zombie.dir;  //for Beast melee attack
 		}
 	}
 };
 
-void ZombieUpdateSprite(vector<Zombie>::iterator & zombie)
+void ZombieUpdateSprite(Zombie & zombie)
 {
-	if (zombie->state == DEAD)  //if zombie is exploding
+	if (zombie.state == DEAD)  //if zombie is exploding
 	{
-		zombie->sprite.setTextureRect(IntRect(5 + 40 * int(zombie->currentFrame), 344, 34, 48));
-		zombie->currentFrame += 0.05;
-		if (zombie->currentFrame > 9)
+		zombie.sprite.setTextureRect(IntRect(5 + 40 * int(zombie.currentFrame), 344, 34, 48));
+		zombie.currentFrame += 0.05;
+		if (zombie.currentFrame > 9)
 		{
-			zombie->state = EXPLODED;
+			zombie.state = EXPLODED;
 		}
 	}
-	if (zombie->state == NOTSPAWNED)  //if zombie is not spawned yet
+	if (zombie.state == NOTSPAWNED)  //if zombie is not spawned yet
 	{
-		zombie->sprite.setTextureRect(IntRect(15 + 50 * int(zombie->currentFrame), 12, 33, 51));
+		zombie.sprite.setTextureRect(IntRect(15 + 50 * int(zombie.currentFrame), 12, 33, 51));
 
-		if (zombie->currentFrame > 5)
+		if (zombie.currentFrame > 5)
 		{
-			zombie->state = ACTIVE;
-			zombie->currentFrame = 0;
+			zombie.state = ACTIVE;
+			zombie.currentFrame = 0;
 		}
-		zombie->currentFrame += 0.04;
+		zombie.currentFrame += 0.04;
 	}
-	else if (zombie->state == ACTIVE)
+	else if (zombie.state == ACTIVE)
 	{
-		if (zombie->health < 1)
+		if (zombie.health < 1)
 		{
-			zombie->state = DEAD;
+			zombie.state = DEAD;
 		}
 		else
 		{
 			//sprite change for active moving zombies
-			switch (zombie->dir)
+			switch (zombie.dir)
 			{
 			case UP:
-				zombie->sprite.setTextureRect(IntRect(15 + 36 * int(zombie->currentFrame), 84 + 59 + 59, 27, 49));
-				if (zombie->currentFrame > 4)
+				zombie.sprite.setTextureRect(IntRect(15 + 36 * int(zombie.currentFrame), 84 + 59 + 59, 27, 49));
+				if (zombie.currentFrame > 4)
 				{
-					zombie->currentFrame = 0;
+					zombie.currentFrame = 0;
 				}
 				break;
 			case UPRIGHT: case RIGHT: case DOWNRIGHT:
-				zombie->sprite.setTextureRect(IntRect(15 + 36 * int(zombie->currentFrame), 84 + 59 * 3, 27, 49));
-				if (zombie->currentFrame > 2)
+				zombie.sprite.setTextureRect(IntRect(15 + 36 * int(zombie.currentFrame), 84 + 59 * 3, 27, 49));
+				if (zombie.currentFrame > 2)
 				{
-					zombie->currentFrame = 0;
+					zombie.currentFrame = 0;
 				}
 				break;
 			case DOWN:
-				zombie->sprite.setTextureRect(IntRect(15 + 36 * int(zombie->currentFrame), 84, 27, 49));
-				if (zombie->currentFrame > 2)
+				zombie.sprite.setTextureRect(IntRect(15 + 36 * int(zombie.currentFrame), 84, 27, 49));
+				if (zombie.currentFrame > 2)
 				{
-					zombie->currentFrame = 0;
+					zombie.currentFrame = 0;
 				}
 				break;
 			case DOWNLEFT: case LEFT: case UPLEFT:
-				zombie->sprite.setTextureRect(IntRect(15 + 36 * int(zombie->currentFrame), 84 + 59, 27, 49));
-				if (zombie->currentFrame > 2)
+				zombie.sprite.setTextureRect(IntRect(15 + 36 * int(zombie.currentFrame), 84 + 59, 27, 49));
+				if (zombie.currentFrame > 2)
 				{
-					zombie->currentFrame = 0;
+					zombie.currentFrame = 0;
 				}
 				break;
 			case NONE:
 				//no need??
-				zombie->sprite.setTextureRect(IntRect(190, 84, 27, 48));
-				if (zombie->currentFrame > 4)
+				zombie.sprite.setTextureRect(IntRect(190, 84, 27, 48));
+				if (zombie.currentFrame > 4)
 				{
-					zombie->currentFrame = 0;
+					zombie.currentFrame = 0;
 				}
 				break;
 			}
 		}
 	}
-	zombie->currentFrame += 0.05;
+	zombie.currentFrame += 0.05;
 };
-
-
-void ZombieUpdateAttack(Hero & hero, vector<Zombie>::iterator zombie, float & time)
-{
-	//add correct xyHero xyZombie for detecting meleeAttack
-	//TODO: change mechanics of zombie attack(depends on side from which it attacks), same for beast attack
-	if ((abs(zombie->pos.x - hero.pos.x) < 7) && (abs(zombie->pos.y - hero.pos.y) < 7))
-	{
-		//attack
-		if (zombie->attack_time < time - 1.5)
-		{
-			if (hero.state == BEAST)
-				hero.health -= (ZOMBIE_DAMAGE / 3);
-			else
-				hero.health -= (ZOMBIE_DAMAGE);
-			if (hero.state != BEAST)
-			{
-				hero.state = DAMAGED;
-				hero.currentFrame = 0;
-			}
-			zombie->attack_time = time;
-			zombie->isNear = zombie->dir;  //for Beast melee attack
-		}
-	}
-}
 
 void ZombieMoveRandom(vector<Zombie> & zombieList)  //not using
 {
-	int rand_dir;
-	Direction dir_zombie;
-
 	for (vector<Zombie>::iterator zombie = zombieList.begin(); zombie != zombieList.end(); ++zombie)
 	{
 		if (zombie->dir == NONE)
 		{
-			rand_dir = 1 + rand() % 4;
+			int rand_dir = 1 + rand() % 4;
 
 			switch (rand_dir)
 			{
 			case 1:
-				dir_zombie = UP;
+				zombie->dir = UP;
 				break;
 			case 2:
-				dir_zombie = RIGHT;
+				zombie->dir = RIGHT;
 				break;
 			case 3:
-				dir_zombie = DOWN;
+				zombie->dir = DOWN;
 				break;
 			case 4:
-				dir_zombie = LEFT;
+				zombie->dir = LEFT;
 				break;
 			}
 		}
@@ -363,38 +335,38 @@ void ZombieMoveRandom(vector<Zombie> & zombieList)  //not using
 };
 
 
-void ComputeZombieDirection(vector<Zombie>::iterator zombie, Vector2f & heroPos)
+void ComputeZombieDirection(Zombie & zombie, Vector2f & heroPos)
 {
 	//compute distance and dir
-	float dx = abs(heroPos.x - zombie->pos.x);  //distance x
-	float dy = abs(heroPos.y - zombie->pos.y);  //distance y
+	float dx = abs(heroPos.x - zombie.pos.x);  //distance x
+	float dy = abs(heroPos.y - zombie.pos.y);  //distance y
 	if (dx > 5 || dy > 5)
 	{
 		//TODO: check left-right dir zombie sprite bug (almost)
 		if ((dx > 3 && dy > 3) && (dx / dy > 0.9) && (dy / dx < 1.1))
 		{
-			if (heroPos.x >= zombie->pos.x && heroPos.y >= zombie->pos.y)
-				zombie->dir = DOWNRIGHT;
-			else if (heroPos.x >= zombie->pos.x && heroPos.y < zombie->pos.y)
-				zombie->dir = UPRIGHT;
-			else if (heroPos.x < zombie->pos.x && heroPos.y >= zombie->pos.y)
-				zombie->dir = DOWNLEFT;
-			else if (heroPos.x < zombie->pos.x && heroPos.y < zombie->pos.y)
-				zombie->dir = UPLEFT;
+			if (heroPos.x >= zombie.pos.x && heroPos.y >= zombie.pos.y)
+				zombie.dir = DOWNRIGHT;
+			else if (heroPos.x >= zombie.pos.x && heroPos.y < zombie.pos.y)
+				zombie.dir = UPRIGHT;
+			else if (heroPos.x < zombie.pos.x && heroPos.y >= zombie.pos.y)
+				zombie.dir = DOWNLEFT;
+			else if (heroPos.x < zombie.pos.x && heroPos.y < zombie.pos.y)
+				zombie.dir = UPLEFT;
 		}
 		else if (dx >= dy)
 		{
-			if (heroPos.x > zombie->pos.x)
-				zombie->dir = RIGHT;
+			if (heroPos.x > zombie.pos.x)
+				zombie.dir = RIGHT;
 			else
-				zombie->dir = LEFT;
+				zombie.dir = LEFT;
 		}
 		else if (dx < dy)
 		{
-			if (heroPos.y > zombie->pos.y)
-				zombie->dir = DOWN;
+			if (heroPos.y > zombie.pos.y)
+				zombie.dir = DOWN;
 			else
-				zombie->dir = UP;
+				zombie.dir = UP;
 		}
 	}
 }
@@ -439,19 +411,19 @@ void SpawnZombieRandomly(vector<Zombie>&zombieList, vector<Object> & objects, in
 }
 
 
-void ZombieCheckDir(float & time, vector<Zombie>::iterator & zombie)
+void ZombieCheckDir(float & time, Zombie & zombie)
 {
-	if (zombie->follow == false)
+	if (zombie.follow == false)
 	{
-		if (zombie->dirChangeTime == 0)
+		if (zombie.dirChangeTime == 0)
 		{
 			//cout << " 1 IS " << endl;
-			zombie->dir = ComputeRandDir(zombie);
+			zombie.dir = ComputeRandDir(zombie);
 		}
-		if (time - zombie->dirChangeTime > ZOMBIE_DIR_CHANGE_TIME)
+		if (time - zombie.dirChangeTime > ZOMBIE_DIR_CHANGE_TIME)
 		{
 			//cout << " 2 IS " << endl;
-			zombie->dirChangeTime = 0;
+			zombie.dirChangeTime = 0;
 		}
 	}
 };
@@ -481,8 +453,5 @@ void CheckZombieExplosion(vector<Explosion> & explosionList, vector<Zombie> & zo
 
 void DeleteZombieList(vector<Zombie> & zombies)
 {
-	for (vector<Zombie>::iterator it = zombies.begin(); it != zombies.end();)
-	{
-		it = zombies.erase(it);
-	}
+	zombies.clear();
 }
