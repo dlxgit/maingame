@@ -273,7 +273,6 @@ void ZombieUpdateSprite(vector<Zombie>::iterator & zombie)
 				}
 				break;
 			case UPRIGHT: case RIGHT: case DOWNRIGHT:
-				//21 38
 				zombie->sprite.setTextureRect(IntRect(15 + 36 * int(zombie->currentFrame), 84 + 59 * 3, 27, 49));
 				if (zombie->currentFrame > 2)
 				{
@@ -333,7 +332,7 @@ void ZombieUpdateAttack(Hero & hero, vector<Zombie>::iterator zombie, float & ti
 	}
 }
 
-void ZombieMoveRandom(vector<Zombie> & zombieList)
+void ZombieMoveRandom(vector<Zombie> & zombieList)  //not using
 {
 	int rand_dir;
 	Direction dir_zombie;
@@ -402,6 +401,7 @@ void ComputeZombieDirection(vector<Zombie>::iterator zombie, Vector2f & heroPos)
 
 void SpawnZombieRandomly(vector<Zombie>&zombieList, vector<Object> & objects, int zombiesRemaining, float & time, Sprite & sprite_zombie)
 {
+	//TODO: MAKE FUNCTION MORE READABLE
 	do
 	{
 		bool needNewBlock = false;

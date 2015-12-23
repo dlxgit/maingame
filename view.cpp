@@ -16,6 +16,7 @@ Vector2f GetInterfacePosition(View & view)
 
 View UpdateView(RenderWindow & window, Sprite & hero, View & view)  //UpdateCameraPosition
 {
+	//TODO: no magic numbers
 	Vector2f temp = hero.getPosition();
 
 	if (temp.x < 640) temp.x = 640;

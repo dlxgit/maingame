@@ -126,7 +126,7 @@ void DrawNpc(RenderWindow & window, vector<Npc> & npcList)
 };
 
 
-void CheckHeroBeastDamage(Hero & hero, vector<Zombie>::iterator & zombie, float & time)  //killing zombie with melee attack
+void CheckHeroBeastDamage(Hero & hero, vector<Zombie>::iterator & zombie, float & time)  //killing zombie by melee attack
 {
 	if (hero.isBeastAttack && ((time - hero.lastAttackTime) > HERO_BEAST_ATTACK_TIME))
 	{
@@ -172,6 +172,7 @@ void UpdateShots(Game & game, Hero & hero, Sprite & sprite_explosion) //shots po
 {
 	for (vector<Shot>::iterator shot = game.shotList.begin(); shot != game.shotList.end();)
 	{
+		//TODO: PART FUNCTION
 		if (shot->type == BULLET)
 		{
 			switch (shot->dir)  //shot position update
@@ -267,24 +268,18 @@ void CheckCollisionWithMap(Sprite & sprite, Direction & dir, const float & speed
 		{
 			if (objects[i].name == "solid")
 			{
-				//cout << "ASDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD" << endl;
-				//cout << "SPRITE " << obj[i].sprite.getPosition().x << " " << obj[i].sprite.getPosition().y<< endl;
 				switch (dir)
 				{
 				case UP:
-					//cout << "WE DID IT" << endl;
 					sprite.setPosition(spriteRect.left, spriteRect.top + speed);
 					break;
 				case RIGHT:
-					//cout << "WE DID IT" << endl;
 					sprite.setPosition(spriteRect.left - speed, spriteRect.top);
 					break;
 				case DOWN:
-					//cout << "WE DID IT" << endl;
 					sprite.setPosition(spriteRect.left, spriteRect.top - speed);
 					break;
 				case LEFT:
-					//cout << "WE DID IT" << endl;
 					sprite.setPosition(spriteRect.left + speed, spriteRect.top);
 					break;
 				default:
@@ -354,6 +349,7 @@ void UpdateHero(Game & game) //position + collision + sprite
 {
 	Vector2f pos = game.hero->sprite.getPosition();
 
+	//TODO: PART FUNCTION
 	if (game.hero->state == NORMAL || game.hero->state == BEAST)
 	{
 		switch (game.hero->dir)
@@ -421,7 +417,6 @@ void ProcessEvents(Game & game, Sprites & sprites)
 	while (game.window->pollEvent(event))
 	{
 		UpdateDirection(*game.hero);
-
 		//inventorySwitch
 		if (IsInventorySwitch(*game.hero))
 		{
@@ -448,6 +443,7 @@ void Render(Game & game)
 
 void CheckSpawnZombiesAndLoot(Game & game, Sprite & items, Sprite & sprite_zombie)
 {
+	//TODO: PART FUNCTION
 	if (game.lootList.size() < 5)
 	{
 		int itemNo = rand() % 4;
@@ -521,8 +517,6 @@ void StartGame(Game * game)
 			case PLAY:
 				//TODO: spawn zombie at definite time (and change SpawnZombie func (spawn only near hero))
 
-				//cout << "TIME  " << game->time << endl;
-
 				CheckSpawnZombiesAndLoot(*game, game->sprites.items, game->sprites.zombie);
 				ProcessEvents(*game, game->sprites);
 				UpdateHero(*game);
@@ -540,11 +534,9 @@ void StartGame(Game * game)
 				ComputeNpcFrame(game->npcList);
 				CheckGameOver(game->state, *game->hero);
 
-				//Drawing
-				game->lvl.Draw(*game->window);//рисуем новую карту
 
+				game->lvl.Draw(*game->window);
 				DrawInventoryText(*game->window, game->inventoryList, *game->hero, game->view, game->text);
-
 				Render(*game);
 				DrawBar(*game->window, game->inventoryList, *game->hero, game->view, game->text, game->sprites);
 				break;

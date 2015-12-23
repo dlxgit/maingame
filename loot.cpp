@@ -29,6 +29,7 @@ bool IsItemInInventory(vector<Loot>::iterator out, vector<Inventory> & inventory
 
 void GenerateLoot(vector<Loot> & lootList, vector<Object> & objects, int ItemsRemaining, NameItem  item, Sprite & texture_items)
 {
+	//TODO: MAKE FUNCTION MORE READABLE
 	do
 	{
 		bool needNewBlock = false;
@@ -56,11 +57,8 @@ void GenerateLoot(vector<Loot> & lootList, vector<Object> & objects, int ItemsRe
 			if (needNewBlock == false)
 			{
 				Loot loot;
-
 				loot.name = item;
-
 				loot.quantity = GetMaxQuantity(loot.name);
-				//checkifNeedIt??
 				loot.pos = { float(x),float(y) };
 				loot.sprite = texture_items;
 				loot.sprite.setPosition(loot.pos);
