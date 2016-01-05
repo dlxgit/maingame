@@ -3,6 +3,7 @@
 
 void InitializeView(View & view)
 {
+	//view.reset(sf::FloatRect(0, 0, 640, 512));
 	view.reset(sf::FloatRect(0, 0, 1280, 1024));
 }
 

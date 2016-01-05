@@ -7,9 +7,12 @@ const Vector2f GetSpriteCenter(const Sprite & sprite)
 
 const FloatRect GetSpriteRect(const Sprite & sprite)
 {
-	const Vector2f pos = sprite.getPosition();
+	//TODO: check if works good (after change)
+	/*
+	const Vector2f pos = sprite.getPosition();	
 	const Vector2f size = { sprite.getGlobalBounds().width, sprite.getGlobalBounds().height };
-	return FloatRect(pos, size);
+	*/
+	return FloatRect(sprite.getPosition(), { sprite.getGlobalBounds().width, sprite.getGlobalBounds().height });
 }
 
 void InitiazlizeSprites(Sprites & sprites)

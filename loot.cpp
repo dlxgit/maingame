@@ -2,7 +2,6 @@
 #include "loot.h"
 
 
-
 void DrawLoot(RenderWindow & window, vector<Loot> & lootList)
 {
 	for (Loot & item:lootList)
@@ -12,16 +11,18 @@ void DrawLoot(RenderWindow & window, vector<Loot> & lootList)
 	}
 };
 
-bool IsItemInInventory(vector<Loot>::iterator out, vector<Inventory> & inventoryList, Sprite & items)
+int GetSlotIndexOfItem(vector<Loot>::iterator out, vector<Inventory> & inventoryList)
 {
+	int index = 0;
 	for (std::vector<Inventory>::iterator in = inventoryList.begin(); in != inventoryList.end(); ++in)
 	{
 		if (in->name == out->name)
 		{
-			return true;
+			return index;
 		}
+		index++;
 	}
-	return false;
+	return -1;
 }
 
 Loot GetNewLootItem(NameItem & item, Sprite & sprite, float & x, float & y)

@@ -15,12 +15,13 @@ void InitializeLoot(Game & game)
 void InitializeGame(Game & game)
 {
 	game.hero = new Hero();
+	InitiazlizeSprites(game.sprites);
 	InitializeInventory(game.inventoryList, game.sprites);
 	InitializeHero(*game.hero);
 	game.hero->item = game.inventoryList[0];
+	game.hero->item.sprite.setTextureRect(IntRect(32, 0, 32, 32));
 	game.window = new RenderWindow(VideoMode(W_WIDTH, W_HEIGHT), "Shoot and Run");
 	InitializeView(game.view);
-	InitiazlizeSprites(game.sprites);
 	InitializeText(game.font,game.text);
 	game.lvl.LoadFromFile("level0.tmx");
 	game.solidObjects = game.lvl.GetObjects("solid");
@@ -30,8 +31,21 @@ void InitializeGame(Game & game)
 	InitializeNpc(game.npcList, game.sprites.npc);
 	game.time = 0;
 	game.state = START_GAME;
+	//game.hero->sprite.setPosition(game.view.getCenter());
 };
 
+void DeleteGame(Game * game)
+{
+	delete(game->hero);
+	delete(game->window);
+	DeleteExplosionList(game->explosionList);
+	DeleteLoot(game->lootList);
+	DeleteNpcList(game->npcList);
+	DeleteShots(game->shotList);
+	DeleteZombieList(game->zombieList);
+	DeleteInventory(game->inventoryList);
+	delete(game);
+}
 
 void CheckWindowClose(Game & game)
 {
@@ -75,7 +89,35 @@ void EndGameEvent(Game & game, View & view)
 
 	if (Keyboard::isKeyPressed(Keyboard::Return))
 	{
-		game.state = PLAY;
+		delete((&game)->hero);
+		//delete((&game)->window);
+		DeleteExplosionList((&game)->explosionList);
+		DeleteLoot((&game)->lootList);
+		DeleteNpcList((&game)->npcList);
+		DeleteShots((&game)->shotList);
+		DeleteZombieList((&game)->zombieList);
+		DeleteInventory((&game)->inventoryList);
+		//delete((&game));
+
+
+		game.hero = new Hero();
+		//InitiazlizeSprites(game.sprites);
+		InitializeInventory(game.inventoryList, game.sprites);
+		InitializeHero(*game.hero);
+		game.hero->item = game.inventoryList[0];
+		game.hero->item.sprite.setTextureRect(IntRect(32, 0, 32, 32));
+		//game.window = new RenderWindow(VideoMode(W_WIDTH, W_HEIGHT), "Shoot and Run");
+		//InitializeView(game.view);
+		//InitializeText(game.font, game.text);
+		//game.lvl.LoadFromFile("level0.tmx");
+		//game.solidObjects = game.lvl.GetObjects("solid");
+
+		ZombieSpawn(game.zombieList, game.time, 100, 100, game.sprites.zombie);
+		InitializeLoot(game);
+		InitializeNpc(game.npcList, game.sprites.npc);
+		game.time = 0;
+		game.state = START_GAME;
+		//game.hero->sprite.setPosition(game.view.getCenter());
 	}
 };
 
@@ -93,44 +135,43 @@ void LevelFinishEvent(Game & game, View & view)
 
 void DrawShots(RenderWindow & window, vector<Shot> & shotList, vector<Explosion> & explosionList, Hero & hero)
 {
-	for (vector<Shot>::iterator shot = shotList.begin(); shot != shotList.end(); ++shot)
+	for (Shot & shot: shotList)
 	{
-		shot->sprite.setPosition(shot->pos.x, shot->pos.y);
-		window.draw(shot->sprite);
+		shot.sprite.setPosition(shot.pos);
+		window.draw(shot.sprite);
 	}
-	for (vector<Explosion>::iterator explosion = explosionList.begin(); explosion != explosionList.end();)
+	for (Explosion & explosion: explosionList)
 	{
-		explosion->sprite.setTextureRect(IntRect(0 + 250 * int(explosion->currentFrame), 0, 250, 140));
-		explosion->currentFrame += 0.7;
-		window.draw(explosion->sprite);
-		explosion++;
+		explosion.sprite.setTextureRect(IntRect(0 + 250 * int(explosion.currentFrame), 0, 250, 140));
+		explosion.currentFrame += 0.7;
+		window.draw(explosion.sprite);
 	}
 };
 
 
 void DrawZombies(RenderWindow & window, vector<Zombie> & zombieList)
 {
-	for (vector<Zombie>::iterator zombie = zombieList.begin(); zombie != zombieList.end(); ++zombie)
+	for (Zombie & zombie: zombieList)
 	{
-		window.draw(zombie->sprite);
+		window.draw(zombie.sprite);
 	}
 };
 
 
 void DrawNpc(RenderWindow & window, vector<Npc> & npcList)
 {
-	for (vector<Npc>::iterator npc = npcList.begin(); npc != npcList.end(); npc++)
+	for (Npc npc: npcList)
 	{
-		window.draw(npc->sprite);
+		window.draw(npc.sprite);
 	}
 };
 
 
-void CheckHeroBeastDamage(Hero & hero, vector<Zombie>::iterator & zombie, float & time)  //killing zombie by melee attack
+void CheckHeroBeastDamage(Hero & hero, Zombie & zombie, float & time)  //killing zombie by melee attack
 {
 	if (hero.isBeastAttack && ((time - hero.lastAttackTime) > HERO_BEAST_ATTACK_TIME))
 	{
-		zombie->health -= HERO_BEAST_DAMAGE;
+		zombie.health -= HERO_BEAST_DAMAGE;
 		hero.lastAttackTime = time;
 	}
 }
@@ -156,11 +197,11 @@ bool IsShotCollision(vector<Zombie> & zombieList, NameItem & weapon, vector<Obje
 		}
 	}
 
-	for (vector<Zombie>::iterator zombie = zombieList.begin(); zombie != zombieList.end(); ++zombie)
+	for (Zombie & zombie: zombieList)
 	{
-		if (zombie->sprite.getGlobalBounds().contains(shotCenter))
+		if (zombie.sprite.getGlobalBounds().contains(shotCenter))
 		{
-			zombie->health -= DMG_ITEM[weapon];
+			zombie.health -= DMG_ITEM[weapon];
 			return true;
 		}
 	}
@@ -252,6 +293,35 @@ void UpdateShots(Game & game, Hero & hero, Sprite & sprite_explosion) //shots po
 	}
 }
 
+vector<int> GetCollideSides(Sprite & sprite, Direction & dir, vector<Object> & objects)
+{
+	vector<FloatRect> sideRects;
+	FloatRect rect = GetSpriteRect(sprite);
+	sideRects[0] = FloatRect(rect.left, rect.top + 1, rect.width, 1);
+	//sideRects[1] = FloatRect(rect.left, rect.top, 1, 1);
+	sideRects[2] = FloatRect(rect.left + rect.width + 1, rect.top, 1, rect.height);
+	//sideRects[3] = FloatRect(rect.left, rect.top, 1, 1);
+	sideRects[4] = FloatRect(rect.left, rect.top + rect.height, rect.width, 1);
+	//sideRects[5] = FloatRect(rect.left, rect.top, 1, 1);
+	sideRects[6] = FloatRect(rect.left - 1, rect.top, 1, rect.height);
+	//sideRects[7] = FloatRect(rect.left, rect.top, 1, 1);
+	vector<int> collideSides;
+	for (int i = 0; i < 8; i++)
+	{
+		collideSides.push_back(0);
+	}
+	for (size_t i = 0; i < objects.size(); ++i)
+	{
+		for (int n = 0; n < sideRects.size(); n++)
+		{
+			if (sideRects[n].intersects(objects[i].rect))
+			{
+				collideSides[n] = 1;
+			}
+		}
+	}
+	return collideSides;
+}
 
 void CheckCollisionWithMap(Sprite & sprite, Direction & dir, const float & speed, vector<Object> &objects)
 {
@@ -317,7 +387,7 @@ void UpdateZombies(vector<Zombie> & zombieList, Hero & hero, vector<Npc> & npcLi
 			{
 				if (IsZombieNearHero(hero, *zombie))
 				{
-					CheckHeroBeastDamage(hero, zombie, time);
+					CheckHeroBeastDamage(hero, *zombie, time);
 				}
 			}
 			if (heroPos.x != zombie->pos.x || heroPos.y != zombie->pos.y)
@@ -516,9 +586,11 @@ void StartGame(Game * game)
 				break;
 			case PLAY:
 				//TODO: spawn zombie at definite time (and change SpawnZombie func (spawn only near hero))
-
+				cout << game->hero->item.name << " item " << endl;
+				
 				CheckSpawnZombiesAndLoot(*game, game->sprites.items, game->sprites.zombie);
 				ProcessEvents(*game, game->sprites);
+				
 				UpdateHero(*game);
 				UpdateInventory(*game->hero, game->inventoryList, game->time);
 				CheckEventNpc(game->npcList, *game->hero);
@@ -530,32 +602,19 @@ void StartGame(Game * game)
 
 				CheckLoot(*game->hero, game->lootList, game->inventoryList, game->sprites.items);
 				UpdateInventory(*game->hero, game->inventoryList, game->time);
-
+				
 				ComputeNpcFrame(game->npcList);
 				CheckGameOver(game->state, *game->hero);
 
-
 				game->lvl.Draw(*game->window);
 				DrawInventoryText(*game->window, game->inventoryList, *game->hero, game->view, game->text);
+				
 				Render(*game);
 				DrawBar(*game->window, game->inventoryList, *game->hero, game->view, game->text, game->sprites);
+				
 				break;
 			}
 			game->window->display();
 		}
 	}
 };
-
-
-void DeleteGame(Game * game)
-{
-	delete(game->hero);
-	delete(game->window);
-	DeleteExplosionList(game->explosionList);
-	DeleteLoot(game->lootList);
-	DeleteNpcList(game->npcList);
-	DeleteShots(game->shotList);
-	DeleteZombieList(game->zombieList);
-	DeleteInventory(game->inventoryList);
-	delete(game);
-}

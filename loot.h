@@ -17,7 +17,7 @@ struct Loot
 
 void DrawLoot(RenderWindow & window, vector<Loot> & lootList);
 
-bool IsItemInInventory(vector<Loot>::iterator out, vector<Inventory> & inventoryList, Sprite & items);
+int GetSlotIndexOfItem(vector<Loot>::iterator out, vector<Inventory> & inventoryList);
 
 Loot GetNewLootItem(NameItem & item, Sprite & sprite, float & x, float & y);
 

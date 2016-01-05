@@ -27,10 +27,8 @@ void InitializeInventory(vector<Inventory> & inventoryList, Sprites & gameSprite
 	inventory.name = PISTOL;
 	inventory.current = 0;
 	inventory.quantity = 7;
-	inventory.sprite.setTexture(inventory.texture);
 	inventory.sprite = gameSprites.items;
 	inventory.sprite.setTextureRect(IntRect(32, 0, 32, 32));
-	inventory.sprite = gameSprites.items;
 	inventoryList.push_back(inventory);
 }
 

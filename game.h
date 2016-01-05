@@ -77,7 +77,7 @@ void DrawZombies(RenderWindow & window, vector<Zombie> & zombieList);
 
 void DrawNpc(RenderWindow & window, vector<Npc> & npcList);
 
-void CheckHeroBeastDamage(Hero & hero, vector<Zombie>::iterator & zombie, float & time);
+void CheckHeroBeastDamage(Hero & hero, Zombie & zombie, float & time);
 
 bool IsShotCollision(vector<Zombie> & zombieList, NameItem & weapon, vector<Object> & objects, vector<Shot>::iterator  shot);
 

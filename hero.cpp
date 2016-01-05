@@ -188,7 +188,6 @@ void UpdateHeroSprite(Hero & hero, float & time)
 				hero.sprite.setTextureRect(IntRect(355 + 40 * int(hero.currentFrame), 597, 34, 47));
 				break;
 			case UPRIGHT: case RIGHT: case DOWNRIGHT:
-				//21 38
 				hero.sprite.setTextureRect(IntRect(182 + 57 * int(hero.currentFrame), 598, 48, 52));
 				break;
 			case DOWN:
@@ -200,13 +199,13 @@ void UpdateHeroSprite(Hero & hero, float & time)
 			case NONE:
 				break;
 			}
-
+			//cout << "ATTACKING !!!! ! !! !  ! ! !! !" << endl;
 			hero.currentFrame += 0.2f;
 			if (hero.currentFrame > 2)
 			{
 				//TODO: deal damage after this
 				hero.isBeastAttack = false;
-				hero.currentFrame = 0;
+				 hero.currentFrame = 0;
 			}
 		}
 		else  //moving beast animation
@@ -252,9 +251,9 @@ void UpdateHeroSprite(Hero & hero, float & time)
 			{
 				cout << hero.currentFrame << " FRAME" << endl;
 				hero.currentFrame = 0;
-
 			}
 		}
+		cout << "ASDWEDQWD " << hero.currentFrame << endl;
 	}
 	else if (hero.state == NORMAL)  //normal moving animation
 	{
@@ -316,10 +315,6 @@ void UpdateHeroSprite(Hero & hero, float & time)
 		{
 			hero.currentFrame = 0;
 		}
-	}
-	else
-	{
-		hero.currentFrame = 0;
 	}
 };
 
@@ -403,15 +398,16 @@ void CheckLoot(Hero & hero, vector<Loot> & lootList, vector<Inventory> & invento
 				if (out->name != AMMO)  //any item that we can take
 				{
 					//check if this item exists in inventory, and if so - upload it
-					if (IsItemInInventory(out, inventoryList, items))
+					int itemIndex = GetSlotIndexOfItem(out, inventoryList);
+					if (itemIndex >= 0)
 					{
-						inventoryList[hero.slotNo].quantity += out->quantity;
-						inventoryList[hero.slotNo].sprite = items;
-						inventoryList[hero.slotNo].sprite.setTextureRect(sf::IntRect(out->name * 32, 0, 32, 32));
+						inventoryList[itemIndex].quantity += out->quantity;
+						//inventoryList[hero.slotNo].sprite = items;
+						//inventoryList[hero.slotNo].sprite.setTextureRect(sf::IntRect(out->name * 32, 0, 32, 32));
 						out->isDrawn = false;
 						isItemAlreadyIn = true;
 					}
-					if (isItemAlreadyIn == false) //adding new item to inventory List
+					else //(isItemAlreadyIn == false) //adding new item to inventory List
 					{
 						Inventory inventory = GetNewInventoryItem(*out, items);
 						inventoryList.push_back(inventory);
@@ -428,7 +424,7 @@ void CheckLoot(Hero & hero, vector<Loot> & lootList, vector<Inventory> & invento
 					while (nWeaponAmmoAdded < AMMO_PACKS)
 					{
 						//delSoon>??
-						for (Inventory itm : inventoryList)
+						for (Inventory & itm : inventoryList)
 						{
 							if (itm.name != MIXTURE && itm.name != KEY && itm.name != DRINK)
 							{
