@@ -338,12 +338,12 @@ void ZombieMoveRandom(vector<Zombie> & zombieList)  //not using
 void ComputeZombieDirection(Zombie & zombie, Vector2f & heroPos)
 {
 	//compute distance and dir
-	float dx = abs(heroPos.x - zombie.pos.x);  //distance x
-	float dy = abs(heroPos.y - zombie.pos.y);  //distance y
-	if (dx > 5 || dy > 5)
+	Vector2f distance = { abs(heroPos.x - zombie.pos.x),
+						  abs(heroPos.y - zombie.pos.y) };
+	if (distance.x > 5 || distance.y > 5)
 	{
 		//TODO: check left-right dir zombie sprite bug (almost)
-		if ((dx > 3 && dy > 3) && (dx / dy > 0.9) && (dy / dx < 1.1))
+		if ((distance.x > 3 && distance.y > 3) && (distance.x / distance.y > 0.9) && (distance.y / distance.x < 1.1))
 		{
 			if (heroPos.x >= zombie.pos.x && heroPos.y >= zombie.pos.y)
 				zombie.dir = DOWNRIGHT;
@@ -354,14 +354,14 @@ void ComputeZombieDirection(Zombie & zombie, Vector2f & heroPos)
 			else if (heroPos.x < zombie.pos.x && heroPos.y < zombie.pos.y)
 				zombie.dir = UPLEFT;
 		}
-		else if (dx >= dy)
+		else if (distance.x >= distance.y)
 		{
 			if (heroPos.x > zombie.pos.x)
 				zombie.dir = RIGHT;
 			else
 				zombie.dir = LEFT;
 		}
-		else if (dx < dy)
+		else if (distance.x < distance.y)
 		{
 			if (heroPos.y > zombie.pos.y)
 				zombie.dir = DOWN;

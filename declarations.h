@@ -91,6 +91,11 @@ const int HEIGHT_MAP = 30;
 const int WIDTH_MAP = 76;
 const int STEP = 48;
 
+//minimap
+const Vector2f MINIMAP_START_POS = { 700.f,700.f };
+const float MINIMAP_DISTANCE_SCALE = 5.f;
+const float MINIMAP_CIRCLE_RADIUS = 50.f;
+
 //movespeed of objects
 const float STEP_HERO = 5.f;
 const float STEP_HERO_HULK = 7.f;

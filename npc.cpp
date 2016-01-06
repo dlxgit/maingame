@@ -49,6 +49,7 @@ void InitializeNpc(vector<Npc> & npcList, Sprite & sprite_npc)
 	npcList.push_back(npc);
 };
 
+
 void ComputeNpcFrame(vector<Npc> & npcList)
 {
 	for (Npc & npc:npcList)
@@ -125,41 +126,57 @@ void ComputeNpcFrame(vector<Npc> & npcList)
 	}
 };
 
+void SortNpcList(vector<Npc> & npcList)
+{
+	for (vector<Npc>::iterator it = npcList.begin(); it != npcList.end(); )
+	{
+		if (it->state != LIVING)
+		{
+			it = npcList.erase(it);
+			npcList.push_back(*it);
+		}
+		else it++;
+	}
+}
+
 void CheckEventNpc(vector<Npc> & npcList, Hero & hero)
 {
 	Vector2f heroCenter = GetSpriteCenter(hero.sprite);
 	bool needDeleteNpc = false;
+	bool isAnyNpcChanged = false;
 	for (vector<Npc>::iterator npc = npcList.begin(); npc != npcList.end();)
 	{
 		needDeleteNpc = false;
-
-		if (npc->state == LIVING)  //if loot.item.center contains heroSprite  -> add new item in inventory
+		if (npc->state == LIVING)
 		{
 			Vector2f npcCenter = GetSpriteCenter(npc->sprite);
-			if (npc->type == COOK)
-				cout << (abs(npcCenter.x - heroCenter.x)) << " CENTER " << abs(npcCenter.y - heroCenter.y) << "  STATE " << npc->state << endl;
 			if ((abs(npcCenter.x - heroCenter.x) < 35) && (abs(npcCenter.y - heroCenter.y)) < 35)
 			{
-				//cout << "NEAR" << endl;
 				npc->state = SURVIVED;
 				hero.savedNeighbors += 1;
 				needDeleteNpc = true;
+				isAnyNpcChanged = true;
 			}
 		}
 		if (npc->health <= 0)
 		{
 			npc->state = KILLED;
+			isAnyNpcChanged = true;
 		}
 		if (npc->state == KILLED && npc->currentFrame > 8)
 			needDeleteNpc = true;
-		//deleting Npc from List
-		if (needDeleteNpc)
+
+		if (needDeleteNpc) //deleting Npc from List
 		{
 			npc = npcList.erase(npc);
 		}
 		else
 		{
 			npc++;
+		}
+		if (isAnyNpcChanged)
+		{
+			SortNpcList(npcList);
 		}
 	}
 };

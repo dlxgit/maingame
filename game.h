@@ -12,16 +12,12 @@
 #include "view.h"
 #include "text.h"
 
+#include "minimap.h"
+
+
 using namespace sf;
 using namespace std;
 
-struct Door
-{
-	Texture texture;
-	Sprite sprite;
-	Vector2f pos;
-	bool isOpened;
-};
 
 struct FinalDoor //not using yet
 {
@@ -57,6 +53,8 @@ struct Game
 
 	Level lvl;
 	vector<Object> solidObjects;
+
+	MiniMap miniMap;
 };
 
 void InitializeLoot(Game & game);

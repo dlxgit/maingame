@@ -32,6 +32,7 @@ void InitializeGame(Game & game)
 	game.time = 0;
 	game.state = START_GAME;
 	//game.hero->sprite.setPosition(game.view.getCenter());
+	InitializeMinimap(game.miniMap, game.npcList);
 };
 
 void DeleteGame(Game * game)
@@ -508,6 +509,7 @@ void Render(Game & game)
 	DrawNpc(*game.window, game.npcList);
 	DrawZombies(*game.window, game.zombieList);
 	DrawHero(*game.window, *game.hero);
+	DrawMiniMap(*game.window, game.miniMap);
 };
 
 
@@ -577,6 +579,8 @@ void StartGame(Game * game)
 			{
 			case START_GAME:
 				BeginEvent(*game, game->view);
+				game->miniMap.heroDot.setPosition(100, 100);
+				game->window->draw(game->miniMap.heroDot);
 				break;
 			case END_GAME:
 				EndGameEvent(*game, game->view);
@@ -586,11 +590,12 @@ void StartGame(Game * game)
 				break;
 			case PLAY:
 				//TODO: spawn zombie at definite time (and change SpawnZombie func (spawn only near hero))
-				cout << game->hero->item.name << " item " << endl;
+				//cout << game->hero->item.name << " item " << endl;
 				
 				CheckSpawnZombiesAndLoot(*game, game->sprites.items, game->sprites.zombie);
 				ProcessEvents(*game, game->sprites);
 				
+
 				UpdateHero(*game);
 				UpdateInventory(*game->hero, game->inventoryList, game->time);
 				CheckEventNpc(game->npcList, *game->hero);
@@ -604,6 +609,9 @@ void StartGame(Game * game)
 				UpdateInventory(*game->hero, game->inventoryList, game->time);
 				
 				ComputeNpcFrame(game->npcList);
+
+				UpdateMinimap(game->miniMap, game->npcList, game->hero->sprite);
+
 				CheckGameOver(game->state, *game->hero);
 
 				game->lvl.Draw(*game->window);
