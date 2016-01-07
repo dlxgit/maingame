@@ -17,14 +17,17 @@ Vector2f GetInterfacePosition(View & view)
 
 View UpdateView(RenderWindow & window, Sprite & hero, View & view)  //UpdateCameraPosition
 {
-	//TODO: no magic numbers
 	Vector2f temp = hero.getPosition();
 
-	if (temp.x < 640) temp.x = 640;
-	else if (temp.x > 3008) temp.x = 3008;
+	if (temp.x < float(WINDOW_SIZE.x) / 2.f) 
+		temp.x = float(WINDOW_SIZE.x) / 2.f;
+	else if (TILEMAP_SIZE.x * STEP_TILE - float(WINDOW_SIZE.x) / 2.f < temp.x) 
+		temp.x = (TILEMAP_SIZE.x * STEP_TILE - float(WINDOW_SIZE.x) / 2.f);
 
-	if (temp.y < 512) temp.y = 512;
-	else if (temp.y > 928) temp.y = 928;
+	if (temp.y < float(WINDOW_SIZE.y) / 2.f) 
+		temp.y = float(WINDOW_SIZE.y) / 2.f;
+	else if (TILEMAP_SIZE.y * STEP_TILE - float(WINDOW_SIZE.y) / 2.f < temp.y) 
+		temp.y = (TILEMAP_SIZE.y * STEP_TILE - float(WINDOW_SIZE.y) / 2.f);
 
 	view.setCenter(temp);
 	window.setView(view);

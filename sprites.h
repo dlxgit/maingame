@@ -17,7 +17,8 @@ struct Sprites
 	Sprite explosion;
 	Sprite house;
 	Sprite door;
-	Sprite dot;
+	Sprite minimapMarkerNpc;
+	Sprite minimapMarkerHero;
 
 	Texture texture_hero;
 	Texture texture_zombie;
@@ -31,7 +32,8 @@ struct Sprites
 	Texture texture_explosion;
 	Texture texture_house;
 	Texture texture_door;
-	Texture texture_dot;
+	Texture texture_minimapMarkerNpc;
+	Texture texture_minimapMarkerHero;
 };
 
 

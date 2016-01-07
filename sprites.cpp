@@ -67,9 +67,15 @@ void InitiazlizeSprites(Sprites & sprites)
 	texture_explosion.loadFromFile("resources/images/explosion.png");
 	sprites.texture_explosion = texture_explosion;
 	sprites.explosion.setTexture(sprites.texture_explosion);
-	//Dot
-	Texture texture_dot;
-	texture_dot.loadFromFile("resources/images/dot.png");
-	sprites.texture_dot = texture_dot;
-	sprites.dot.setTexture(sprites.texture_dot);
+	//npc Minimap Marker
+	Texture texture_npc_marker;
+	texture_npc_marker.loadFromFile("resources/images/marker_npc.png");
+	sprites.texture_minimapMarkerNpc = texture_npc_marker;
+	sprites.minimapMarkerNpc.setTexture(sprites.texture_minimapMarkerNpc);
+	//hero Minimap Marker
+	Texture texture_hero_marker;
+	texture_hero_marker.loadFromFile("resources/images/marker_hero.png");
+	sprites.texture_minimapMarkerHero = texture_hero_marker;
+	sprites.minimapMarkerHero.setTexture(sprites.texture_minimapMarkerHero);
+
 }

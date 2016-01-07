@@ -20,7 +20,7 @@ void InitializeGame(Game & game)
 	InitializeHero(*game.hero);
 	game.hero->item = game.inventoryList[0];
 	game.hero->item.sprite.setTextureRect(IntRect(32, 0, 32, 32));
-	game.window = new RenderWindow(VideoMode(W_WIDTH, W_HEIGHT), "Shoot and Run");
+	game.window = new RenderWindow(VideoMode(WINDOW_SIZE.x, WINDOW_SIZE.y), "Shoot and Run");
 	InitializeView(game.view);
 	InitializeText(game.font,game.text);
 	game.lvl.LoadFromFile("level0.tmx");
@@ -122,7 +122,6 @@ void EndGameEvent(Game & game, View & view)
 	}
 };
 
-
 void LevelFinishEvent(Game & game, View & view)
 {
 	Vector2f posView = view.getCenter();
@@ -132,7 +131,6 @@ void LevelFinishEvent(Game & game, View & view)
 	game.window->draw(game.text);
 	CheckWindowClose(game);
 };
-
 
 void DrawShots(RenderWindow & window, vector<Shot> & shotList, vector<Explosion> & explosionList, Hero & hero)
 {
@@ -149,7 +147,6 @@ void DrawShots(RenderWindow & window, vector<Shot> & shotList, vector<Explosion>
 	}
 };
 
-
 void DrawZombies(RenderWindow & window, vector<Zombie> & zombieList)
 {
 	for (Zombie & zombie: zombieList)
@@ -157,7 +154,6 @@ void DrawZombies(RenderWindow & window, vector<Zombie> & zombieList)
 		window.draw(zombie.sprite);
 	}
 };
-
 
 void DrawNpc(RenderWindow & window, vector<Npc> & npcList)
 {
@@ -167,7 +163,6 @@ void DrawNpc(RenderWindow & window, vector<Npc> & npcList)
 	}
 };
 
-
 void CheckHeroBeastDamage(Hero & hero, Zombie & zombie, float & time)  //killing zombie by melee attack
 {
 	if (hero.isBeastAttack && ((time - hero.lastAttackTime) > HERO_BEAST_ATTACK_TIME))
@@ -176,7 +171,6 @@ void CheckHeroBeastDamage(Hero & hero, Zombie & zombie, float & time)  //killing
 		hero.lastAttackTime = time;
 	}
 }
-
 
 bool IsShotCollision(vector<Zombie> & zombieList, NameItem & weapon, vector<Object> & objects, vector<Shot>::iterator  shot)
 {
@@ -208,7 +202,6 @@ bool IsShotCollision(vector<Zombie> & zombieList, NameItem & weapon, vector<Obje
 	}
 	return false;
 }
-
 
 void UpdateShots(Game & game, Hero & hero, Sprite & sprite_explosion) //shots position update and delete if need
 {
@@ -324,45 +317,62 @@ vector<int> GetCollideSides(Sprite & sprite, Direction & dir, vector<Object> & o
 	return collideSides;
 }
 
-void CheckCollisionWithMap(Sprite & sprite, Direction & dir, const float & speed, vector<Object> &objects)
+Vector2f ComputeSpriteNewPosition(Sprite & sprite, Direction & dir, const float & speed)
+{
+	Vector2f pos = sprite.getPosition();
+	switch (dir)
+	{
+	case UP:
+		pos.y -= speed;
+		break;
+	case UPRIGHT:
+		pos.x += (DIAGONAL_STEP * speed);
+		pos.y -= (DIAGONAL_STEP * speed);
+		break;
+	case RIGHT:
+		pos.x += speed;
+		break;
+	case DOWNRIGHT:
+		pos.x += (DIAGONAL_STEP * speed);
+		pos.y += (DIAGONAL_STEP * speed);
+		break;
+	case DOWN:
+		pos.y += speed;
+		break;
+	case DOWNLEFT:
+		pos.x -= (DIAGONAL_STEP * speed);
+		pos.y += (DIAGONAL_STEP * speed);
+		break;
+	case LEFT:
+		pos.x -= speed;
+		break;
+	case UPLEFT:
+		pos.x -= (DIAGONAL_STEP * speed);
+		pos.y -= (DIAGONAL_STEP * speed);
+		break;
+	case NONE:
+		break;
+	default:
+		break;
+	}
+	return pos;
+}
+
+bool CheckCollisionWithMap(Sprite & sprite, Direction & dir, const float & speed, vector<Object> &objects)
 {
 	FloatRect spriteRect = GetSpriteRect(sprite);
-
-	bool q = false; //is TopLeft position collide
-	bool w = false; //is TopRight position collide
-	bool e = false; //is BottomRight position collide
-	bool r = false; //is BottomLeft position collide
 
 	for (size_t i = 0; i < objects.size(); ++i)
 	{
 		if (spriteRect.intersects(objects[i].rect))
 		{
-			if (objects[i].name == "solid")
-			{
-				switch (dir)
-				{
-				case UP:
-					sprite.setPosition(spriteRect.left, spriteRect.top + speed);
-					break;
-				case RIGHT:
-					sprite.setPosition(spriteRect.left - speed, spriteRect.top);
-					break;
-				case DOWN:
-					sprite.setPosition(spriteRect.left, spriteRect.top - speed);
-					break;
-				case LEFT:
-					sprite.setPosition(spriteRect.left + speed, spriteRect.top);
-					break;
-				default:
-					break;
-				}
-			}
+				return true;
 		}
-
 	}
+	return false;
 };
 
-void UpdateZombies(vector<Zombie> & zombieList, Hero & hero, vector<Npc> & npcList, vector<Object> & objects, float & time)
+void UpdateZombies(vector<Zombie> & zombieList, Hero & hero, vector<Npc> & npcList, vector<Object> & solidObjects, float & time)
 {
 	Vector2f heroPos = hero.sprite.getPosition();
 	for (vector<Zombie>::iterator zombie = zombieList.begin(); zombie != zombieList.end();)
@@ -381,7 +391,7 @@ void UpdateZombies(vector<Zombie> & zombieList, Hero & hero, vector<Npc> & npcLi
 				ZombieCheckDir(*zombie, time);
 			}
 
-			CheckCollisionWithMap(zombie->sprite,zombie->dirLast,STEP_ZOMBIE_ACTIVE, objects);
+			//CheckCollisionWithMap(zombie->sprite,zombie->dirLast,STEP_ZOMBIE_ACTIVE, objects);
 			ZombieUpdateAttack(hero, *zombie, time);
 
 			if (hero.state == BEAST)
@@ -395,11 +405,32 @@ void UpdateZombies(vector<Zombie> & zombieList, Hero & hero, vector<Npc> & npcLi
 			{
 				if (zombie->follow)
 				{
-					ZombieUpdatePosition(*zombie);
+					//ZombieUpdatePosition(*zombie);
+					//Vector2f newPos;
+					if (zombie->follow == true)
+					{
+						UpdateSpritePosition(zombie->sprite, zombie->dir, STEP_ZOMBIE_ACTIVE, solidObjects);
+						//cout << "1     1" << endl;
+					}
+					else
+					{
+						UpdateSpritePosition(zombie->sprite, zombie->dir, STEP_ZOMBIE, solidObjects);
+						//cout << "2      2" << endl;
+					}
+					zombie->pos = zombie->sprite.getPosition();
 				}
 			}
 		}
-		ZombieUpdateSprite(*zombie);
+		
+		/*
+		if (zombie == zombieList.begin())
+		{
+			cout << hero.pos.x << " " << hero.pos.y << " HERO" << endl;
+			cout << "                           " << zombie->pos.x << " " << zombie->pos.y << " ZOMBIE" << endl;
+		}
+		*/
+
+		UpdateZombieFrame(*zombie);
 		//UpdateZombiePosition(i);  TODO: make it for all zombies, not jsut for following ones
  
 		if (zombie->dir != zombie->dirLast)
@@ -460,46 +491,40 @@ void CheckEventNpc(vector<Npc> & npcList, Hero & hero, MiniMap & miniMap)
 };
 
 
+void UpdateSpritePosition(Sprite & sprite, Direction & dir, const float & speed, vector<Object> & solidObjects)
+{
+	Vector2f oldPos = sprite.getPosition();
+	Vector2f pos = ComputeSpriteNewPosition(sprite, dir, speed);
+
+	sprite.setPosition(pos);
+
+	if (CheckCollisionWithMap(sprite, dir, speed, solidObjects))
+	{
+		sprite.setPosition(oldPos);
+		if (pos.x != oldPos.x && pos.y != oldPos.y)
+		{
+			sprite.setPosition(oldPos.x, pos.y);
+			if (CheckCollisionWithMap(sprite, dir, speed, solidObjects))
+			{
+				sprite.setPosition(pos.x, oldPos.y);
+				if (CheckCollisionWithMap(sprite, dir, speed, solidObjects))
+				{
+					sprite.setPosition(oldPos);
+				}
+			}
+		}
+	}
+}
+
 void UpdateHero(Game & game) //position + collision + sprite
 {
 	Vector2f pos = game.hero->sprite.getPosition();
-
-	//TODO: PART FUNCTION
+	Vector2f oldPos = pos;
+	//TODO: CHECK BEAST MOVE SPEED (after changing func (07.01.16))
 	if (game.hero->state == NORMAL || game.hero->state == BEAST)
 	{
-		switch (game.hero->dir)
-		{
-		case UP:
-			pos.y -= STEP_HERO;
-			break;
-		case UPRIGHT:
-			pos.x += (DIAGONAL_STEP * STEP_HERO);
-			pos.y -= (DIAGONAL_STEP * STEP_HERO);
-			break;
-		case RIGHT:
-			pos.x += STEP_HERO;
-			break;
-		case DOWNRIGHT:
-			pos.x += (DIAGONAL_STEP * STEP_HERO);
-			pos.y += (DIAGONAL_STEP * STEP_HERO);
-			break;
-		case DOWN:
-			pos.y += STEP_HERO;
-			break;
-		case DOWNLEFT:
-			pos.x -= (DIAGONAL_STEP * STEP_HERO);
-			pos.y += (DIAGONAL_STEP * STEP_HERO);
-			break;
-		case LEFT:
-			pos.x -= STEP_HERO;
-			break;
-		case UPLEFT:
-			pos.x -= (DIAGONAL_STEP * STEP_HERO);
-			pos.y -= (DIAGONAL_STEP * STEP_HERO);
-			break;
-		case NONE:
-			break;
-		}
+		UpdateSpritePosition(game.hero->sprite, game.hero->dir, STEP_HERO, game.solidObjects);
+		game.hero->pos = game.hero->sprite.getPosition();
 	}
 	if (game.hero->state == BEAST)
 	{
@@ -510,7 +535,7 @@ void UpdateHero(Game & game) //position + collision + sprite
 			game.hero->beastTimer = 0;
 		}
 	}
-
+	UpdateHeroFrame(*game.hero, game.time);
 	if ((game.inventoryList[game.hero->slotNo].quantity > 0 && game.inventoryList[game.hero->slotNo].current == 0 && (game.inventoryList[game.hero->slotNo].name == PISTOL || game.inventoryList[game.hero->slotNo].name == RIFLE)))
 	{
 		if (game.hero->isReloading == false)
@@ -519,11 +544,6 @@ void UpdateHero(Game & game) //position + collision + sprite
 			game.hero->isReloading = true;
 		}
 	}
-
-	UpdateHeroSprite(*game.hero, game.time);
-	game.hero->sprite.setPosition(pos);
-	game.hero->pos = game.hero->sprite.getPosition();  //#for
-	CheckCollisionWithMap(game.hero->sprite, game.hero->dirLast,STEP_HERO,game.lvl.GetObjects("solid"));
 }
 
 void ProcessEvents(Game & game, Sprites & sprites)
@@ -650,7 +670,7 @@ void StartGame(Game * game)
 				UpdateView(*game->window, game->hero->sprite, game->view);
 				UpdateShots(*game, *game->hero, game->sprites.explosion);
 
-				//UpdateZombies(game->zombieList, *game->hero, game->npcList, game->solidObjects, game->time);
+				UpdateZombies(game->zombieList, *game->hero, game->npcList, game->solidObjects, game->time);
 				CheckZombieExplosion(game->explosionList, game->zombieList);
 
 				CheckLoot(*game->hero, game->lootList, game->inventoryList, game->sprites.items);
@@ -669,6 +689,7 @@ void StartGame(Game * game)
 				Render(*game);
 				DrawBar(*game->window, game->inventoryList, *game->hero, game->view, game->text, game->sprites);
 				//cout << game->hero->sprite.getPosition().x << " " << game->hero->sprite.getPosition().y << endl;
+				cout << "STATE " << game->hero->state << endl;
 				break;
 			}
 			game->window->display();

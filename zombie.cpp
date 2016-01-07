@@ -103,60 +103,6 @@ void ZombieCheckFollow(Zombie & zombie, Hero & hero)
 	}
 };
 
-void ZombieUpdatePosition(Zombie & zombie)
-{
-	//TODO:vec2f
-	float xZombie = zombie.sprite.getPosition().x;
-	float yZombie = zombie.sprite.getPosition().y;
-
-	int stepZ;
-	if (zombie.follow == true)
-	{
-		stepZ = STEP_ZOMBIE_ACTIVE;
-	}
-	else
-	{
-		stepZ = STEP_ZOMBIE;
-	}
-
-	switch (zombie.dir)
-	{
-	case UP:
-		yZombie -= stepZ;
-		break;
-	case DOWN:
-		yZombie += stepZ;
-		break;
-	case LEFT:
-		xZombie -= stepZ;
-		break;
-	case RIGHT:
-		xZombie += stepZ;
-		break;
-	case UPLEFT:
-		xZombie -= stepZ * DIAGONAL_STEP;
-		yZombie -= stepZ * DIAGONAL_STEP;
-		break;
-	case UPRIGHT:
-		xZombie += stepZ * DIAGONAL_STEP;
-		yZombie -= stepZ * DIAGONAL_STEP;
-		break;
-	case DOWNLEFT:
-		xZombie -= stepZ * DIAGONAL_STEP;
-		yZombie += stepZ * DIAGONAL_STEP;
-		break;
-	case DOWNRIGHT:
-		xZombie += stepZ * DIAGONAL_STEP;
-		yZombie += stepZ * DIAGONAL_STEP;
-		break;
-	}
-
-	//struct_zombies[z].sprite.setTextureRect(IntRect(5, 5, 30, 30));
-	zombie.pos = { xZombie, yZombie };
-	//struct_zombies[z].sprite.setPosition(x, y);
-	//zametka
-	zombie.sprite.setPosition(zombie.pos.x, zombie.pos.y);
-};
 
 //should i store it in zombieList>? if i can just keep it here (return true)
 bool IsZombieNearHero(Hero & hero, Zombie & zombie)
@@ -232,7 +178,7 @@ void ZombieUpdateAttack(Hero & hero, Zombie & zombie, const float & time)
 	}
 };
 
-void ZombieUpdateSprite(Zombie & zombie)
+void UpdateZombieFrame(Zombie & zombie)
 {
 	if (zombie.state == DEAD)  //if zombie is exploding
 	{

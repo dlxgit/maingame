@@ -15,7 +15,7 @@ void InitializeHero(Hero & hero)
 	hero.dir = NONE;
 	hero.dirLast = DOWN;
 	hero.currentFrame = 0;
-	hero.sprite.setPosition(6 * 32, 9 * 32);  //start position
+	hero.sprite.setPosition(6 * 32, 12 * 32);  //start position
 	hero.state = NORMAL;
 	hero.isBeastAttack = false;
 	hero.isWeaponSwitch = false;
@@ -164,7 +164,7 @@ void CheckUsingItems(Hero & hero, vector<Inventory> & inventoryList, vector<Shot
 };
 
 
-void UpdateHeroSprite(Hero & hero, float & time)
+void UpdateHeroFrame(Hero & hero, float & time)
 {
 	if (hero.state == TRANSFORMING)
 	{
@@ -199,7 +199,6 @@ void UpdateHeroSprite(Hero & hero, float & time)
 			case NONE:
 				break;
 			}
-			//cout << "ATTACKING !!!! ! !! !  ! ! !! !" << endl;
 			hero.currentFrame += 0.2f;
 			if (hero.currentFrame > 2)
 			{

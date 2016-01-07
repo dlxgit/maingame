@@ -48,7 +48,7 @@ Inventory GetNewInventoryItem(Loot & loot, Sprite & items);
 
 void CheckUsingItems(Hero & hero, vector<Inventory> & inventoryList, vector<Shot> & shotList, float & time, Sprite & sprite_shot, Sprite & sprite_grenade);
 
-void UpdateHeroSprite(Hero & hero, float & time);
+void UpdateHeroFrame(Hero & hero, float & time);
 
 void DrawHero(RenderWindow & window, Hero & hero);
 

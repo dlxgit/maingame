@@ -46,7 +46,7 @@ void ComputeZombieDirection(Zombie  & zombie, Vector2f & heroPos);
 
 void ZombieUpdateAttack(Hero & hero, Zombie & zombie, const float & time);
 
-void ZombieUpdateSprite(Zombie & zombie);
+void UpdateZombieFrame(Zombie & zombie);
 
 void ZombieMoveRandom(vector<Zombie> & zombieList);
 

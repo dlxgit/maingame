@@ -77,13 +77,19 @@ void DrawNpc(RenderWindow & window, vector<Npc> & npcList);
 
 void CheckHeroBeastDamage(Hero & hero, Zombie & zombie, float & time);
 
+Vector2f ComputeSpriteNewPosition(Sprite & sprite, Direction & dir, const float & speed);
+
 bool IsShotCollision(vector<Zombie> & zombieList, NameItem & weapon, vector<Object> & objects, vector<Shot>::iterator  shot);
 
 void UpdateShots(Game & game, Hero & hero, Sprite & sprite_explosion);
 
+bool CheckCollisionWithMap(Sprite & sprite, Direction & dir, const float & speed, vector<Object> &objects);
+
 void UpdateZombies(vector<Zombie> & zombieList, Hero & hero, vector<Npc> & npcList, vector<Object> & objects, float & time);
 
 void CheckEventNpc(vector<Npc> & npcList, Hero & hero, MiniMap & miniMap);
+
+void UpdateSpritePosition(Sprite & sprite, Direction & dir, const float & speed, vector<Object> & solidObjects);
 
 void UpdateHero(Game & game);
 

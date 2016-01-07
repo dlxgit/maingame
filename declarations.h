@@ -1,6 +1,7 @@
 #pragma once
 #include <SFML\Graphics.hpp>
 #include <vector>
+#include "iostream"
 
 using namespace sf;
 using namespace std;
@@ -82,14 +83,15 @@ enum NpcState
 //spawn settings
 const float ZOMBIE_SPAWN_RADIUS_COLLISION = 80.f;
 
-//window
-const int W_WIDTH = 1280;
-const int W_HEIGHT = 1024;
 
 //map
+const Vector2i WINDOW_SIZE = { 1280,1024 };
+const Vector2i TILEMAP_SIZE = { 50,27};
 const int HEIGHT_MAP = 30;
 const int WIDTH_MAP = 76;
+const int STEP_TILE = 64;
 const int STEP = 48;
+
 
 //minimap
 const Vector2f MINIMAP_START_POS = { 700.f,700.f };
@@ -120,11 +122,12 @@ const int NPC_MAX_HEALTH = 50;
 
 //time 
 const float ITEM_REUSE_COOLDOWN[7] = { 0.35f, 0.35f,0.15f,0.15f,0.15f,0.15f };
-const int BEAST_MAX_TIME = 30;
+const int BEAST_MAX_TIME = 17;
 const float HERO_BEAST_ATTACK_TIME = 0.7f;
 const float WEAPON_RELOAD_TIME = 1.5f;
 const int TIME_GAME_STEP = 10;
 const float SCREEN_UPDATE_TIME = 15.f;
+//const float SCREEN_UPDATE_TIME = 150.f;
 const float GRENADE_MAX_TIME = 1.f;  //throwtime
 const int ZOMBIE_DIR_CHANGE_TIME = 5;
 

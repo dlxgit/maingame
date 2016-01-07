@@ -20,7 +20,7 @@ void InitializeNpc(vector<Npc> & npcList, Sprite & sprite_npc)
 	npcList.push_back(npc);
 
 	npc.type = TEACHER;
-	npc.pos = { 10 * STEP, 15 * STEP };
+	npc.pos = { 9 * STEP, 15 * STEP };
 	npc.sprite.setPosition(npc.pos);
 	npcList.push_back(npc);
 
@@ -40,7 +40,7 @@ void InitializeNpc(vector<Npc> & npcList, Sprite & sprite_npc)
 	npcList.push_back(npc);
 
 	npc.type = COOK;
-	npc.pos = { 20 * STEP, 15 * STEP };
+	npc.pos = { 20 * STEP, 14 * STEP };
 	npc.sprite.setPosition(npc.pos);
 	npcList.push_back(npc);
 	npc.type = GIRL;

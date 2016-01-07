@@ -18,13 +18,13 @@ void InitializeMinimap(MiniMap & miniMap, vector<Npc> & npcList, Sprites & sprit
 	for (Npc & npc : npcList)
 	{
 		Sprite npcDot;
-		npcDot.setTexture(sprites.texture_dot);
+		npcDot = sprites.minimapMarkerNpc;
 		npcDot.setPosition(750,750);
 		npcDot.setOrigin(-50, 0);
 		//npcDot.setPosition()
 		miniMap.npcDotList.push_back(npcDot);
 	}
-	miniMap.heroDot = sprites.dot;
+	miniMap.heroDot = sprites.minimapMarkerHero;
 	//miniMap.heroDot.setOrigin(-miniMapCenter.x, -miniMapCenter.y);
 
 };
@@ -35,7 +35,7 @@ void UpdateMinimap(MiniMap & miniMap, vector<Npc> & npcList, Sprite & hero, View
 
 	Vector2f viewCenter = view.getCenter();
 	miniMap.circle.setPosition(viewCenter.x + 450, viewCenter.y - 450);
-	miniMap.heroDot.setPosition(miniMap.circle.getPosition().x + 50, miniMap.circle.getPosition().y + 50);
+	miniMap.heroDot.setPosition(miniMap.circle.getPosition().x + 50 - (miniMap.heroDot.getGlobalBounds().width / 2), miniMap.circle.getPosition().y + 50 - (miniMap.heroDot.getGlobalBounds().width / 2));
 
 	for (Npc & npc : npcList)
 	{
@@ -70,8 +70,8 @@ void UpdateMinimap(MiniMap & miniMap, vector<Npc> & npcList, Sprite & hero, View
 		miniMap.npcDotList[i].setRotation(angle);
 
 
-		miniMap.npcDotList[i].setPosition(miniMap.heroDot.getPosition());
-
+		//miniMap.npcDotList[i].setPosition(miniMap.heroDot.getPosition());
+		miniMap.npcDotList[i].setPosition(miniMap.circle.getPosition().x + 50, miniMap.circle.getPosition().y + 50);
 		i++;
 	}
 };
