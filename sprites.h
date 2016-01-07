@@ -17,7 +17,8 @@ struct Sprites
 	Sprite explosion;
 	Sprite house;
 	Sprite door;
-	
+	Sprite dot;
+
 	Texture texture_hero;
 	Texture texture_zombie;
 	Texture texture_items;
@@ -30,6 +31,7 @@ struct Sprites
 	Texture texture_explosion;
 	Texture texture_house;
 	Texture texture_door;
+	Texture texture_dot;
 };
 
 

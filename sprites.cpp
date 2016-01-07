@@ -67,4 +67,9 @@ void InitiazlizeSprites(Sprites & sprites)
 	texture_explosion.loadFromFile("resources/images/explosion.png");
 	sprites.texture_explosion = texture_explosion;
 	sprites.explosion.setTexture(sprites.texture_explosion);
+	//Dot
+	Texture texture_dot;
+	texture_dot.loadFromFile("resources/images/dot.png");
+	sprites.texture_dot = texture_dot;
+	sprites.dot.setTexture(sprites.texture_dot);
 }

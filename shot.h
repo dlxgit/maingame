@@ -4,9 +4,6 @@
 #include <iostream>
 #include "explosion.h"
 
-using namespace sf;
-
-using namespace std;
 
 struct Shot
 {
@@ -20,6 +17,6 @@ struct Shot
 	float currentFrame;
 };
 
-void AddNewShot(std::vector<Shot> & shotList, Direction & dirLast, Vector2f & pos, float & time, Sprite & sprite_shot, Sprite & sprite_grenade, ShotType  shotType);
+void AddNewShot(std::vector<Shot> & shotList, Direction & dirLast, Vector2f & pos, float & time, Sprite & sprite_shot, Sprite & sprite_grenade, ShotType shotType);
 
 void DeleteShots(vector<Shot> & shot);

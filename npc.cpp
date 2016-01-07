@@ -13,7 +13,7 @@ void InitializeNpc(vector<Npc> & npcList, Sprite & sprite_npc)
 	npc.pos = { 5 * STEP, 8 * STEP };
 	npc.sprite.setPosition(npc.pos);
 	npcList.push_back(npc);
-
+	
 	npc.type = BABY;
 	npc.pos = { 50 * STEP, 10 * STEP };
 	npc.sprite.setPosition(npc.pos);
@@ -138,48 +138,6 @@ void SortNpcList(vector<Npc> & npcList)
 		else it++;
 	}
 }
-
-void CheckEventNpc(vector<Npc> & npcList, Hero & hero)
-{
-	Vector2f heroCenter = GetSpriteCenter(hero.sprite);
-	bool needDeleteNpc = false;
-	bool isAnyNpcChanged = false;
-	for (vector<Npc>::iterator npc = npcList.begin(); npc != npcList.end();)
-	{
-		needDeleteNpc = false;
-		if (npc->state == LIVING)
-		{
-			Vector2f npcCenter = GetSpriteCenter(npc->sprite);
-			if ((abs(npcCenter.x - heroCenter.x) < 35) && (abs(npcCenter.y - heroCenter.y)) < 35)
-			{
-				npc->state = SURVIVED;
-				hero.savedNeighbors += 1;
-				needDeleteNpc = true;
-				isAnyNpcChanged = true;
-			}
-		}
-		if (npc->health <= 0)
-		{
-			npc->state = KILLED;
-			isAnyNpcChanged = true;
-		}
-		if (npc->state == KILLED && npc->currentFrame > 8)
-			needDeleteNpc = true;
-
-		if (needDeleteNpc) //deleting Npc from List
-		{
-			npc = npcList.erase(npc);
-		}
-		else
-		{
-			npc++;
-		}
-		if (isAnyNpcChanged)
-		{
-			SortNpcList(npcList);
-		}
-	}
-};
 
 void DeleteNpcList(vector<Npc> & npcs)
 {

@@ -83,6 +83,8 @@ void UpdateShots(Game & game, Hero & hero, Sprite & sprite_explosion);
 
 void UpdateZombies(vector<Zombie> & zombieList, Hero & hero, vector<Npc> & npcList, vector<Object> & objects, float & time);
 
+void CheckEventNpc(vector<Npc> & npcList, Hero & hero, MiniMap & miniMap);
+
 void UpdateHero(Game & game);
 
 void ProcessEvents(Game & game, Sprites & sprites);

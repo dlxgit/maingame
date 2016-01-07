@@ -32,7 +32,7 @@ void InitializeGame(Game & game)
 	game.time = 0;
 	game.state = START_GAME;
 	//game.hero->sprite.setPosition(game.view.getCenter());
-	InitializeMinimap(game.miniMap, game.npcList);
+	InitializeMinimap(game.miniMap, game.npcList, game.sprites);
 };
 
 void DeleteGame(Game * game)
@@ -415,6 +415,50 @@ void UpdateZombies(vector<Zombie> & zombieList, Hero & hero, vector<Npc> & npcLi
 	}
 }
 
+void CheckEventNpc(vector<Npc> & npcList, Hero & hero, MiniMap & miniMap)
+{
+	Vector2f heroCenter = GetSpriteCenter(hero.sprite);
+	bool needDeleteNpc = false;
+	bool isAnyNpcChanged = false;
+	int i = 0;
+	for (vector<Npc>::iterator npc = npcList.begin(); npc != npcList.end();)
+	{
+		needDeleteNpc = false;
+		if (npc->state == LIVING)
+		{
+			Vector2f npcCenter = GetSpriteCenter(npc->sprite);
+			if ((abs(npcCenter.x - heroCenter.x) < 35) && (abs(npcCenter.y - heroCenter.y)) < 35)
+			{
+				npc->state = SURVIVED;
+				hero.savedNeighbors += 1;
+				needDeleteNpc = true;
+				isAnyNpcChanged = true;
+			}
+		}
+		if (npc->health <= 0)
+		{
+			npc->state = KILLED;
+			isAnyNpcChanged = true;
+		}
+		if (npc->state == KILLED && npc->currentFrame > 8)
+			needDeleteNpc = true;
+
+		if (needDeleteNpc) //deleting Npc from List
+		{
+			npc = npcList.erase(npc);
+			DeleteNpcDot(miniMap, i);
+		}
+		else
+		{
+			npc++;
+		}
+		if (isAnyNpcChanged)
+		{
+			//SortNpcList(npcList);
+		}
+	}
+};
+
 
 void UpdateHero(Game & game) //position + collision + sprite
 {
@@ -579,8 +623,12 @@ void StartGame(Game * game)
 			{
 			case START_GAME:
 				BeginEvent(*game, game->view);
-				game->miniMap.heroDot.setPosition(100, 100);
-				game->window->draw(game->miniMap.heroDot);
+				//game->sprites.dot.setPosition(100, 100);
+				//game->sprites.dot.setOrigin(100, 100);
+				//game->window->draw(game->sprites.dot);
+				//game->miniMap.heroDot.setPosition(100, 100);
+				//game->miniMap.heroDot.setOrigin(100, 100);
+				//game->window->draw(game->miniMap.heroDot);
 				break;
 			case END_GAME:
 				EndGameEvent(*game, game->view);
@@ -598,11 +646,11 @@ void StartGame(Game * game)
 
 				UpdateHero(*game);
 				UpdateInventory(*game->hero, game->inventoryList, game->time);
-				CheckEventNpc(game->npcList, *game->hero);
+				CheckEventNpc(game->npcList, *game->hero,game->miniMap);
 				UpdateView(*game->window, game->hero->sprite, game->view);
 				UpdateShots(*game, *game->hero, game->sprites.explosion);
 
-				UpdateZombies(game->zombieList, *game->hero, game->npcList, game->solidObjects, game->time);
+				//UpdateZombies(game->zombieList, *game->hero, game->npcList, game->solidObjects, game->time);
 				CheckZombieExplosion(game->explosionList, game->zombieList);
 
 				CheckLoot(*game->hero, game->lootList, game->inventoryList, game->sprites.items);
@@ -610,16 +658,17 @@ void StartGame(Game * game)
 				
 				ComputeNpcFrame(game->npcList);
 
-				UpdateMinimap(game->miniMap, game->npcList, game->hero->sprite);
+				UpdateMinimap(game->miniMap, game->npcList, game->hero->sprite, game->view);
 
 				CheckGameOver(game->state, *game->hero);
 
 				game->lvl.Draw(*game->window);
 				DrawInventoryText(*game->window, game->inventoryList, *game->hero, game->view, game->text);
 				
+				//game->miniMap.npcDotList[0].rotate(1);
 				Render(*game);
 				DrawBar(*game->window, game->inventoryList, *game->hero, game->view, game->text, game->sprites);
-				
+				//cout << game->hero->sprite.getPosition().x << " " << game->hero->sprite.getPosition().y << endl;
 				break;
 			}
 			game->window->display();
