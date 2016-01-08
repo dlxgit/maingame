@@ -342,10 +342,9 @@ void SpawnZombieRandomly(vector<Zombie>&zombieList, vector<Object> & objects, in
 	{
 		bool needNewBlock = false;
 
-		float x = (rand() % WIDTH_MAP) * STEP;
-		float y = (rand() % HEIGHT_MAP) * STEP;
+		Vector2f newPos = { float((rand() % WIDTH_MAP) * STEP), float((rand() % HEIGHT_MAP) * STEP) };
 
-		FloatRect lootRect = { x,y,ZOMBIE_SPAWN_RADIUS_COLLISION, ZOMBIE_SPAWN_RADIUS_COLLISION };
+		FloatRect lootRect = { newPos.x,newPos.y,ZOMBIE_SPAWN_RADIUS_COLLISION, ZOMBIE_SPAWN_RADIUS_COLLISION };
 		for (size_t i = 0; i < objects.size(); ++i)
 		{
 			if (lootRect.intersects(objects[i].rect))
@@ -356,16 +355,16 @@ void SpawnZombieRandomly(vector<Zombie>&zombieList, vector<Object> & objects, in
 		}
 		if (!needNewBlock)
 		{
-			for (vector<Zombie>::iterator i = zombieList.begin(); i != zombieList.end(); ++i)
-				if ((abs(i->pos.x - x) < 100 && abs(i->pos.y - y) < 100))
+			for (Zombie & zombie : zombieList)
+				if ((abs(zombie.pos.x - newPos.x) < 100 && abs(zombie.pos.y - newPos.y) < 100))
 				{
 					needNewBlock = true;
 					break;
 				}
 			if (needNewBlock == false)
 			{
-				sprite_zombie.setPosition(x, y);
-				ZombieSpawn(zombieList, time, x, y, sprite_zombie);
+				sprite_zombie.setPosition(newPos);
+				ZombieSpawn(zombieList, time, newPos.x,newPos.y, sprite_zombie);
 				zombieList[zombieList.size() - 1].sprite = sprite_zombie;
 
 				zombiesRemaining -= 1;
