@@ -15,9 +15,11 @@ struct Loot
 	bool isDrawn;
 };
 
+void InitializeLoot(vector<Loot> & lootList, vector<Object> & objects, Sprite & sprite);
+
 void DrawLoot(RenderWindow & window, vector<Loot> & lootList);
 
-int GetSlotIndexOfItem(vector<Loot>::iterator out, vector<Inventory> & inventoryList);
+int GetSlotIndexOfItem(Loot & out, vector<Inventory> & inventoryList);
 
 Loot GetNewLootItem(NameItem & item, Sprite & sprite, float & x, float & y);
 

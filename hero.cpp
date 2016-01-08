@@ -329,12 +329,12 @@ void DrawInventoryText(RenderWindow & window, vector<Inventory> & inventoryList,
 	text.setPosition(posView.x + 40, posView.y + 40);
 
 	//currentItem << (hero.iCurrent.item);
-	std::ostringstream toStringCurrent;
-	toStringCurrent << inventoryList[hero.slotNo].current;
+	//std::ostringstream toStringCurrent;
 
-	std::ostringstream toStringQuantity;
-	toStringQuantity << inventoryList[hero.slotNo].quantity;
-	text.setString(toStringCurrent.str() + "/" + toStringQuantity.str() + " " + ITEM_NAMES[inventoryList[hero.slotNo].name]);
+	//std::ostringstream toStringQuantity;
+
+
+	text.setString(to_string(inventoryList[hero.slotNo].current) + "/" + to_string(inventoryList[hero.slotNo].quantity) + " " + ITEM_NAMES[inventoryList[hero.slotNo].name]);
 	window.draw(text);
 	if (hero.isReloading)
 	{
@@ -353,16 +353,12 @@ void DrawInventoryText(RenderWindow & window, vector<Inventory> & inventoryList,
 		}
 		window.draw(text);
 	}
-	std::ostringstream toStringNeighbors;
-	toStringNeighbors << hero.savedNeighbors;
-	text.setString("rescued: " + toStringNeighbors.str());
+	text.setString("rescued: " + to_string(hero.savedNeighbors));
 	text.setPosition(posView.x + 5, posView.y + 100);
 	window.draw(text);
 
-	std::ostringstream toStringRemaining;
 	int remaining = MAX_NUMBER_OF_NEIGHBORS - hero.savedNeighbors;
-	toStringRemaining << remaining;
-	text.setString("remaining: " + toStringRemaining.str());
+	text.setString("remaining: " + to_string(remaining));
 	text.setPosition(posView.x + 5, posView.y + 120);
 	window.draw(text);
 }
@@ -397,12 +393,10 @@ void CheckLoot(Hero & hero, vector<Loot> & lootList, vector<Inventory> & invento
 				if (out->name != AMMO)  //any item that we can take
 				{
 					//check if this item exists in inventory, and if so - upload it
-					int itemIndex = GetSlotIndexOfItem(out, inventoryList);
+					int itemIndex = GetSlotIndexOfItem(*out, inventoryList);
 					if (itemIndex >= 0)
 					{
 						inventoryList[itemIndex].quantity += out->quantity;
-						//inventoryList[hero.slotNo].sprite = items;
-						//inventoryList[hero.slotNo].sprite.setTextureRect(sf::IntRect(out->name * 32, 0, 32, 32));
 						out->isDrawn = false;
 						isItemAlreadyIn = true;
 					}
@@ -422,7 +416,6 @@ void CheckLoot(Hero & hero, vector<Loot> & lootList, vector<Inventory> & invento
 					int nWeaponAmmoAdded = 0;
 					while (nWeaponAmmoAdded < AMMO_PACKS)
 					{
-						//delSoon>??
 						for (Inventory & itm : inventoryList)
 						{
 							if (itm.name != MIXTURE && itm.name != KEY && itm.name != DRINK)

@@ -48,6 +48,8 @@ void ZombieUpdateAttack(Hero & hero, Zombie & zombie, const float & time);
 
 void UpdateZombieFrame(Zombie & zombie);
 
+bool IsIntersectWithOtherZombie(vector<Zombie> & zombieList, int & index);
+
 void ZombieMoveRandom(vector<Zombie> & zombieList);
 
 void SpawnZombieRandomly(vector<Zombie>&zombieList, vector<Object> & objects, int zombiesRemaining, float & time, Sprite & sprite_zombie);
@@ -55,5 +57,7 @@ void SpawnZombieRandomly(vector<Zombie>&zombieList, vector<Object> & objects, in
 void ZombieCheckDir(float & time, Zombie & zombie);
 
 void CheckZombieExplosion(vector<Explosion> & explosionList, vector<Zombie> & zombieList);
+
+void DrawZombies(RenderWindow & window, vector<Zombie> & zombieList);
 
 void DeleteZombieList(vector<Zombie> & zombies);

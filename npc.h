@@ -24,4 +24,6 @@ void ComputeNpcFrame(vector<Npc> & npcList);
 
 void SortNpcList(vector<Npc> & npcList);
 
+void DrawNpc(RenderWindow & window, vector<Npc> & npcList);
+
 void DeleteNpcList(vector<Npc> & npcs);

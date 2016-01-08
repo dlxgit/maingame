@@ -178,6 +178,24 @@ void ZombieUpdateAttack(Hero & hero, Zombie & zombie, const float & time)
 	}
 };
 
+bool IsIntersectWithOtherZombie(vector<Zombie> & zombieList, int & index)
+{
+	int i = 0;
+	for (Zombie & zomb : zombieList)
+	{
+		if (i != index)
+		{
+			if (zombieList[index].sprite.getGlobalBounds().intersects(zomb.sprite.getGlobalBounds()))
+			{
+				cout << "IND " << index << " i " << i << endl;
+				return true;
+			}
+		}
+		i++;
+	}
+	return false;
+}
+
 void UpdateZombieFrame(Zombie & zombie)
 {
 	if (zombie.state == DEAD)  //if zombie is exploding
@@ -396,6 +414,14 @@ void CheckZombieExplosion(vector<Explosion> & explosionList, vector<Zombie> & zo
 		}
 	}
 }
+
+void DrawZombies(RenderWindow & window, vector<Zombie> & zombieList)
+{
+	for (Zombie & zombie : zombieList)
+	{
+		window.draw(zombie.sprite);
+	}
+};
 
 void DeleteZombieList(vector<Zombie> & zombies)
 {

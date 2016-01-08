@@ -39,7 +39,6 @@ struct Game
 	std::vector<Shot> shotList;
 	std::vector<Zombie> zombieList;
 	std::vector<Npc> npcList;
-	//std::vector<Door> doorList;  //not using
 	std::vector<Explosion> explosionList;
 	View view;
 	GameState state;
@@ -52,12 +51,11 @@ struct Game
 	Sprite explosionSprite;
 
 	Level lvl;
+	vector<Object> allObjects;
 	vector<Object> solidObjects;
 
 	MiniMap miniMap;
 };
-
-void InitializeLoot(Game & game);
 
 void InitializeGame(Game & game);
 
@@ -71,19 +69,15 @@ void LevelFinishEvent(Game & game, View & view);
 
 void DrawShots(RenderWindow & window, vector<Shot> & shotList, vector<Explosion> & explosionList, Hero & hero);
 
-void DrawZombies(RenderWindow & window, vector<Zombie> & zombieList);
-
-void DrawNpc(RenderWindow & window, vector<Npc> & npcList);
-
 void CheckHeroBeastDamage(Hero & hero, Zombie & zombie, float & time);
 
 Vector2f ComputeSpriteNewPosition(Sprite & sprite, Direction & dir, const float & speed);
 
-bool IsShotCollision(vector<Zombie> & zombieList, NameItem & weapon, vector<Object> & objects, vector<Shot>::iterator  shot);
+bool IsShotCollision(vector<Zombie> & zombieList, NameItem & weapon, vector<Object> & objects, Shot & shot);
 
 void UpdateShots(Game & game, Hero & hero, Sprite & sprite_explosion);
 
-bool CheckCollisionWithMap(Sprite & sprite, Direction & dir, const float & speed, vector<Object> &objects);
+bool IsCollisionWithMap(Sprite & sprite, Direction & dir, const float & speed, vector<Object> &objects);
 
 void UpdateZombies(vector<Zombie> & zombieList, Hero & hero, vector<Npc> & npcList, vector<Object> & objects, float & time);
 

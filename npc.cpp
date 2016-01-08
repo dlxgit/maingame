@@ -139,6 +139,14 @@ void SortNpcList(vector<Npc> & npcList)
 	}
 }
 
+void DrawNpc(RenderWindow & window, vector<Npc> & npcList)
+{
+	for (Npc npc : npcList)
+	{
+		window.draw(npc.sprite);
+	}
+};
+
 void DeleteNpcList(vector<Npc> & npcs)
 {
 	npcs.clear();

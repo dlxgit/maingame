@@ -58,6 +58,7 @@ enum NameItem
 	KEY,
 	MIXTURE,
 	GRENADE,
+	SODA
 };
 
 enum NpcType
@@ -100,7 +101,7 @@ const float MINIMAP_CIRCLE_RADIUS = 50.f;
 
 //movespeed of objects
 const float STEP_HERO = 5.f;
-const float STEP_HERO_HULK = 7.f;
+const float STEP_HERO_BEAST = 7.f;
 const float STEP_ZOMBIE = 2.f;
 const float STEP_ZOMBIE_ACTIVE = 3.f;
 const float STEP_SHOT = 12.f;
@@ -108,7 +109,8 @@ const float STEP_GRENADE = 5.f;
 
 //damage
 const int ZOMBIE_DAMAGE = 30;
-const int DMG_ITEM[7] = { 0, 35, 50,0, 0,0,100 };
+//const int DMG_ITEM[7] = { 0, 35, 50, 0, 0, 0, 100 };
+const int DMG_ITEM[8] = { 0, 100, 100, 0, 0, 0, 100, 100 };
 const int HERO_BEAST_DAMAGE = 100;
 
 //distance
@@ -121,10 +123,13 @@ const int HP_PER_DRINK = 30;
 const int NPC_MAX_HEALTH = 50;
 
 //time 
-const float ITEM_REUSE_COOLDOWN[7] = { 0.35f, 0.35f,0.15f,0.15f,0.15f,0.15f };
+const float ITEM_REUSE_COOLDOWN[8] = { 0.35f, 0.35f,0.15f,0.15f,0.15f,0.15f, 0.1f };
 const int BEAST_MAX_TIME = 17;
 const float HERO_BEAST_ATTACK_TIME = 0.7f;
-const float WEAPON_RELOAD_TIME = 1.5f;
+
+//const float WEAPON_RELOAD_TIME = 1.5f;
+const float WEAPON_RELOAD_TIME = 0.1f;
+
 const int TIME_GAME_STEP = 10;
 const float SCREEN_UPDATE_TIME = 15.f;
 //const float SCREEN_UPDATE_TIME = 150.f;
@@ -133,7 +138,7 @@ const int ZOMBIE_DIR_CHANGE_TIME = 5;
 
 //item quantity settings
 const int AMMO_PACKS = 4;
-const int MAX_AMMO[7] = { 1,12,30,1,1,1,1 };
+const int MAX_AMMO[8] = { 1,12,30,1,1,1,1,1 };
 
 //counts
 const int MAX_NUMBER_OF_NEIGHBORS = 8;
@@ -142,4 +147,4 @@ const int MAX_NUMBER_OF_NEIGHBORS = 8;
 const float DIAGONAL_STEP = 0.66f;  //
 
 //names
-const sf::String ITEM_NAMES[7] = { "drink", "pistol", "rifle", "ammo", "key", "mixture", "grenade" };
+const sf::String ITEM_NAMES[8] = { "drink", "pistol", "rifle", "ammo", "key", "mixture", "grenade", "soda" };

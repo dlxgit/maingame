@@ -8,10 +8,10 @@ void ComputeNpcDotDegree(Sprite & hero, Sprite & npc)
 void InitializeMinimap(MiniMap & miniMap, vector<Npc> & npcList, Sprites & sprites)
 {
 	miniMap.circle.setRadius(50);  //TODO: const
-	miniMap.circle.setFillColor(sf::Color(150, 50, 250));
+	miniMap.circle.setFillColor(sf::Color(64, 64, 64));
 	// set a 10-pixel wide orange outline
 	miniMap.circle.setOutlineThickness(10);
-	miniMap.circle.setOutlineColor(sf::Color(250, 150, 100));
+	miniMap.circle.setOutlineColor(sf::Color(0, 0, 0));
 	miniMap.circle.setPosition(MINIMAP_START_POS);
 	Vector2f miniMapCenter = { miniMap.circle.getPosition().x + MINIMAP_CIRCLE_RADIUS,  miniMap.circle.getPosition().y + MINIMAP_CIRCLE_RADIUS };
 

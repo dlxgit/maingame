@@ -5,7 +5,6 @@
 #include "shot.h"
 #include "view.h"
 #include "sprites.h"
-#include <sstream>
 #include "level.h"
 
 using namespace sf;

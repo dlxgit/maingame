@@ -1,6 +1,17 @@
 #pragma once
 #include "loot.h"
 
+void InitializeLoot(vector<Loot> & lootList, vector<Object> & objects, Sprite & sprite)
+{
+	GenerateLoot(lootList, objects, 5, DRINK, sprite);
+	GenerateLoot(lootList, objects, 3, PISTOL, sprite);
+	GenerateLoot(lootList, objects, 2, AMMO, sprite);
+	GenerateLoot(lootList, objects, 1, RIFLE, sprite);
+	GenerateLoot(lootList, objects, 1, KEY, sprite);
+	GenerateLoot(lootList, objects, 1, MIXTURE, sprite);
+	GenerateLoot(lootList, objects, 2, GRENADE, sprite);
+}
+
 
 void DrawLoot(RenderWindow & window, vector<Loot> & lootList)
 {
@@ -11,12 +22,12 @@ void DrawLoot(RenderWindow & window, vector<Loot> & lootList)
 	}
 };
 
-int GetSlotIndexOfItem(vector<Loot>::iterator out, vector<Inventory> & inventoryList)
+int GetSlotIndexOfItem(Loot & out, vector<Inventory> & inventoryList)
 {
 	int index = 0;
-	for (std::vector<Inventory>::iterator in = inventoryList.begin(); in != inventoryList.end(); ++in)
+	for (Inventory & in : inventoryList)
 	{
-		if (in->name == out->name)
+		if (in.name == out.name)
 		{
 			return index;
 		}
