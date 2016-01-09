@@ -49,7 +49,7 @@ void CheckUsingItems(Hero & hero, vector<Inventory> & inventoryList, vector<Shot
 
 void UpdateHeroFrame(Hero & hero, float & time);
 
-void DrawHero(RenderWindow & window, Hero & hero);
+void DrawHero(RenderWindow & window, Sprite & hero);
 
 void DrawInventoryText(RenderWindow & window, vector<Inventory> & inventoryList, Hero & hero, View & view, Text & text);
 

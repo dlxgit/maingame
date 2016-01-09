@@ -24,3 +24,5 @@ void UpdateMinimap(MiniMap & miniMap, vector<Npc> & npcList, Sprite & hero, View
 void DrawMiniMap(RenderWindow & window, MiniMap & miniMap);
 
 void DeleteNpcDot(MiniMap & miniMap, int & index);
+
+void DeleteMinimap(MiniMap & miniMap);

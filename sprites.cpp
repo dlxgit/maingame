@@ -17,16 +17,30 @@ const FloatRect GetSpriteRect(const Sprite & sprite)
 
 void InitiazlizeSprites(Sprites & sprites)
 {
-	//map
-	Texture texture_map;
-	texture_map.loadFromFile("resources/images/map.png");
-	sprites.texture_map = texture_map;
-	sprites.map.setTexture(sprites.texture_map);
-	//zombie
+	//enemies
+	//common
 	Texture texture_zombie;
 	texture_zombie.loadFromFile("resources/images/zombie.png");
 	sprites.texture_zombie = texture_zombie;
 	sprites.zombie.setTexture(sprites.texture_zombie);
+	//axe
+	Texture texture_axe_enemy;
+	texture_axe_enemy.loadFromFile("resources/images/axe_enemy.png");
+	sprites.texture_axe_enemy = texture_axe_enemy;
+	sprites.axe_enemy.setTexture(sprites.texture_axe_enemy);
+
+	//throwing_axe
+	Texture texture_throwing_axe;
+	texture_throwing_axe.loadFromFile("resources/images/throwing_axe.png");
+	sprites.texture_throwing_axe = texture_throwing_axe;
+	sprites.throwing_axe.setTexture(sprites.texture_throwing_axe);
+
+	//boss
+	Texture texture_boss;
+	texture_boss.loadFromFile("resources/images/boss.png");
+	sprites.texture_boss = texture_boss;
+	sprites.boss.setTexture(sprites.texture_boss);
+
 	//shot
 	Texture texture_shot;
 	texture_shot.loadFromFile("resources/images/shots.png");
@@ -57,11 +71,7 @@ void InitiazlizeSprites(Sprites & sprites)
 	texture_grenade.loadFromFile("resources/images/grenade.png");
 	sprites.texture_grenade = texture_grenade;
 	sprites.grenade.setTexture(sprites.texture_grenade);
-	//Door
-	Texture texture_door;
-	texture_door.loadFromFile("resources/images/door1.png");
-	sprites.texture_door = texture_door;
-	sprites.door.setTexture(sprites.texture_door);
+
 	//Explosion
 	Texture texture_explosion;
 	texture_explosion.loadFromFile("resources/images/explosion.png");
@@ -78,4 +88,9 @@ void InitiazlizeSprites(Sprites & sprites)
 	sprites.texture_minimapMarkerHero = texture_hero_marker;
 	sprites.minimapMarkerHero.setTexture(sprites.texture_minimapMarkerHero);
 
+}
+
+const Vector2f ComputeDistanceBetweenSprites(Sprite & s1, Sprite & s2)
+{
+	return{ abs(s1.getPosition().x - s2.getPosition().x), abs(s1.getPosition().y - s2.getPosition().y) };
 }

@@ -5,7 +5,7 @@
 #include "hero.h"
 #include "level.h"
 #include "npc.h"
-#include "zombie.h"
+#include "enemy.h"
 #include "loot.h"
 #include "explosion.h"
 #include "sprites.h"
@@ -13,6 +13,9 @@
 #include "text.h"
 
 #include "minimap.h"
+
+#include "throwing.h"
+
 
 
 using namespace sf;
@@ -37,9 +40,10 @@ struct Game
 	std::vector<Inventory> inventoryList;
 	std::vector<Loot> lootList;
 	std::vector<Shot> shotList;
-	std::vector<Zombie> zombieList;
+	std::vector<Enemy> zombieList;
 	std::vector<Npc> npcList;
-	std::vector<Explosion> explosionList;
+	std::vector<Explosion> explosionList; 
+	std::vector<Throwing> throwingList;
 	View view;
 	GameState state;
 
@@ -69,17 +73,17 @@ void LevelFinishEvent(Game & game, View & view);
 
 void DrawShots(RenderWindow & window, vector<Shot> & shotList, vector<Explosion> & explosionList, Hero & hero);
 
-void CheckHeroBeastDamage(Hero & hero, Zombie & zombie, float & time);
+void CheckHeroBeastDamage(Hero & hero, Enemy & enemy, float & time);
 
 Vector2f ComputeSpriteNewPosition(Sprite & sprite, Direction & dir, const float & speed);
 
-bool IsShotCollision(vector<Zombie> & zombieList, NameItem & weapon, vector<Object> & objects, Shot & shot);
+bool IsShotCollision(vector<Enemy> & zombieList, NameItem & weapon, vector<Object> & objects, Shot & shot);
 
 void UpdateShots(Game & game, Hero & hero, Sprite & sprite_explosion);
 
-bool IsCollisionWithMap(Sprite & sprite, Direction & dir, const float & speed, vector<Object> &objects);
+bool IsCollisionWithMap(Sprite & sprite, Direction & dir, vector<Object> &objects);
 
-void UpdateZombies(vector<Zombie> & zombieList, Hero & hero, vector<Npc> & npcList, vector<Object> & objects, float & time);
+void UpdateEnemies(vector<Enemy> & zombieList, Hero & hero, vector<Npc> & npcList, vector<Object> & solidObjects, vector<Throwing> & throwingList, Sprites & gameSprites, float & time);
 
 void CheckEventNpc(vector<Npc> & npcList, Hero & hero, MiniMap & miniMap);
 
@@ -91,7 +95,7 @@ void ProcessEvents(Game & game, Sprites & sprites);
 
 void Render(Game & game);
 
-void CheckSpawnZombiesAndLoot(Game & game, Sprite & items, Sprite & sprite_zombie);
+void CheckSpawnEnemyAndLoot(Game & game);
 
 void DrawBar(RenderWindow & window, vector<Inventory> & inventoryList, Hero & hero, View & view, Text & text, Sprites & sprites);
 

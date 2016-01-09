@@ -119,7 +119,7 @@ bool UpdateInventory(Hero & hero, vector<Inventory> & inventoryList, float & tim
 
 void CheckUsingItems(Hero & hero, vector<Inventory> & inventoryList, vector<Shot> & shotList, float & time, Sprite & sprite_shot, Sprite & sprite_grenade)
 {
-	if (Keyboard::isKeyPressed(Keyboard::A))
+	if (Keyboard::isKeyPressed(Keyboard::A) || Keyboard::isKeyPressed(Keyboard::S) || Keyboard::isKeyPressed(Keyboard::D)|| Keyboard::isKeyPressed(Keyboard::W))
 	{
 		if (hero.state == BEAST)
 		{
@@ -138,6 +138,10 @@ void CheckUsingItems(Hero & hero, vector<Inventory> & inventoryList, vector<Shot
 				inventoryList[hero.slotNo].current -= 1;
 				if (inventoryList[hero.slotNo].name == PISTOL || inventoryList[hero.slotNo].name == RIFLE)
 				{
+					if (Keyboard::isKeyPressed(Keyboard::A)) hero.dirLast = LEFT;
+					if (Keyboard::isKeyPressed(Keyboard::S)) hero.dirLast = DOWN;
+					if (Keyboard::isKeyPressed(Keyboard::D)) hero.dirLast = RIGHT;
+					if (Keyboard::isKeyPressed(Keyboard::W)) hero.dirLast = UP;
 					AddNewShot(shotList, hero.dirLast, hero.pos, time, sprite_shot, sprite_grenade, BULLET);
 				}
 				else if (inventoryList[hero.slotNo].name == DRINK)
@@ -317,9 +321,9 @@ void UpdateHeroFrame(Hero & hero, float & time)
 	}
 };
 
-void DrawHero(RenderWindow & window, Hero & hero)
+void DrawHero(RenderWindow & window, Sprite & hero)
 {
-	window.draw(hero.sprite);
+	window.draw(hero);
 };
 
 void DrawInventoryText(RenderWindow & window, vector<Inventory> & inventoryList, Hero & hero, View & view, Text & text)

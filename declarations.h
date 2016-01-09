@@ -19,13 +19,24 @@ enum Direction
 	UPLEFT,
 	FOLLOW
 };
-enum ZombieState
+
+enum EnemyType
+{
+	COMMON,
+	AXE,
+	MUMMY,
+	FIRE,
+	//BOSS.
+};
+
+enum EnemyState
 {
 	NOTSPAWNED,  //cant move (raising from the ground)
 	ACTIVE,
 	DEAD,      //cant move (health = 0)
 	EXPLODED  //if animation has finished (for deleting from list)
 };
+
 enum HeroState
 {
 	DAMAGED,
@@ -106,12 +117,34 @@ const float STEP_ZOMBIE = 2.f;
 const float STEP_ZOMBIE_ACTIVE = 3.f;
 const float STEP_SHOT = 12.f;
 const float STEP_GRENADE = 5.f;
+const float STEP_ZOMBIE_AXE = 2.f;
+
+
+//coefficients
+const float ZOMBIE_INCREASE_RATE_AXE = 2;
+
+
+//enemies
+const int ENEMY_AXE_ATTACK_DAMAGE = 34;
+const float ENEMY_AXE_SPAWN_DELAY = 3.f;
+
+const float ENEMY_AXE_ATTACK_COOLDOWN = 3.f;
+const float ENEMY_AXE_ACTION_COOLDOWN = 3.f;
+const float ENEMY_AXE_THROWING_MAX_TIME = 2.f;
+const float ENEMY_AXE_THROWING_SPEED = 5.f;
+const float ENEMY_AXE_CHARGE_TIME = 3.f;
+const float ENEMY_AXE_CHARGE_COOLDOWN = 8;
+const float ENEMY_AXE_CHARGE_SPEED_INCREASE_PER_LOOP = 0.2f;
+
+const float ENEMY_AXE_THROWING_STEP_PER_LOOP = 5;
 
 //damage
 const int ZOMBIE_DAMAGE = 30;
 //const int DMG_ITEM[7] = { 0, 35, 50, 0, 0, 0, 100 };
 const int DMG_ITEM[8] = { 0, 100, 100, 0, 0, 0, 100, 100 };
 const int HERO_BEAST_DAMAGE = 100;
+
+const float THROWING_AXE_DAMAGE = 30.f;
 
 //distance
 const int SHOT_MAX_DISTANCE = 400;
@@ -126,6 +159,8 @@ const int NPC_MAX_HEALTH = 50;
 const float ITEM_REUSE_COOLDOWN[8] = { 0.35f, 0.35f,0.15f,0.15f,0.15f,0.15f, 0.1f };
 const int BEAST_MAX_TIME = 17;
 const float HERO_BEAST_ATTACK_TIME = 0.7f;
+
+
 
 //const float WEAPON_RELOAD_TIME = 1.5f;
 const float WEAPON_RELOAD_TIME = 0.1f;

@@ -15,10 +15,15 @@ struct Sprites
 	Sprite health;
 	Sprite bar;
 	Sprite explosion;
-	Sprite house;
-	Sprite door;
 	Sprite minimapMarkerNpc;
 	Sprite minimapMarkerHero;
+	
+	Sprite axe_enemy;
+	Sprite mummy_enemy;
+
+	Sprite throwing_axe;
+
+	Sprite boss;
 
 	Texture texture_hero;
 	Texture texture_zombie;
@@ -30,10 +35,16 @@ struct Sprites
 	Texture texture_health;
 	Texture texture_bar;
 	Texture texture_explosion;
-	Texture texture_house;
-	Texture texture_door;
+
 	Texture texture_minimapMarkerNpc;
 	Texture texture_minimapMarkerHero;
+
+	Texture texture_axe_enemy;
+	Texture texture_mummy_enemy;
+
+	Texture texture_throwing_axe;
+
+	Texture texture_boss;
 };
 
 
@@ -42,3 +53,5 @@ const FloatRect GetSpriteRect(const Sprite & sprite);
 const Vector2f GetSpriteCenter(const Sprite & sprite);
 
 void InitiazlizeSprites(Sprites & sprites);
+
+const Vector2f ComputeDistanceBetweenSprites(Sprite & s1, Sprite & s2);

@@ -90,3 +90,8 @@ void DeleteNpcDot(MiniMap & miniMap, int & index)
 {
 	miniMap.npcDotList.erase(miniMap.npcDotList.begin() + index);
 }
+
+void DeleteMinimap(MiniMap & miniMap)
+{
+	miniMap.npcDotList.clear();
+}

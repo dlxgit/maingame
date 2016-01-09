@@ -55,10 +55,9 @@ void GenerateLoot(vector<Loot> & lootList, vector<Object> & objects, int ItemsRe
 	do
 	{
 		bool needNewBlock = false;
-		float x = (rand() % WIDTH_MAP) * STEP;
-		float y = (rand() % HEIGHT_MAP) * STEP;
+		Vector2f newPos = { float((rand() % WIDTH_MAP) * STEP), float((rand() % HEIGHT_MAP) * STEP) };
 
-		FloatRect lootRect = { x,y,texture_items.getGlobalBounds().height,texture_items.getGlobalBounds().height };
+		FloatRect lootRect = { newPos.x,newPos.y,texture_items.getGlobalBounds().height,texture_items.getGlobalBounds().height };
 		bool isIntersected = false;
 		for (size_t i = 0; i < objects.size() &&  needNewBlock == false; ++i)
 		{
@@ -72,14 +71,14 @@ void GenerateLoot(vector<Loot> & lootList, vector<Object> & objects, int ItemsRe
 			continue;
 		}
 		for (Loot & item : lootList)
-			if (abs(item.pos.x - x) < 100 && abs(item.pos.y - y) < 100)
+			if (abs(item.pos.x - newPos.x) < 100 && abs(item.pos.y - newPos.y) < 100)
 			{
 				needNewBlock = true;
 				break;
 			}
 		if (needNewBlock == false)
 		{
-			Loot loot = GetNewLootItem(item, texture_items, x, y);
+			Loot loot = GetNewLootItem(item, texture_items, newPos.x, newPos.y);
 			lootList.push_back(loot);
 			ItemsRemaining -= 1;
 		}
