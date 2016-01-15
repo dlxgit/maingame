@@ -12,7 +12,9 @@ void InitializeGame(Game & game)
 	game.window = new RenderWindow(VideoMode(WINDOW_SIZE.x, WINDOW_SIZE.y), "Shoot and Run");
 	InitializeView(game.view);
 	InitializeText(game.font,game.text);
-	game.lvl.LoadFromFile("level0.tmx");
+	game.lvl = game.sprites.level0;
+	game.level = 0;
+	game.hero->maxNeighbors = MAX_NUMBER_OF_NEIGHBORS;
 	game.allObjects = game.lvl.GetAllObjects();
 	game.solidObjects = game.lvl.GetObjects("solid");
 
@@ -24,18 +26,22 @@ void InitializeGame(Game & game)
 	game.state = START_GAME;
 	//game.hero->sprite.setPosition(game.view.getCenter());
 	InitializeMinimap(game.miniMap, game.npcList, game.sprites);
+
+	InitializeSoundResouces(game.audio);
 };
 
 void DeleteGame(Game * game)
 {
 	delete(game->hero);
-	delete(game->window);
+	//delete(game->window);
 	DeleteExplosionList(game->explosionList);
 	DeleteLoot(game->lootList);
 	DeleteNpcList(game->npcList);
 	DeleteShots(game->shotList);
 	DeleteEnemyList(game->zombieList);
 	DeleteInventory(game->inventoryList);
+	DeleteMinimap(game->miniMap);
+	DeleteThrowings(game->throwingList);
 	delete(game);
 }
 
@@ -51,9 +57,9 @@ void CheckWindowClose(Game & game)
 	}
 };
 
-void BeginEvent(Game & game, View & view)
+void BeginEvent(Game & game)  //process startGame events
 {
-	Vector2f posView = view.getCenter();
+	Vector2f posView = game.view.getCenter();
 
 	game.text.setString("It's time to rescue neighbors!");
 	game.text.setPosition(posView.x - 140, posView.y - 100);
@@ -67,20 +73,34 @@ void BeginEvent(Game & game, View & view)
 	{
 		//game.time = 0;
 		ResetEnemySpawnTime(game.zombieList, game.time);
+		game.audio.menu.stop();
 		game.state = PLAY;
+		if (game.level == 0)
+		{
+			game.audio.level0.play();
+		}
 	}
 	CheckWindowClose(game);
 };
 
-void EndGameEvent(Game & game, View & view)
+void EndGameEvent(Game & game)
 {
-	Vector2f posView = view.getCenter();
+	Vector2f posView = game.view.getCenter();
 
 	game.text.setString("GAME OVER");
 	game.text.setPosition(posView.x - 40, posView.y - 100);
 	game.window->draw(game.text);
 	CheckWindowClose(game);
 
+	game.audio.level0.stop();
+	game.audio.beastAttackSound.stop();
+	game.audio.lootSound.stop();
+	game.audio.npcSurviveSound.stop();
+	game.audio.npcDeathSound.stop();
+	game.audio.shotSound.stop();
+	game.audio.takenDamageSound.stop();
+	game.audio.enemyExplosionSound.stop();
+	game.audio.menu.play();
 	if (Keyboard::isKeyPressed(Keyboard::Return))
 	{
 		delete((&game)->hero);
@@ -92,12 +112,20 @@ void EndGameEvent(Game & game, View & view)
 		DeleteEnemyList((&game)->zombieList);
 		DeleteInventory((&game)->inventoryList);
 		DeleteMinimap(game.miniMap);
+		DeleteThrowings(game.throwingList);
 		//delete((&game));
+
 
 		game.hero = new Hero();
 		//InitiazlizeSprites(game.sprites);
 		InitializeInventory(game.inventoryList, game.sprites);
 		InitializeHero(*game.hero);
+		if (game.level == 1)
+		{
+			game.hero->maxNeighbors = 0;
+		}
+		else game.hero->maxNeighbors = MAX_NUMBER_OF_NEIGHBORS;
+
 		game.hero->item = game.inventoryList[0];
 		game.hero->item.sprite.setTextureRect(IntRect(32, 0, 32, 32));
 		//game.window = new RenderWindow(VideoMode(W_WIDTH, W_HEIGHT), "Shoot and Run");
@@ -107,24 +135,116 @@ void EndGameEvent(Game & game, View & view)
 		//game.solidObjects = game.lvl.GetObjects("solid");
 
 		SpawnEnemy(game.zombieList, game.time, 100, 100, game.sprites, COMMON);
-		InitializeLoot(game.lootList, game.allObjects, game.sprites.items);
-		InitializeNpc(game.npcList, game.sprites.npc);
+		//InitializeLoot(game.lootList, game.allObjects, game.sprites.items);
+		if(game.level == 0)
+			InitializeNpc(game.npcList, game.sprites.npc);
 		InitializeMinimap(game.miniMap, game.npcList, game.sprites);
 		game.time = 0;
-		game.state = START_GAME;
+		game.state = PLAY;
+
+		game.audio.menu.stop();
+		if (game.level == 1)
+		{
+			game.audio.level1.play();
+		}
+		else game.audio.level0.play();
 		//game.hero->sprite.setPosition(game.view.getCenter());
 	}
 };
 
-void LevelFinishEvent(Game & game, View & view)
+void LevelFinishEvent(Game & game)
 {
-	Vector2f posView = view.getCenter();
+	Vector2f posView = game.view.getCenter();
 
 	game.text.setString("LEVEL HAS FINISHED!");
 	game.text.setPosition(posView.x - 100, posView.y - 100);
 	game.window->draw(game.text);
 	CheckWindowClose(game);
+	game.audio.level0.stop();
+	if (Keyboard::isKeyPressed(Keyboard::Return))
+	{
+		delete((&game)->hero);
+		//delete((&game)->window);
+		DeleteExplosionList((&game)->explosionList);
+		DeleteLoot((&game)->lootList);
+		DeleteNpcList((&game)->npcList);
+		DeleteShots((&game)->shotList);
+		DeleteEnemyList((&game)->zombieList);
+		DeleteInventory((&game)->inventoryList);
+		DeleteMinimap(game.miniMap);
+		DeleteThrowings(game.throwingList);
+
+		game.hero = new Hero();
+		InitializeHero(*game.hero);
+		InitializeInventory(game.inventoryList, game.sprites);
+		game.hero->item = game.inventoryList[0];
+		game.time = 0;
+		game.hero->sprite.setPosition(2 * 64 + 10, 8 * 64);
+		game.hero->maxNeighbors = 0;
+		game.level = 1;
+
+		game.lvl = game.sprites.level1;
+		game.allObjects = game.lvl.GetAllObjects();
+		game.solidObjects = game.lvl.GetObjects("solid");
+
+		//SpawnEnemy(game.zombieList, game.time, 100, 100, game.sprites, COMMON);
+		//InitializeLoot(game.lootList, game.allObjects, game.sprites.items);
+		//InitializeNpc(game.npcList, game.sprites.npc);
+		InitializeMinimap(game.miniMap, game.npcList, game.sprites);
+		
+		InitializeBoss(game.boss, game.sprites, game.time);
+
+		game.audio.level1.play();
+
+		game.state = PLAY;
+	}
 };
+
+void GameFinishEvent(Game & game)
+{
+	Vector2f posView = game.view.getCenter();
+
+	game.text.setString("You won. Wanna try again?(Enter) \nQuit(Esc)");
+	game.text.setPosition(posView.x - 100, posView.y - 100);
+	game.window->draw(game.text);
+	CheckWindowClose(game);
+	if (Keyboard::isKeyPressed(Keyboard::Return))
+	{
+		delete((&game)->hero);
+		DeleteExplosionList((&game)->explosionList);
+		DeleteLoot((&game)->lootList);
+		DeleteNpcList((&game)->npcList);
+		DeleteShots((&game)->shotList);
+		DeleteEnemyList((&game)->zombieList);
+		DeleteInventory((&game)->inventoryList);
+		DeleteMinimap(game.miniMap);
+		DeleteThrowings(game.throwingList);
+
+
+		game.hero = new Hero();
+		InitiazlizeSprites(game.sprites);
+		InitializeInventory(game.inventoryList, game.sprites);
+		InitializeHero(*game.hero);
+		game.hero->item = game.inventoryList[0];
+		game.hero->item.sprite.setTextureRect(IntRect(32, 0, 32, 32));
+		InitializeView(game.view);
+		InitializeText(game.font, game.text);
+		game.lvl = game.sprites.level0;
+		game.level = 0;
+		game.hero->maxNeighbors = MAX_NUMBER_OF_NEIGHBORS;
+		game.allObjects = game.lvl.GetAllObjects();
+		game.solidObjects = game.lvl.GetObjects("solid");
+
+		SpawnEnemy(game.zombieList, game.time, 100, 100, game.sprites, AXE);
+		InitializeLoot(game.lootList, game.allObjects, game.sprites.items);
+		InitializeNpc(game.npcList, game.sprites.npc);
+		game.time = 0;
+		game.state = START_GAME;
+		//game.hero->sprite.setPosition(game.view.getCenter());
+		InitializeMinimap(game.miniMap, game.npcList, game.sprites);
+		InitializeSoundResouces(game.audio);
+	}
+}
 
 void DrawShots(RenderWindow & window, vector<Shot> & shotList, vector<Explosion> & explosionList, Hero & hero)
 {
@@ -150,10 +270,9 @@ void CheckHeroBeastDamage(Hero & hero, Enemy & enemy, float & time)  //killing z
 	}
 }
 
-bool IsShotCollision(vector<Enemy> & zombieList, NameItem & weapon, vector<Object> & objects, Shot & shot)  //check if need delete shot from list
+bool IsShotCollision(vector<Enemy> & zombieList, Hero & hero, vector<Object> & objects, Shot & shot)  //check if need delete shot from list
 {
-	Vector2f shotCenter = GetSpriteCenter(shot.sprite);
-
+	//Vector2f shotCenter = GetSpriteCenter(shot.sprite);
 	if (shot.distance > SHOT_MAX_DISTANCE)
 	{
 		return true;
@@ -176,9 +295,11 @@ bool IsShotCollision(vector<Enemy> & zombieList, NameItem & weapon, vector<Objec
 
 	for (Enemy & enemy: zombieList)
 	{
-		if (enemy.sprite.getGlobalBounds().contains(shotCenter))
+		cout << enemy.state;
+		if (enemy.sprite.getGlobalBounds().intersects(shot.sprite.getGlobalBounds()))
 		{
-			enemy.health -= DMG_ITEM[weapon];
+			enemy.health -= DMG_ITEM[hero.item.name];
+			hero.isSoundEnemyExplosion = true;
 			return true;
 		}
 	}
@@ -195,11 +316,23 @@ void UpdateShots(Game & game, Hero & hero, Sprite & sprite_explosion) //shots po
 			shot->pos = ComputeSpriteNewPosition(shot->sprite, shot->dir, STEP_SHOT);
 			shot->distance += STEP_SHOT;
 
-			if (IsShotCollision(game.zombieList,hero.item.name,game.solidObjects, *shot))  //shot delete
+
+			bool isDeleted = false;
+			if (game.level == 1)
+			{
+				if (game.boss.sprite.getGlobalBounds().intersects(shot->sprite.getGlobalBounds()))
+				{
+					game.boss.health -= DMG_ITEM[hero.item.name];
+					shot = game.shotList.erase(shot);
+					isDeleted = true;
+				}
+			}
+			if (isDeleted == false &&(IsShotCollision(game.zombieList,hero,game.solidObjects, *shot)) ) //shot delete
 			{
 				shot = game.shotList.erase(shot);
 			}
-			else shot++;
+			else if (isDeleted == false)
+				shot++;
 		}
 		else if (shot->type == USED_GRENADE)
 		{
@@ -255,6 +388,7 @@ void UpdateShots(Game & game, Hero & hero, Sprite & sprite_explosion) //shots po
 	}
 }
 
+
 Vector2f ComputeSpriteNewPosition(Sprite & sprite, Direction & dir, const float & speed)
 {
 	Vector2f pos = sprite.getPosition();
@@ -296,10 +430,8 @@ Vector2f ComputeSpriteNewPosition(Sprite & sprite, Direction & dir, const float 
 	return pos;
 }
 
-bool IsCollisionWithMap(Sprite & sprite, Direction & dir, vector<Object> &objects)
+bool IsCollisionWithMap(FloatRect & spriteRect, Direction & dir, vector<Object> &objects)
 {
-	FloatRect spriteRect = GetSpriteRect(sprite);
-
 	for (size_t i = 0; i < objects.size(); ++i)
 	{
 		if (spriteRect.intersects(objects[i].rect))
@@ -310,34 +442,34 @@ bool IsCollisionWithMap(Sprite & sprite, Direction & dir, vector<Object> &object
 	return false;
 };
 
-void UpdateEnemies(vector<Enemy> & zombieList, Hero & hero, vector<Npc> & npcList, vector<Object> & solidObjects, vector<Throwing> & throwingList, Sprites & gameSprites, float & time)
+void UpdateEnemies(Game & game)
 {
-	Vector2f heroPos = hero.sprite.getPosition();
+	Vector2f heroPos = game.hero->sprite.getPosition();
 	int index = 0;
-	for (vector<Enemy>::iterator zombie = zombieList.begin(); zombie != zombieList.end();)
+	for (vector<Enemy>::iterator zombie = game.zombieList.begin(); zombie != game.zombieList.end();)
 	{
 		//float di = sqrt(pow(dx,2) + pow(dy,2));  //distance
 		if (zombie->state == ACTIVE)
 		{
-			CheckEnemyFollow(*zombie, hero);
+			CheckEnemyFollow(*zombie, *game.hero);
 			if (zombie->follow)
 			{
 				ComputeEnemyDirection(*zombie,heroPos);  //direction relatively to hero
-				CheckNpcDeath(npcList, *zombie);
+				CheckNpcDeath(game.npcList, *zombie);
 			}
 			else
 			{
-				CheckEnemyDir(*zombie, time);
+				CheckEnemyDir(*zombie, game.time);
 			}
 
 			//CheckCollisionWithMap(zombie->sprite,zombie->dirLast,STEP_ZOMBIE_ACTIVE, objects);
-			UpdateEnemyAttack(hero, *zombie, time);
+			UpdateEnemyAttack(*game.hero, *zombie, game.time);
 
-			if (hero.state == BEAST)
+			if (game.hero->state == BEAST)
 			{
-				if (IsEnemyNearHero(hero, *zombie))
+				if (IsEnemyNearHero(*game.hero, *zombie))
 				{
-					CheckHeroBeastDamage(hero, *zombie, time);
+					CheckHeroBeastDamage(*game.hero, *zombie, game.time);
 				}
 			}
 			if (heroPos.x != zombie->pos.x || heroPos.y != zombie->pos.y)
@@ -349,40 +481,39 @@ void UpdateEnemies(vector<Enemy> & zombieList, Hero & hero, vector<Npc> & npcLis
 					Vector2f oldPosition = zombie->sprite.getPosition();
 					if (zombie->follow == true)
 					{
-						UpdateSpritePosition(zombie->sprite, zombie->dir, STEP_ZOMBIE_ACTIVE, solidObjects);
+						UpdateSpritePosition(zombie->sprite, zombie->dir, STEP_ZOMBIE_ACTIVE, game.solidObjects);
 						//cout << "1     1" << endl;
 					}
 					else
 					{
-						UpdateSpritePosition(zombie->sprite, zombie->dir, STEP_ZOMBIE, solidObjects);
+						UpdateSpritePosition(zombie->sprite, zombie->dir, STEP_ZOMBIE, game.solidObjects);
 						//cout << "2      2" << endl;
 					}
-					if (IsIntersectWithOtherEnemy(zombieList, index))
+					if (IsIntersectWithOtherEnemy(game.zombieList, index))
 					{
 						zombie->sprite.setPosition(oldPosition);
 					}
 					if (zombie->type == AXE)
 					{
-						if (IsIntersectWithHero(zombie->sprite, hero.sprite))
+						if (IsIntersectWithHero(zombie->sprite, game.hero->sprite))
 						{
 							//zombie->pos = oldPosition;
 							zombie->sprite.setPosition(oldPosition);
-							if (time > zombie->attack_time + zombie->attackCooldown)
+							if (game.time > zombie->attack_time + zombie->attackCooldown)
 							{
 								zombie->currentFrame = 0;
 								zombie->isAttack = true;
-								zombie->attack_time = time;
-								hero.health -= ENEMY_AXE_ATTACK_DAMAGE;
-								//cout << "ATTACKING!! " << endl;
+								zombie->attack_time = game.time;
+								game.hero->health -= ENEMY_AXE_ATTACK_DAMAGE * game.hero->damageResistance;
 							}
 						}
-						if (zombie->last_action_time + ENEMY_AXE_ACTION_COOLDOWN < time)
+						if (zombie->last_action_time + ENEMY_AXE_ACTION_COOLDOWN < game.time)
 						{
-							Vector2f spriteDistance = ComputeDistanceBetweenSprites(zombie->sprite, hero.sprite);
-							zombie->last_action_time = time;
+							Vector2f spriteDistance = ComputeDistanceBetweenSprites(zombie->sprite, game.hero->sprite);
+							zombie->last_action_time = game.time;
 							//zombie->
-							cout << "ACTION!!!  " << endl;
-							throwingList.push_back(CreateThrowing(zombie->sprite,hero.sprite, "axe", gameSprites.throwing_axe, time));
+							//cout << "ACTION!!!  " << endl;
+							game.throwingList.push_back(CreateThrowing(zombie->sprite, game.hero->sprite, "axe", game.sprites.throwing_axe, game.time));
 							
 						}
 					}
@@ -391,7 +522,7 @@ void UpdateEnemies(vector<Enemy> & zombieList, Hero & hero, vector<Npc> & npcLis
 			}
 		}
 
-		UpdateEnemyFrame(*zombie, time);
+		UpdateEnemyFrame(*zombie, game.time);
 		//UpdateZombiePosition(i);  TODO: make it for all zombies, not jsut for following ones
 		//zombie->isAttack = false;
 		if (zombie->dir != zombie->dirLast)
@@ -401,7 +532,7 @@ void UpdateEnemies(vector<Enemy> & zombieList, Hero & hero, vector<Npc> & npcLis
 		}
 		if (zombie->state == EXPLODED)  //deleting
 		{
-			zombie = zombieList.erase(zombie);
+			zombie = game.zombieList.erase(zombie);
 		}
 		else
 		{
@@ -425,6 +556,7 @@ void CheckEventNpc(vector<Npc> & npcList, Hero & hero, MiniMap & miniMap)
 			Vector2f npcCenter = GetSpriteCenter(npc->sprite);
 			if ((abs(npcCenter.x - heroCenter.x) < 35) && (abs(npcCenter.y - heroCenter.y)) < 35)
 			{
+				hero.isSoundNpcSurvive = true;
 				npc->state = SURVIVED;
 				hero.savedNeighbors += 1;
 				needDeleteNpc = true;
@@ -433,6 +565,7 @@ void CheckEventNpc(vector<Npc> & npcList, Hero & hero, MiniMap & miniMap)
 		}
 		if (npc->health <= 0)
 		{
+			hero.isSoundNpcDeath = true;
 			npc->state = KILLED;
 			isAnyNpcChanged = true;
 		}
@@ -455,31 +588,31 @@ void CheckEventNpc(vector<Npc> & npcList, Hero & hero, MiniMap & miniMap)
 	}
 };
 
-
 void UpdateSpritePosition(Sprite & sprite, Direction & dir, const float & speed, vector<Object> & solidObjects)
 {
 	Vector2f oldPos = sprite.getPosition();
 	Vector2f pos = ComputeSpriteNewPosition(sprite, dir, speed);
 
 	sprite.setPosition(pos);
+	
+	FloatRect spriteRect = GetSpriteRect(sprite);
 
-	if (IsCollisionWithMap(sprite, dir, solidObjects))
+	if (IsCollisionWithMap(spriteRect, dir, solidObjects))
 	{
 		sprite.setPosition(oldPos);
 		if (pos.x != oldPos.x && pos.y != oldPos.y)
 		{
 			sprite.setPosition(oldPos.x, pos.y);
-			if (IsCollisionWithMap(sprite, dir, solidObjects))
+			if (IsCollisionWithMap(spriteRect, dir, solidObjects))
 			{
 				sprite.setPosition(pos.x, oldPos.y);
-				if (IsCollisionWithMap(sprite, dir, solidObjects))
+				if (IsCollisionWithMap(spriteRect, dir, solidObjects))
 				{
 					sprite.setPosition(oldPos);
 				}
 			}
 		}
 	}
-	
 }
 
 void UpdateHero(Game & game) //position + collision + sprite
@@ -499,6 +632,7 @@ void UpdateHero(Game & game) //position + collision + sprite
 			game.hero->state = NORMAL;
 			game.hero->currentFrame = 0;
 			game.hero->beastTimer = 0;
+			game.hero->damageResistance = 1;
 		}
 	}
 	UpdateHeroFrame(*game.hero, game.time);
@@ -510,14 +644,76 @@ void UpdateHero(Game & game) //position + collision + sprite
 			game.hero->isReloading = true;
 		}
 	}
+	if (game.hero->health < 0)
+	{
+		game.hero->health = 0;
+	}
 }
+
+void UpdateBossPosition(Boss & boss, vector<Object> & solidObjects)
+{
+	Vector2f oldPos = boss.sprite.getPosition();
+	if (boss.eventType == CHARGE)
+	{
+		boss.speed = STEP_BOSS_CHARGE;
+	}
+	else if (boss.eventType == MOVE_OUT)
+	{
+		boss.speed = STEP_BOSS;
+	}
+	else if (boss.eventType == MOVE_TO)
+	{
+		boss.speed = STEP_BOSS_FOLLOW;
+	}
+
+	Vector2f pos = ComputeSpriteNewPosition(boss.sprite, boss.dir, boss.speed);
+
+	boss.sprite.setPosition(pos);
+
+	FloatRect spriteRect = GetBossCollisionRect(boss.sprite);
+
+	if (IsCollisionWithMap(spriteRect, boss.dir, solidObjects))
+	{
+		boss.sprite.setPosition(oldPos);
+		if (pos.x != oldPos.x && pos.y != oldPos.y)
+		{
+			boss.sprite.setPosition(oldPos.x, pos.y);
+			if (IsCollisionWithMap(spriteRect, boss.dir, solidObjects))
+			{
+				boss.sprite.setPosition(pos.x, oldPos.y);
+				if (IsCollisionWithMap(spriteRect, boss.dir, solidObjects))
+				{
+					boss.sprite.setPosition(oldPos);
+				}
+			}
+		}
+	}
+}
+
 
 void UpdateThrowings(vector<Throwing> & throwingList, Hero & hero, vector<Object> & solidObjects, float & time)
 {
 	for (vector<Throwing>::iterator it = throwingList.begin(); it != throwingList.end(); )
 	{
-		UpdateThrowingPosition(*it);
+		if (it->name != "milk" || (it->name == "milk" && it->currentFrame < 1))
+		{
+			UpdateThrowingPosition(*it);
+		}
 		UpdateThrowingFrame(*it);
+
+		if (it->name == "milk")
+		{
+			if (IsMilkOnGround(*it))
+			{
+
+				if (it->currentFrame < 1)
+				{
+					it->currentFrame = 1;
+				}
+
+			}
+		}
+
 		if (it->startTime + it->maxTime < time)
 		{
 			it = throwingList.erase(it);
@@ -525,10 +721,13 @@ void UpdateThrowings(vector<Throwing> & throwingList, Hero & hero, vector<Object
 		else if (IsIntersectWithHero(it->sprite,hero.sprite))
 		{
 			//deal damage (action)
-			hero.health -= THROWING_AXE_DAMAGE;
+			if(it->name != "milk")
+				hero.health -= THROWING_AXE_DAMAGE * hero.damageResistance;
+			else hero.health -= BOSS_MILK_DAMAGE * hero.damageResistance;
 			it = throwingList.erase(it);
+			hero.isSoundTakeDamage = true;
 		}
-		else if (IsCollisionWithMap(it->sprite,it->dir,solidObjects))
+		else if (IsCollisionWithMap(GetSpriteRect(it->sprite),it->dir,solidObjects))
 		{
 			it = throwingList.erase(it);
 		}
@@ -563,6 +762,13 @@ void Render(Game & game)
 	DrawNpc(*game.window, game.npcList);
 	DrawEnemies(*game.window, game.zombieList);
 	DrawHero(*game.window, game.hero->sprite);
+
+	if (game.level == 1)
+	{
+		DrawBoss(*game.window, game.boss.sprite);
+		DrawBossBar(*game.window, game.boss, game.view.getCenter());
+	}
+
 	DrawMiniMap(*game.window, game.miniMap);
 	DrawThrowings(*game.window, game.throwingList);
 };
@@ -570,7 +776,7 @@ void Render(Game & game)
 
 void CheckSpawnEnemyAndLoot(Game & game)
 {
-	if (game.lootList.size() < 5)
+	if ((game.level == 0 && game.lootList.size() < 5) || (game.level == 1 && (game.lootList.size() < LEVEL_BOSS_MAX_LOOT_QUANTITY)))
 	{
 		int itemNo = rand() % 5;
 		NameItem item;
@@ -589,14 +795,34 @@ void CheckSpawnEnemyAndLoot(Game & game)
 			item = MIXTURE;
 			break;
 		case 4:
-			item = SODA;
+			item = GRENADE;
 			break;
 		}
-		GenerateLoot(game.lootList, game.allObjects, 1, item, game.sprites.items);
+		if (game.level == 0)
+		{
+			GenerateLoot(game.lootList, game.allObjects, { WIDTH_MAP, HEIGHT_MAP }, 1, item, game.sprites.items);
+		}
+		else 
+			GenerateLoot(game.lootList, game.allObjects, { LEVEL_BOSS_SIZE.x - 1, LEVEL_BOSS_SIZE.y - 1 }, 1, item, game.sprites.items);
 	}
-	if (game.zombieList.size() < 20)
+	if (game.level == 0 && game.zombieList.size() < 20)
 	{
 		SpawnEnemyRandomly(game.zombieList,game.allObjects, 1, game.time, game.sprites);
+	}
+}
+
+void CheckGameOver(Game & game)
+{
+	if (game.level == 0)
+	{
+		if (game.hero->health <= 0)
+		{
+			game.state = END_GAME;
+		}
+		if ((game.hero->savedNeighbors >= MAX_NUMBER_OF_NEIGHBORS) || (game.npcList.size() == 0 && game.hero->savedNeighbors >= 6))
+		{
+			game.state = LEVEL_FINISH;
+		}
 	}
 }
 
@@ -614,7 +840,232 @@ void DrawBar(RenderWindow & window, vector<Inventory> & inventoryList, Hero & he
 
 	window.draw(inventoryList[hero.slotNo].sprite);
 	window.draw(sprites.bar);
-	window.draw(sprites.health);
+	if(hero.health > 0)
+		window.draw(sprites.health);
+}
+
+
+void UpdateAudio(Game & game)
+{
+	if (game.hero->isSoundBeastAtttack)
+	{
+		game.audio.beastAttackSound.play();
+		game.hero->isSoundBeastAtttack = false;
+	}
+	if (game.hero->isSoundLoot)
+	{
+		game.audio.lootSound.play();
+		game.hero->isSoundLoot = false;
+	}
+	if (game.hero->isSoundNpcSurvive)
+	{
+		game.audio.npcSurviveSound.play();
+		game.hero->isSoundNpcSurvive = false;
+	}
+	if (game.hero->isSoundNpcDeath)
+	{
+		game.audio.npcDeathSound.play();
+		game.hero->isSoundNpcDeath = false;
+	}
+	if (game.hero->isSoundShoot)
+	{
+		game.audio.shotSound.play();
+		game.hero->isSoundShoot = false;
+	}
+	if (game.hero->isSoundTakeDamage)
+	{
+		game.audio.takenDamageSound.play();
+		game.hero->isSoundTakeDamage = false;
+	}
+	if (game.hero->isSoundEnemyExplosion)
+	{
+		game.audio.enemyExplosionSound.play();
+		game.hero->isSoundEnemyExplosion = false;
+	}
+	//if(game.)
+}
+
+void UpdateBossEvent(Boss & boss, Hero & hero, float & time)
+{
+	if (boss.eventType == MOVE_OUT)
+	{
+		cout << "MOVE_OUT " << endl;
+		if (IsBossNearMapCenter(boss.sprite))//(boss.eventstartTime + 7.f < time)
+		{
+			cout << "B" << endl;
+			boss.eventType = STOMP_FOR_ZOMBIES;
+			if (boss.isCommonZombie == true)
+			{
+				boss.isCommonZombie = false;
+			}
+			else boss.isCommonZombie = true;
+			boss.spawnedEnemies = 0;
+			boss.eventstartTime = time;
+		}
+	}
+	else if (boss.eventType == MOVE_TO)
+	{
+		cout << "MOVE_TO " << endl;
+		//cout << "A";
+
+		if (boss.shootStartTime == -1)
+		{
+			if (IsBossAbleToShoot(hero.sprite, boss.sprite))
+			{
+				boss.eventType = SHOOT;
+				boss.eventstartTime = time;
+				boss.shootStartTime = time;
+				return;
+			}
+		}
+		else if (boss.shootStartTime + BOSS_FOLLOW_FOR_SHOOT_TIME > time)
+		{
+			if (IsBossAbleToShoot(hero.sprite, boss.sprite))
+			{
+				boss.eventType = SHOOT;
+			}
+			return;
+		}
+		else if (boss.eventstartTime + 5.f < time)
+		{
+			//cout << "B " << time << endl;
+			boss.eventType = MOVE_OUT;
+			boss.wasCharged = false;
+			boss.eventstartTime = time;
+			return;
+		}
+		if (boss.wasCharged == false && boss.eventstartTime + 2.f < time)
+		{
+			boss.eventType = CHARGE;
+			boss.eventstartTime = time;
+
+			boss.wasCharged = true;
+		}
+	}
+	else if (boss.eventType == STOMP_FOR_ZOMBIES)
+	{
+		cout << "STOMP_FOR_ZOMBIES" << endl;
+		if (boss.spawnedEnemies == 4) //(boss.eventstartTime + 2.5f < time)
+		{
+			boss.shootStartTime = -1;
+			boss.eventType = MOVE_TO;
+			boss.eventstartTime = time;
+		}
+	}
+	else if (boss.eventType == SHOOT)
+	{
+		cout << "SHOOT" << endl;
+		if (boss.eventstartTime + BOSS_FOLLOW_FOR_SHOOT_TIME < time)
+		{
+			boss.eventType = MOVE_OUT;
+			boss.eventstartTime = time;
+			return;
+		}
+		if (IsBossAbleToShoot(hero.sprite, boss.sprite) == false)
+		{
+			boss.eventType = MOVE_TO;
+		}
+	}
+	else if (boss.eventType == CHARGE)
+	{
+		cout << "CHARGE" << endl;
+		if (IsReachedHero(boss.sprite, hero.sprite))
+		{
+			hero.lastSmashTime = time;
+			hero.isSmashed = true;
+			hero.state = SMASHED;
+			boss.lastShootTime = time + 0.3f;
+			hero.isSoundTakeDamage = true;
+			hero.health -= BOSS_SMASH_DAMAGE;
+
+			boss.eventType = SHOOT;
+			boss.shootStartTime = time;
+			boss.eventstartTime = time;
+			return;
+		}
+		else if (boss.eventstartTime + 2.f < time)
+		{
+			//boss.wasCharged = false;
+			boss.eventType = MOVE_TO;
+			boss.eventstartTime = time;
+		}
+	}
+}
+
+void UpdateBoss(Game & game)
+{
+	if (game.level == 1)
+	{
+		FloatRect collideRect = GetBossCollisionRect(game.boss.sprite);
+
+		BossEvent bossEvent = game.boss.eventType;
+		UpdateBossEvent(game.boss, *game.hero, game.time);
+		if (bossEvent == STOMP_FOR_ZOMBIES)
+		{
+			if (game.boss.eventstartTime + 1 + game.boss.spawnedEnemies * BOSS_SPAWN_ENEMY_INTERVAL < game.time)
+			{
+				EnemyType type;
+				if (game.boss.isCommonZombie)
+				{
+					type = COMMON;
+				}
+				else type = AXE;
+
+				SpawnEnemy(game.zombieList, game.time, LEVEL1_ZOMBIE_SPAWN_SPOTS[game.boss.spawnedEnemies].x, LEVEL1_ZOMBIE_SPAWN_SPOTS[game.boss.spawnedEnemies].y, game.sprites, type);
+				game.boss.spawnedEnemies++;
+			}
+
+		}
+		ComputeBossDirection(game.boss, collideRect, game.hero->sprite);
+		UpdateBossPosition(game.boss, game.solidObjects);
+
+		//UpdateSpritePosition(boss.sprite, boss.dir, STEP_BOSS, solidObjects);
+		UpdateBossFrame(game.boss);
+
+		if (game.hero->state == BEAST)
+		{
+			if (IsFootRectIntersectWithHero(game.hero->sprite, GetBossCollisionRect(game.boss.sprite)))
+			{
+				if (game.hero->isBeastAttack && ((game.time - game.hero->lastAttackTime) > HERO_BEAST_ATTACK_TIME))
+				{
+					game.boss.health -= HERO_BEAST_DAMAGE;
+					game.hero->lastAttackTime = game.time;
+				}
+			}
+		}
+		if (game.boss.eventType == SHOOT)
+		{
+			if (game.hero->isSmashed == true)
+			{
+				//boss.lastShootTime = time;
+			}
+			else if (IsReadyToShoot(game.boss, game.time))
+			{
+				game.boss.lastShootTime = game.time;
+				Sprite milk = game.boss.sprite;
+				milk.setTextureRect(IntRect(392, 404, 42, 19));
+				Throwing thr = CreateThrowing(game.boss.sprite, game.hero->sprite, "milk", milk, game.time);
+
+				if (game.boss.lastSide == LEFT)
+				{
+					thr.sprite.setPosition(game.boss.sprite.getPosition().x - 5.f, game.boss.sprite.getPosition().y + 75.f);
+				}
+				else thr.sprite.setPosition(game.boss.sprite.getPosition().x + 78.f, game.boss.sprite.getPosition().y + 71.f);
+
+				game.throwingList.push_back(thr);
+				game.boss.isAttack = false;
+			}
+		}
+
+		if (game.hero->health <= 0)
+		{
+			game.state = END_GAME;
+		}
+		else if (game.boss.health <= 0)
+		{
+			game.state = FINISH;
+		}
+	}
 }
 
 
@@ -623,6 +1074,7 @@ void StartGame(Game * game)
 	Clock clock;
 	Clock gameSpeedClock;
 	float gameSpeedTime = 0;
+	game->audio.menu.play();
 	while (game->window->isOpen())
 	{
 		gameSpeedTime = gameSpeedClock.getElapsedTime().asMilliseconds();
@@ -635,31 +1087,36 @@ void StartGame(Game * game)
 			switch (game->state)
 			{
 			case START_GAME:
-				BeginEvent(*game, game->view);
+				BeginEvent(*game);
 				break;
 			case END_GAME:
-				EndGameEvent(*game, game->view);
+				EndGameEvent(*game);
 				break;
 			case LEVEL_FINISH:
-				LevelFinishEvent(*game, game->view);
+				LevelFinishEvent(*game);
+				break;
+			case FINISH:
+				GameFinishEvent(*game);
 				break;
 			case PLAY:
-				//TODO: spawn zombie at definite time (and change SpawnZombie func (spawn only near hero))
-				//cout << game->hero->item.name << " item " << endl;
-				
+				//TODO: spawn zombie at definite time (and change SpawnZombie func (spawn only near hero))			
+							
+
 				CheckSpawnEnemyAndLoot(*game);
+
 				ProcessEvents(*game, game->sprites);
-				
-				//cout << "ZOMBIE_STATE " << game->zombieList[0].state << " SPAWN " << game->zombieList[0].spawnTime<< " GAME " << game->time <<  endl;
 
 				UpdateHero(*game);
 				UpdateInventory(*game->hero, game->inventoryList, game->time);
 				CheckEventNpc(game->npcList, *game->hero,game->miniMap);
-				UpdateView(*game->window, game->hero->sprite, game->view);
+				UpdateView(*game->window, game->hero->sprite, game->view,game->level);
 				UpdateShots(*game, *game->hero, game->sprites.explosion);
 
-				UpdateEnemies(game->zombieList, *game->hero, game->npcList, game->solidObjects,game->throwingList, game->sprites, game->time);
+				UpdateEnemies(*game);
 				UpdateThrowings(game->throwingList, *game->hero, game->solidObjects, game->time);
+
+
+				CheckBossExplosion(game->boss, game->explosionList, game->level);
 				CheckEnemyExplosion(game->explosionList, game->zombieList);
 
 				CheckLoot(*game->hero, game->lootList, game->inventoryList, game->sprites.items);
@@ -669,16 +1126,26 @@ void StartGame(Game * game)
 
 				UpdateMinimap(game->miniMap, game->npcList, game->hero->sprite, game->view);
 
-				CheckGameOver(game->state, *game->hero);
+
+				UpdateBoss(*game);
+
+				CheckGameOver(*game);
 
 				game->lvl.Draw(*game->window);
-				DrawInventoryText(*game->window, game->inventoryList, *game->hero, game->view, game->text);
 				
 				//game->miniMap.npcDotList[0].rotate(1);
+
+
 				Render(*game);
+
 				DrawBar(*game->window, game->inventoryList, *game->hero, game->view, game->text, game->sprites);
+				DrawText(*game->window, game->inventoryList, *game->hero, game->view, game->text);
 				//cout << game->hero->sprite.getPosition().x << " " << game->hero->sprite.getPosition().y << endl;
-				cout << "STATE " << game->hero->state << endl;
+				
+
+				UpdateAudio(*game);
+				//cout << "LEVEL -  " << game->level << endl;
+
 				break;
 			}
 			game->window->display();

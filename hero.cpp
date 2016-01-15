@@ -22,20 +22,16 @@ void InitializeHero(Hero & hero)
 	hero.lastAttackTime = 0;
 	hero.lastReloadTime = 0;
 	hero.savedNeighbors = 0;
+	hero.damageResistance = 1;
+	hero.isSmashed = false;
+
+	hero.isSoundBeastAtttack = false;
+	hero.isSoundLoot = false;
+	hero.isSoundNpcSurvive = false;
+	hero.isSoundShoot = false;
+	hero.isSoundTakeDamage = false;
+	hero.isSoundEnemyExplosion = false;
 };
-
-void CheckGameOver(GameState & state, Hero & hero)
-{
-	if (hero.health <= 0)
-	{
-		state = END_GAME;
-	}
-	if (hero.savedNeighbors >= MAX_NUMBER_OF_NEIGHBORS)
-	{
-		state = LEVEL_FINISH;
-	}
-}
-
 
 void UpdateDirection(Hero & hero)
 {
@@ -113,7 +109,6 @@ bool UpdateInventory(Hero & hero, vector<Inventory> & inventoryList, float & tim
 			inventoryList[hero.slotNo].quantity = 0;
 		}
 		return true;
-
 	}
 };
 
@@ -126,6 +121,7 @@ void CheckUsingItems(Hero & hero, vector<Inventory> & inventoryList, vector<Shot
 			if (time - hero.lastAttackTime > HERO_BEAST_ATTACK_TIME)
 			{
 				//hero.lastAttackTime = game.time;  (reminder)
+				hero.isSoundBeastAtttack = true;
 				hero.isBeastAttack = true;
 				hero.currentFrame = 0;
 			}
@@ -142,6 +138,7 @@ void CheckUsingItems(Hero & hero, vector<Inventory> & inventoryList, vector<Shot
 					if (Keyboard::isKeyPressed(Keyboard::S)) hero.dirLast = DOWN;
 					if (Keyboard::isKeyPressed(Keyboard::D)) hero.dirLast = RIGHT;
 					if (Keyboard::isKeyPressed(Keyboard::W)) hero.dirLast = UP;
+					hero.isSoundShoot = true;
 					AddNewShot(shotList, hero.dirLast, hero.pos, time, sprite_shot, sprite_grenade, BULLET);
 				}
 				else if (inventoryList[hero.slotNo].name == DRINK)
@@ -180,6 +177,7 @@ void UpdateHeroFrame(Hero & hero, float & time)
 			hero.state = BEAST;
 			hero.beastTimer = time;
 			hero.currentFrame = 0;
+			hero.damageResistance = HERO_BEAST_DAMAGE_RESISTANCE;
 		}
 	}
 	else if (hero.state == BEAST)
@@ -252,11 +250,9 @@ void UpdateHeroFrame(Hero & hero, float & time)
 
 			if (hero.currentFrame > 3)
 			{
-				cout << hero.currentFrame << " FRAME" << endl;
 				hero.currentFrame = 0;
 			}
 		}
-		cout << "ASDWEDQWD " << hero.currentFrame << endl;
 	}
 	else if (hero.state == NORMAL)  //normal moving animation
 	{
@@ -311,6 +307,18 @@ void UpdateHeroFrame(Hero & hero, float & time)
 			hero.state = NORMAL;
 		}
 	}
+	else if (hero.state == SMASHED)
+	{
+		hero.sprite.setTextureRect(IntRect(235, 299, 70, 51));
+		hero.currentFrame = 0;
+		if (hero.lastSmashTime + HERO_SMASH_DURATION < time)
+		{
+			hero.state = NORMAL;
+			hero.isSmashed = false;
+			//21.36
+			//hero.sprite.setPosition()
+		}
+	}
 	if (hero.dir != NONE)
 	{
 		hero.dirLast = hero.dir;  //update dirLast (for shooting)
@@ -326,7 +334,7 @@ void DrawHero(RenderWindow & window, Sprite & hero)
 	window.draw(hero);
 };
 
-void DrawInventoryText(RenderWindow & window, vector<Inventory> & inventoryList, Hero & hero, View & view, Text & text)
+void DrawText(RenderWindow & window, vector<Inventory> & inventoryList, Hero & hero, View & view, Text & text)
 {
 	Vector2f posView = GetInterfacePosition(view);  //zametka
 
@@ -357,14 +365,24 @@ void DrawInventoryText(RenderWindow & window, vector<Inventory> & inventoryList,
 		}
 		window.draw(text);
 	}
-	text.setString("rescued: " + to_string(hero.savedNeighbors));
-	text.setPosition(posView.x + 5, posView.y + 100);
-	window.draw(text);
 
-	int remaining = MAX_NUMBER_OF_NEIGHBORS - hero.savedNeighbors;
-	text.setString("remaining: " + to_string(remaining));
-	text.setPosition(posView.x + 5, posView.y + 120);
-	window.draw(text);
+	if (hero.maxNeighbors > 0)
+	{
+		text.setString("rescued: " + to_string(hero.savedNeighbors));
+		text.setPosition(posView.x + 5, posView.y + 100);
+		window.draw(text);
+
+		int remaining = MAX_NUMBER_OF_NEIGHBORS - hero.savedNeighbors;
+		text.setString("remaining: " + to_string(remaining));
+		text.setPosition(posView.x + 5, posView.y + 120);
+		window.draw(text);
+	}
+	else
+	{
+		text.setString("Kill Boss");
+		text.setPosition(posView.x + 5, posView.y + 120);
+		window.draw(text);
+	}
 }
 
 Inventory GetNewInventoryItem(Loot & loot, Sprite & items)
@@ -394,6 +412,7 @@ void CheckLoot(Hero & hero, vector<Loot> & lootList, vector<Inventory> & invento
 			itemCenter.y = out->pos.y + out->sprite.getGlobalBounds().height / 2;
 			if (hero.sprite.getGlobalBounds().contains(itemCenter))
 			{
+				hero.isSoundLoot = true;
 				if (out->name != AMMO)  //any item that we can take
 				{
 					//check if this item exists in inventory, and if so - upload it

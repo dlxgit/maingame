@@ -5,7 +5,7 @@ const Vector2f GetSpriteCenter(const Sprite & sprite)
 	return { sprite.getPosition().x + sprite.getGlobalBounds().width / 2.f,sprite.getPosition().y + sprite.getGlobalBounds().height / 2.f };
 }
 
-const FloatRect GetSpriteRect(const Sprite & sprite)
+FloatRect GetSpriteRect(const Sprite & sprite)
 {
 	//TODO: check if works good (after change)
 	/*
@@ -40,6 +40,16 @@ void InitiazlizeSprites(Sprites & sprites)
 	texture_boss.loadFromFile("resources/images/boss.png");
 	sprites.texture_boss = texture_boss;
 	sprites.boss.setTexture(sprites.texture_boss);
+	//boss_bar
+	Texture texture_boss_bar;
+	texture_boss_bar.loadFromFile("resources/images/boss_bar.png");
+	sprites.texture_boss_bar = texture_boss_bar;
+	sprites.boss_bar.setTexture(sprites.texture_boss_bar);
+	//boss_indicator
+	Texture texture_boss_indicator;
+	texture_boss_indicator.loadFromFile("resources/images/boss_indicator.png");
+	sprites.texture_boss_indicator = texture_boss_indicator;
+	sprites.boss_indicator.setTexture(sprites.texture_boss_indicator);
 
 	//shot
 	Texture texture_shot;
@@ -88,6 +98,9 @@ void InitiazlizeSprites(Sprites & sprites)
 	sprites.texture_minimapMarkerHero = texture_hero_marker;
 	sprites.minimapMarkerHero.setTexture(sprites.texture_minimapMarkerHero);
 
+
+	sprites.level0.LoadFromFile("level0.tmx");
+	sprites.level1.LoadFromFile("level1.tmx");
 }
 
 const Vector2f ComputeDistanceBetweenSprites(Sprite & s1, Sprite & s2)

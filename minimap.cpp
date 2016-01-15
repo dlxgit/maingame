@@ -34,7 +34,7 @@ void UpdateMinimap(MiniMap & miniMap, vector<Npc> & npcList, Sprite & hero, View
 	int i = 0;
 
 	Vector2f viewCenter = view.getCenter();
-	miniMap.circle.setPosition(viewCenter.x + 450, viewCenter.y - 450);
+	miniMap.circle.setPosition(viewCenter.x + 250, viewCenter.y - 275);
 	miniMap.heroDot.setPosition(miniMap.circle.getPosition().x + 50 - (miniMap.heroDot.getGlobalBounds().width / 2), miniMap.circle.getPosition().y + 50 - (miniMap.heroDot.getGlobalBounds().width / 2));
 
 	for (Npc & npc : npcList)

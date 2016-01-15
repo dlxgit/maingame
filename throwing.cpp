@@ -5,12 +5,25 @@
 
 void UpdateThrowingFrame(Throwing & throwing)
 {
-	throwing.sprite.setTextureRect(IntRect(0 + 15 * int(throwing.currentFrame), 0, 16, 16));
-	throwing.currentFrame += 0.6;
-	if (throwing.currentFrame > 4)
+	if (throwing.name != "milk")
 	{
-		throwing.currentFrame = 0;
+		throwing.sprite.setTextureRect(IntRect(0 + 15 * int(throwing.currentFrame), 0, 16, 16));
+		throwing.currentFrame += 0.6;
+		if (throwing.currentFrame > 4)
+		{
+			throwing.currentFrame = 0;
+		}
 	}
+}
+
+bool IsMilkOnGround(Throwing & throwing)
+{
+	Vector2f throwPos = throwing.sprite.getPosition();
+	if (abs(throwPos.x - throwing.endPos.x) < 10 && abs(throwPos.y - throwing.endPos.y) < 10)
+	{
+		return true;
+	}
+	return false;
 }
 
 void UpdateThrowingPosition(Throwing & throwing)

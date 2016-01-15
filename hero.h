@@ -28,14 +28,25 @@ struct Hero
 	float lastReloadTime;
 	bool isReloading;
 	int savedNeighbors;
+	int maxNeighbors;
 	bool isWeaponSwitch;
 	float shotLastTime;
 	Inventory item;
+	float damageResistance;
+
+	bool isSmashed;  //for boss
+	float lastSmashTime;
+
+	bool isSoundShoot;
+	bool isSoundBeastAtttack;
+	bool isSoundLoot;
+	bool isSoundNpcSurvive;
+	bool isSoundTakeDamage;
+	bool isSoundEnemyExplosion;
+	bool isSoundNpcDeath;
 };
 
 void InitializeHero(Hero & hero);
-
-void CheckGameOver(GameState & state, Hero & hero);
 
 void UpdateDirection(Hero & hero);
 
@@ -51,6 +62,6 @@ void UpdateHeroFrame(Hero & hero, float & time);
 
 void DrawHero(RenderWindow & window, Sprite & hero);
 
-void DrawInventoryText(RenderWindow & window, vector<Inventory> & inventoryList, Hero & hero, View & view, Text & text);
+void DrawText(RenderWindow & window, vector<Inventory> & inventoryList, Hero & hero, View & view, Text & text);
 
 void CheckLoot(Hero & hero, vector<Loot> & lootList, vector<Inventory> & inventoryList, Sprite & items);

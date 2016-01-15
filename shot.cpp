@@ -24,25 +24,26 @@ void AddNewShot(std::vector<Shot> & shotList, Direction & dirLast, Vector2f & po
 
 	if (shotType == BULLET)
 	{
-
 		//shot.pos = hero.sprite.getPosition();
 		shot.distance = 0;
 		shot.sprite = sprite_shot;
 		shot.type = shotType;
-
+		shot.sprite.setPosition(pos);
 		switch (shot.dir)
 		{
 		case UP:
-			shot.sprite.setTextureRect(IntRect(3, 11, 7, 13));
+			shot.sprite.setTextureRect(IntRect(2, 5, 3, 7));
 			break;
 		case RIGHT:
-			shot.sprite.setTextureRect(IntRect(0, 0, 13, 7));
+			shot.sprite.setTextureRect(IntRect(0, 0, 7, 3));
+			shot.sprite.setPosition(pos.x, pos.y + 10.f);
 			break;
 		case DOWN:
-			shot.sprite.setTextureRect(IntRect(19, 11, 7, 13));
+			shot.sprite.setTextureRect(IntRect(10, 5, 3, 7));
 			break;
 		case LEFT:
-			shot.sprite.setTextureRect(IntRect(16, 0, 13, 7));
+			shot.sprite.setTextureRect(IntRect(8, 0, 7, 3));
+			shot.sprite.setPosition(pos.x, pos.y + 10.f);
 			break;
 		}
 	}
@@ -58,9 +59,9 @@ void AddNewShot(std::vector<Shot> & shotList, Direction & dirLast, Vector2f & po
 		//shot.sprite.setPosition(hero.sprite.getPosition());
 		shot.currentFrame = 0;
 		shot.isExploded = false;
+		shot.sprite.setPosition(pos);
 	}
-	shot.sprite.setPosition(pos);
-	shot.pos = pos;
+	shot.pos = shot.sprite.getPosition();
 
 	//cout << "SHOTEEEEEE " << pos.x << " " << pos.y  << endl;
 	shotList.push_back(shot);

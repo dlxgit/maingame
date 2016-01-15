@@ -3,13 +3,12 @@
 
 void InitializeLoot(vector<Loot> & lootList, vector<Object> & objects, Sprite & sprite)
 {
-	GenerateLoot(lootList, objects, 5, DRINK, sprite);
-	GenerateLoot(lootList, objects, 3, PISTOL, sprite);
-	GenerateLoot(lootList, objects, 2, AMMO, sprite);
-	GenerateLoot(lootList, objects, 1, RIFLE, sprite);
-	GenerateLoot(lootList, objects, 1, KEY, sprite);
-	GenerateLoot(lootList, objects, 1, MIXTURE, sprite);
-	GenerateLoot(lootList, objects, 2, GRENADE, sprite);
+	GenerateLoot(lootList, objects, { WIDTH_MAP,HEIGHT_MAP }, 5, DRINK, sprite);
+	GenerateLoot(lootList, objects, { WIDTH_MAP,HEIGHT_MAP }, 3, PISTOL, sprite);
+	GenerateLoot(lootList, objects, { WIDTH_MAP,HEIGHT_MAP }, 2, AMMO, sprite);
+	GenerateLoot(lootList, objects, { WIDTH_MAP,HEIGHT_MAP }, 1, RIFLE, sprite);
+	GenerateLoot(lootList, objects, { WIDTH_MAP,HEIGHT_MAP }, 1, MIXTURE, sprite);
+	GenerateLoot(lootList, objects, { WIDTH_MAP,HEIGHT_MAP }, 2, GRENADE, sprite);
 }
 
 
@@ -49,13 +48,13 @@ Loot GetNewLootItem(NameItem & item, Sprite & sprite, float & x, float & y)
 	return loot;
 }
 
-void GenerateLoot(vector<Loot> & lootList, vector<Object> & objects, int ItemsRemaining, NameItem  item, Sprite & texture_items)
+void GenerateLoot(vector<Loot> & lootList, vector<Object> & objects,const Vector2i & mapSize, int ItemsRemaining, NameItem  item, Sprite & texture_items)
 {
 	//TODO: MAKE FUNCTION MORE READABLE
 	do
 	{
 		bool needNewBlock = false;
-		Vector2f newPos = { float((rand() % WIDTH_MAP) * STEP), float((rand() % HEIGHT_MAP) * STEP) };
+		Vector2f newPos = { float((rand() % int(mapSize.x)) * STEP_TILE), float((rand() % int(mapSize.y)) * STEP_TILE) };
 
 		FloatRect lootRect = { newPos.x,newPos.y,texture_items.getGlobalBounds().height,texture_items.getGlobalBounds().height };
 		bool isIntersected = false;

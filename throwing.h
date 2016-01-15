@@ -18,9 +18,13 @@ struct Throwing
 	//float currentTime;
 	bool isEnd;
 	float currentFrame;
+
+	Vector2f endPos;
 };
 
 void UpdateThrowingFrame(Throwing & throwing);
+
+bool IsMilkOnGround(Throwing & throwing);
 
 void UpdateThrowingPosition(Throwing & throwing);
 

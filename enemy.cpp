@@ -5,7 +5,6 @@
 void ComputeThrownItemPosition(Sprite & sprite, Direction dir, float time, bool isHero)
 {
 	Vector2f startPos = sprite.getPosition();
-
 }
 
 Throwing CreateThrowing(Sprite & object, Sprite & target, string type,Sprite & throwingSprite, float & time)
@@ -27,6 +26,13 @@ Throwing CreateThrowing(Sprite & object, Sprite & target, string type,Sprite & t
 	{
 
 	}
+	else if (type == "milk")
+	{
+		throwing.maxTime = 3.f;
+		throwing.cooldown = BOSS_SHOT_COOLDOWN;
+	}
+
+	throwing.name = type;
 
 	float dist = sqrt(pow(distance.x, 2) + pow(distance.y, 2));
 
@@ -56,7 +62,9 @@ Throwing CreateThrowing(Sprite & object, Sprite & target, string type,Sprite & t
 
 	//throwing.dir = dir;
 	throwing.sprite = throwingSprite;
+	
 	throwing.startPos = object.getPosition();
+
 	throwing.sprite.setPosition(throwing.startPos);
 	throwing.startTime = time;
 	throwing.currentFrame = 0;
@@ -69,7 +77,6 @@ void SpawnEnemy(vector<Enemy> & zombieList, float time, int posX, int posY, Spri
 
 	enemy.pos.x = posX;
 	enemy.pos.y = posY;
-
 
 	enemy.health = ZOMBIE_MAX_HP;
 
@@ -186,7 +193,6 @@ void CheckEnemyFollow(Enemy & enemy, Hero & hero)
 	}
 };
 
-
 //should i store it in zombieList>? if i can just keep it here (return true)
 bool IsEnemyNearHero(Hero & hero, Enemy & enemy)
 {
@@ -247,13 +253,11 @@ void UpdateEnemyAttack(Hero & hero, Enemy & enemy, const float & time)
 		if (enemy.attack_time < time - 1.5)
 		{
 			enemy.isAttack = true;
-			if (hero.state == BEAST)
-				hero.health -= (ZOMBIE_DAMAGE / 3);
-			else
-				hero.health -= (ZOMBIE_DAMAGE);
+			hero.health -= (ZOMBIE_DAMAGE * hero.damageResistance);
 			if (hero.state != BEAST)
 			{
 				hero.state = DAMAGED;
+				hero.isSoundTakeDamage = true;
 				hero.currentFrame = 0;
 			}
 			enemy.attack_time = time;
@@ -271,7 +275,7 @@ bool IsIntersectWithOtherEnemy(vector<Enemy> & zombieList, int & index)
 		{
 			if (zombieList[index].sprite.getGlobalBounds().intersects(enemy.sprite.getGlobalBounds()))
 			{
-				cout << "IND " << index << " i " << i << endl;
+				//cout << "IND " << index << " i " << i << endl;
 				return true;
 			}
 		}
@@ -443,18 +447,17 @@ void UpdateEnemyFrame(Enemy & enemy, float & time)
 			}
 			else if (enemy.state == DEAD)
 			{
-				enemy.sprite.setTextureRect(IntRect(5 + 29 * int(enemy.currentFrame),232, 30, 46));
+				enemy.sprite.setTextureRect(IntRect(5 + 29 * int(enemy.currentFrame),232, 30, 38));
+				enemy.currentFrame += 0.03;
 				if (enemy.currentFrame > 9)
 				{
 					enemy.state = EXPLODED;
 				}
 			}
-			
-
 			else if (enemy.state == NOTSPAWNED)
 			{
 				//cout << "TIMES " << time << " " << enemy.spawnTime << " " << enemy.spawnDelay << " " << endl;
-				if (time - (enemy.spawnTime + enemy.spawnDelay) < 0)
+				if (enemy.spawnTime + enemy.spawnDelay > time)
 				{
 					enemy.state = ACTIVE;
 				}
@@ -466,13 +469,6 @@ void UpdateEnemyFrame(Enemy & enemy, float & time)
 
 void ComputeEnemyAttackFrame(Enemy & enemy)
 {
-	/*
-	5, 173, 24, 33
-	5, 201, 24, 33
-	5, 229, 24, 33
-	5, 256, 24, 33
-	*/
-
 	switch (enemy.dirLast)
 	{
 	case UP:
@@ -616,15 +612,28 @@ void SpawnEnemyRandomly(vector<Enemy>&zombieList, vector<Object> & objects, int 
 			{
 				//sprites.enemy.setPosition(newPos);
 				//ZombieSpawn(zombieList, time, newPos.x,newPos.y, sprite_zombie, COMMON);
-				SpawnEnemy(zombieList, time, newPos.x, newPos.y, sprites, AXE);
-				zombieList[zombieList.size() - 1].sprite = sprites.zombie;
+				if (time < 10)
+				{
+					SpawnEnemy(zombieList, time, newPos.x, newPos.y, sprites, COMMON);
+				}
+				else
+				{
+					EnemyType type = COMMON;
+					if (zombieList.size() > 0)
+					{
+						if (zombieList[zombieList.size() - 1].type == AXE)
+							type = COMMON;
+						else type = AXE;
+					}
+					SpawnEnemy(zombieList, time, newPos.x, newPos.y, sprites, type);
+				}
+				//zombieList[zombieList.size() - 1].sprite = sprites.zombie;
 
 				zombiesRemaining -= 1;
 			}
 		}
 	} while (zombiesRemaining > 0);
 }
-
 
 void CheckEnemyDir(float & time, Enemy & enemy)
 {
@@ -649,7 +658,6 @@ void CheckEnemyExplosion(vector<Explosion> & explosionList, vector<Enemy> & zomb
 	{
 		if (explosion->currentFrame > 12)
 		{
-			//checkDamageZombies;
 			for (vector<Enemy>::iterator zombie = zombieList.begin(); zombie != zombieList.end(); zombie++)
 			{
 				if (abs(zombie->pos.x - (explosion->pos.x + 120)) < 120 && (abs(zombie->pos.y - (explosion->pos.y + 70)) < 120))
@@ -658,6 +666,7 @@ void CheckEnemyExplosion(vector<Explosion> & explosionList, vector<Enemy> & zomb
 				}
 			}
 			explosion = explosionList.erase(explosion);
+
 		}
 		else
 		{

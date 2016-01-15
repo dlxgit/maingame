@@ -23,6 +23,6 @@ int GetSlotIndexOfItem(Loot & out, vector<Inventory> & inventoryList);
 
 Loot GetNewLootItem(NameItem & item, Sprite & sprite, float & x, float & y);
 
-void GenerateLoot(vector<Loot> & lootList, vector<Object> & objects, int ItemsRemaining, NameItem  item, Sprite & texture_items);
+void GenerateLoot(vector<Loot> & lootList, vector<Object> & objects, const Vector2i & mapSize, int ItemsRemaining, NameItem  item, Sprite & texture_items);
 
 void DeleteLoot(vector<Loot> & loot);

@@ -29,6 +29,25 @@ enum EnemyType
 	//BOSS.
 };
 
+enum BossState
+{
+	SPAWNING,
+	MOVING,
+	STOMPING,
+	SHOOTING,
+	SHRINKING,
+	DYING
+};
+
+enum BossEvent
+{
+	MOVE_OUT,
+	MOVE_TO,
+	CHARGE,
+	SHOOT,
+	STOMP_FOR_ZOMBIES,
+};
+
 enum EnemyState
 {
 	NOTSPAWNED,  //cant move (raising from the ground)
@@ -40,6 +59,7 @@ enum EnemyState
 enum HeroState
 {
 	DAMAGED,
+	SMASHED,
 	NORMAL,
 	TRANSFORMING,  //changing from normal to beast
 	BEAST
@@ -58,6 +78,7 @@ enum GameState
 	LEVEL_FINISH,
 	END_GAME,
 	RESTART,
+	FINISH,
 };
 
 enum NameItem
@@ -97,16 +118,53 @@ const float ZOMBIE_SPAWN_RADIUS_COLLISION = 80.f;
 
 
 //map
-const Vector2i WINDOW_SIZE = { 1280,1024 };
+const Vector2i WINDOW_SIZE = { 800,600 };
 const Vector2i TILEMAP_SIZE = { 50,27};
-const int HEIGHT_MAP = 30;
-const int WIDTH_MAP = 76;
 const int STEP_TILE = 64;
 const int STEP = 48;
 
+const int HEIGHT_MAP = 30;
+const int WIDTH_MAP = 76;
+const Vector2i LEVEL_BOSS_SIZE = { 20, 12};
+
+const int LEVEL_BOSS_MAX_LOOT_QUANTITY = 2;
+
+//boss
+const int BOSS_MAX_HEALTH = 10000;
+const float BOSS_STAGE_TIME = 10.f;
+
+const float STEP_BOSS = 3.f;
+const float STEP_BOSS_FOLLOW = 5.f;
+const float STEP_BOSS_CHARGE = 12.f;
+
+const float BOSS_DIR_CHANGE_TIME = 2.f;
+
+const float BOSS_EVENT_COME_SHOOT_DISTANCE = 300;
+
+
+const float BOSS_MILK_MAX_DISTANCE = 0;   //
+
+const float BOSS_SPAWN_ENEMY_INTERVAL = 1.f;   //time for 1 enemy spawn while stomping
+
+const float BOSS_FOLLOW_FOR_SHOOT_TIME = 7.f;
+
+
+const float BOSS_SHOT_COOLDOWN = 1.f;
+
+const float BOSS_SHOOTING_COOLDOWN = 0.3f;
+
+
+const Vector2f LEVEL1_CENTER_POS = { float(12 * 64), float(6 * 64) };
+const Vector2f LEVEL1_ZOMBIE_SPAWN_SPOTS[4] = { {11 * 64, 5 * 64}, { 13 * 64, 5 * 64 }, { 11 * 64, 7 * 64 }, { 13 * 64, 7 * 64 } };
+
+//boss_bar
+const Vector2f BOSS_BAR_POSITION = { float(WINDOW_SIZE.x / 2) - 132, 40.f };
+const Vector2f BOSS_INDICATOR_POSITION = { float(WINDOW_SIZE.x / 2) - 132 + 9, 46.f };
+
+
 
 //minimap
-const Vector2f MINIMAP_START_POS = { 700.f,700.f };
+const Vector2f MINIMAP_START_POS = { 500.f,100.f };
 const float MINIMAP_DISTANCE_SCALE = 5.f;
 const float MINIMAP_CIRCLE_RADIUS = 50.f;
 
@@ -117,7 +175,7 @@ const float STEP_ZOMBIE = 2.f;
 const float STEP_ZOMBIE_ACTIVE = 3.f;
 const float STEP_SHOT = 12.f;
 const float STEP_GRENADE = 5.f;
-const float STEP_ZOMBIE_AXE = 2.f;
+const float STEP_ENEMY_AXE = 1.f;
 
 
 //coefficients
@@ -125,7 +183,7 @@ const float ZOMBIE_INCREASE_RATE_AXE = 2;
 
 
 //enemies
-const int ENEMY_AXE_ATTACK_DAMAGE = 34;
+const int ENEMY_AXE_ATTACK_DAMAGE = 20;
 const float ENEMY_AXE_SPAWN_DELAY = 3.f;
 
 const float ENEMY_AXE_ATTACK_COOLDOWN = 3.f;
@@ -139,12 +197,16 @@ const float ENEMY_AXE_CHARGE_SPEED_INCREASE_PER_LOOP = 0.2f;
 const float ENEMY_AXE_THROWING_STEP_PER_LOOP = 5;
 
 //damage
-const int ZOMBIE_DAMAGE = 30;
-//const int DMG_ITEM[7] = { 0, 35, 50, 0, 0, 0, 100 };
-const int DMG_ITEM[8] = { 0, 100, 100, 0, 0, 0, 100, 100 };
-const int HERO_BEAST_DAMAGE = 100;
+const float BOSS_SMASH_DAMAGE = 30.f;
+const float ZOMBIE_DAMAGE = 30.f;
+const int DMG_ITEM[8] = { 0, 100, 100, 0, 0, 0, 200, 100 };
+const int HERO_BEAST_DAMAGE = 150;
 
-const float THROWING_AXE_DAMAGE = 30.f;
+const float THROWING_AXE_DAMAGE = 15.f;
+const float BOSS_MILK_DAMAGE = 7.f;
+
+const float HERO_BEAST_DAMAGE_RESISTANCE = 0.2f;
+
 
 //distance
 const int SHOT_MAX_DISTANCE = 400;
@@ -152,14 +214,16 @@ const int ZOMBIE_VISION_DISTANCE = 300;
 
 //health of objects
 const int ZOMBIE_MAX_HP = 100;
-const int HP_PER_DRINK = 30;
+const int HP_PER_DRINK = 40;
 const int NPC_MAX_HEALTH = 50;
 
 //time 
 const float ITEM_REUSE_COOLDOWN[8] = { 0.35f, 0.35f,0.15f,0.15f,0.15f,0.15f, 0.1f };
-const int BEAST_MAX_TIME = 17;
-const float HERO_BEAST_ATTACK_TIME = 0.7f;
+const int BEAST_MAX_TIME = 12;
+const float HERO_BEAST_ATTACK_TIME = 0.3f;
 
+//heroTime
+const float HERO_SMASH_DURATION = 1.f;
 
 
 //const float WEAPON_RELOAD_TIME = 1.5f;

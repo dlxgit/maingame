@@ -60,7 +60,7 @@ bool Level::LoadFromFile(std::string filename)//двоеточия-обращение к методам кл
 	tilesetImage.loadFromImage(img);
 	tilesetImage.setSmooth(false);
 
-								 
+						 
 	int columns = tilesetImage.getSize().x / tileWidth;
 	int rows = tilesetImage.getSize().y / tileHeight;
 

@@ -1,5 +1,6 @@
 #pragma once
 #include "SFML\Graphics.hpp"
+#include "level.h"
 
 using namespace sf;
 
@@ -24,6 +25,9 @@ struct Sprites
 	Sprite throwing_axe;
 
 	Sprite boss;
+	Sprite boss_bar;
+	Sprite boss_indicator;
+
 
 	Texture texture_hero;
 	Texture texture_zombie;
@@ -45,10 +49,15 @@ struct Sprites
 	Texture texture_throwing_axe;
 
 	Texture texture_boss;
+	Texture texture_boss_bar;
+	Texture texture_boss_indicator;
+
+	Level level0;
+	Level level1;
 };
 
 
-const FloatRect GetSpriteRect(const Sprite & sprite);
+FloatRect GetSpriteRect(const Sprite & sprite);
 
 const Vector2f GetSpriteCenter(const Sprite & sprite);
 
