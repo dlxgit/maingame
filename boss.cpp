@@ -57,7 +57,7 @@ void UpdateBossFrame(Boss & boss)
 		{
 			boss.sprite.setTextureRect(IntRect(11 + 105 * int(boss.currentFrame), 189, 106, 154));
 		}
-		boss.currentFrame += 0.1;
+		boss.currentFrame += 0.1f;
 	}
 	else if (boss.eventType != SHOOT)
 	{
@@ -82,10 +82,10 @@ void UpdateBossFrame(Boss & boss)
 		default:
 			break;
 		}
-		boss.currentFrame += 0.07;
+		boss.currentFrame += 0.07f;
 		if (boss.eventType == CHARGE)
 		{
-			boss.currentFrame += 0.2;
+			boss.currentFrame += 0.2f;
 		}
 		if (boss.currentFrame > 4)
 		{
@@ -106,7 +106,7 @@ void UpdateBossFrame(Boss & boss)
 		{
 			boss.isAttack = true;
 		}
-		boss.currentFrame += 0.2;
+		boss.currentFrame += 0.2f;
 		if (boss.currentFrame >= 3)
 		{
 			boss.currentFrame = 1;
@@ -282,7 +282,7 @@ void DrawBossBar(RenderWindow & window, Boss & boss, const Vector2f & viewPos)
 {
 	if (boss.health > 0)
 	{
-		boss.indicator.setTextureRect(IntRect(0, 0, 246 * (float(boss.health) / float(BOSS_MAX_HEALTH)), 8));
+		boss.indicator.setTextureRect(IntRect(0, 0, 246 * int(float(boss.health) / float(BOSS_MAX_HEALTH)), 8));
 	}
 	boss.bar.setPosition(BOSS_BAR_POSITION.x + viewPos.x - WINDOW_SIZE.x / 2.f, BOSS_BAR_POSITION.y + viewPos.y - WINDOW_SIZE.y / 2.f);
 	boss.indicator.setPosition(BOSS_INDICATOR_POSITION.x + viewPos.x - WINDOW_SIZE.x / 2.f, BOSS_INDICATOR_POSITION.y + viewPos.y - WINDOW_SIZE.y / 2.f);

@@ -314,7 +314,7 @@ void UpdateShots(Game & game, Hero & hero, Sprite & sprite_explosion) //shots po
 		if (shot->type == BULLET)
 		{
 			shot->pos = ComputeSpriteNewPosition(shot->sprite, shot->dir, STEP_SHOT);
-			shot->distance += STEP_SHOT;
+			shot->distance += int(STEP_SHOT);
 
 
 			bool isDeleted = false;
@@ -504,15 +504,14 @@ void UpdateEnemies(Game & game)
 								zombie->currentFrame = 0;
 								zombie->isAttack = true;
 								zombie->attack_time = game.time;
-								game.hero->health -= ENEMY_AXE_ATTACK_DAMAGE * game.hero->damageResistance;
+								game.hero->health -= int(ENEMY_AXE_ATTACK_DAMAGE * game.hero->damageResistance);
 							}
 						}
 						if (zombie->last_action_time + ENEMY_AXE_ACTION_COOLDOWN < game.time)
 						{
 							Vector2f spriteDistance = ComputeDistanceBetweenSprites(zombie->sprite, game.hero->sprite);
 							zombie->last_action_time = game.time;
-							//zombie->
-							//cout << "ACTION!!!  " << endl;
+
 							game.throwingList.push_back(CreateThrowing(zombie->sprite, game.hero->sprite, "axe", game.sprites.throwing_axe, game.time));
 							
 						}
@@ -722,8 +721,8 @@ void UpdateThrowings(vector<Throwing> & throwingList, Hero & hero, vector<Object
 		{
 			//deal damage (action)
 			if(it->name != "milk")
-				hero.health -= THROWING_AXE_DAMAGE * hero.damageResistance;
-			else hero.health -= BOSS_MILK_DAMAGE * hero.damageResistance;
+				hero.health -= int(THROWING_AXE_DAMAGE * hero.damageResistance);
+			else hero.health -= int(BOSS_MILK_DAMAGE * hero.damageResistance);
 			it = throwingList.erase(it);
 			hero.isSoundTakeDamage = true;
 		}
@@ -833,8 +832,8 @@ void DrawBar(RenderWindow & window, vector<Inventory> & inventoryList, Hero & he
 	sprites.bar.setTextureRect(IntRect(0, 0, 170, 35));
 	sprites.bar.setPosition(posView);
 
-	sprites.health.setTextureRect(IntRect(1, 0, 146 * (float(hero.health) / 100), 29));
-	sprites.health.setPosition(posView.x + 10, posView.y + 1);
+	sprites.health.setTextureRect(IntRect(1, 0, 146 * int(float(hero.health) / 100), 29));
+	sprites.health.setPosition(posView.x + 10.f, posView.y + 1.f);
 
 	inventoryList[hero.slotNo].sprite.setPosition(posView.x + 5, posView.y + 40);
 
@@ -976,7 +975,7 @@ void UpdateBossEvent(Boss & boss, Hero & hero, float & time)
 			hero.state = SMASHED;
 			boss.lastShootTime = time + 0.3f;
 			hero.isSoundTakeDamage = true;
-			hero.health -= BOSS_SMASH_DAMAGE;
+			hero.health -= int(BOSS_SMASH_DAMAGE);
 
 			boss.eventType = SHOOT;
 			boss.shootStartTime = time;
@@ -1012,7 +1011,7 @@ void UpdateBoss(Game & game)
 				else type = AXE;
 
 				SpawnEnemy(game.zombieList, game.time, LEVEL1_ZOMBIE_SPAWN_SPOTS[game.boss.spawnedEnemies].x, LEVEL1_ZOMBIE_SPAWN_SPOTS[game.boss.spawnedEnemies].y, game.sprites, type);
-				game.boss.spawnedEnemies++;
+				game.boss.spawnedEnemies += 1;
 			}
 
 		}

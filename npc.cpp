@@ -85,7 +85,7 @@ void ComputeNpcFrame(vector<Npc> & npcList)
 					npc.currentFrame = 0;
 				}
 				npc.sprite.setTextureRect(IntRect(0 + 50 * int(npc.currentFrame), 92, 50, 67));
-				npc.currentFrame += 0.08;
+				npc.currentFrame += 0.08f;
 				break;
 			case DOG:
 				if (npc.currentFrame > 4)
@@ -120,9 +120,9 @@ void ComputeNpcFrame(vector<Npc> & npcList)
 		else if (npc.state == KILLED)
 		{
 			npc.sprite.setTextureRect(IntRect(4 + 45 * int(npc.currentFrame), 593, 53, 45));
-			npc.currentFrame += 0.06;
+			npc.currentFrame += 0.06f;
 		}
-		npc.currentFrame += 0.02;
+		npc.currentFrame += 0.02f;
 	}
 };
 

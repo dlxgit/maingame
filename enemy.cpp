@@ -36,8 +36,6 @@ Throwing CreateThrowing(Sprite & object, Sprite & target, string type,Sprite & t
 
 	float dist = sqrt(pow(distance.x, 2) + pow(distance.y, 2));
 
-	float coeff;
-
 	if (distance.x >= distance.y)
 	{
 		throwing.stepPerLoop = { 1, distance.y / distance.x };
@@ -75,8 +73,7 @@ void SpawnEnemy(vector<Enemy> & zombieList, float time, int posX, int posY, Spri
 {
 	Enemy enemy;
 
-	enemy.pos.x = posX;
-	enemy.pos.y = posY;
+	enemy.pos = { float(posX), float(posY) };
 
 	enemy.health = ZOMBIE_MAX_HP;
 
@@ -115,7 +112,7 @@ void SpawnEnemy(vector<Enemy> & zombieList, float time, int posX, int posY, Spri
 	enemy.isAction = false;
 	enemy.last_action_time = 0;
 
-	enemy.sprite.setPosition(posX, posY);
+	enemy.sprite.setPosition(float(posX), float(posY));
 	zombieList.push_back(enemy);
 };
 
@@ -253,7 +250,7 @@ void UpdateEnemyAttack(Hero & hero, Enemy & enemy, const float & time)
 		if (enemy.attack_time < time - 1.5)
 		{
 			enemy.isAttack = true;
-			hero.health -= (ZOMBIE_DAMAGE * hero.damageResistance);
+			hero.health -= int(ZOMBIE_DAMAGE * hero.damageResistance);
 			if (hero.state != BEAST)
 			{
 				hero.state = DAMAGED;
@@ -261,7 +258,7 @@ void UpdateEnemyAttack(Hero & hero, Enemy & enemy, const float & time)
 				hero.currentFrame = 0;
 			}
 			enemy.attack_time = time;
-			enemy.isNear = enemy.dir;  //for Beast melee attack
+			//enemy.isNear = enemy.dir;  //for Beast melee attack
 		}
 	}
 };
@@ -299,7 +296,7 @@ void UpdateEnemyFrame(Enemy & enemy, float & time)
 		if (enemy.state == DEAD)  //if zombie is exploding
 		{
 			enemy.sprite.setTextureRect(IntRect(5 + 40 * int(enemy.currentFrame), 344, 34, 48));
-			enemy.currentFrame += 0.05;
+			enemy.currentFrame += 0.05f;
 			if (enemy.currentFrame > 9)
 			{
 				enemy.state = EXPLODED;
@@ -314,7 +311,7 @@ void UpdateEnemyFrame(Enemy & enemy, float & time)
 				enemy.state = ACTIVE;
 				enemy.currentFrame = 0;
 			}
-			enemy.currentFrame += 0.04;
+			enemy.currentFrame += 0.04f;
 		}
 		else if (enemy.state == ACTIVE)
 		{
@@ -366,7 +363,7 @@ void UpdateEnemyFrame(Enemy & enemy, float & time)
 				}
 			}
 		}
-		enemy.currentFrame += 0.05;
+		enemy.currentFrame += 0.05f;
 	}
 
 	
@@ -448,7 +445,7 @@ void UpdateEnemyFrame(Enemy & enemy, float & time)
 			else if (enemy.state == DEAD)
 			{
 				enemy.sprite.setTextureRect(IntRect(5 + 29 * int(enemy.currentFrame),232, 30, 38));
-				enemy.currentFrame += 0.03;
+				enemy.currentFrame += 0.03f;
 				if (enemy.currentFrame > 9)
 				{
 					enemy.state = EXPLODED;
@@ -462,7 +459,7 @@ void UpdateEnemyFrame(Enemy & enemy, float & time)
 					enemy.state = ACTIVE;
 				}
 			}
-			enemy.currentFrame += 0.05;
+			enemy.currentFrame += 0.05f;
 		}
 	}
 };
@@ -502,7 +499,7 @@ void ComputeEnemyAttackFrame(Enemy & enemy)
 	default:
 		break;
 	}
-	enemy.currentFrame += 0.05;
+	enemy.currentFrame += 0.05f;
 
 	if (enemy.currentFrame > 2)
 	{
@@ -614,7 +611,7 @@ void SpawnEnemyRandomly(vector<Enemy>&zombieList, vector<Object> & objects, int 
 				//ZombieSpawn(zombieList, time, newPos.x,newPos.y, sprite_zombie, COMMON);
 				if (time < 10)
 				{
-					SpawnEnemy(zombieList, time, newPos.x, newPos.y, sprites, COMMON);
+					SpawnEnemy(zombieList, time, int(newPos.x), int(newPos.y), sprites, COMMON);
 				}
 				else
 				{
@@ -625,7 +622,7 @@ void SpawnEnemyRandomly(vector<Enemy>&zombieList, vector<Object> & objects, int 
 							type = COMMON;
 						else type = AXE;
 					}
-					SpawnEnemy(zombieList, time, newPos.x, newPos.y, sprites, type);
+					SpawnEnemy(zombieList, time, int(newPos.x), int(newPos.y), sprites, type);
 				}
 				//zombieList[zombieList.size() - 1].sprite = sprites.zombie;
 

@@ -8,7 +8,7 @@ void UpdateThrowingFrame(Throwing & throwing)
 	if (throwing.name != "milk")
 	{
 		throwing.sprite.setTextureRect(IntRect(0 + 15 * int(throwing.currentFrame), 0, 16, 16));
-		throwing.currentFrame += 0.6;
+		throwing.currentFrame += 0.6f;
 		if (throwing.currentFrame > 4)
 		{
 			throwing.currentFrame = 0;

@@ -87,7 +87,7 @@ bool IsInventorySwitch(Hero & hero)
 };
 
 
-bool UpdateInventory(Hero & hero, vector<Inventory> & inventoryList, float & time)
+void UpdateInventory(Hero & hero, vector<Inventory> & inventoryList, float & time)
 {
 	//update items 
 	if (inventoryList[hero.slotNo].current == 0 && time - hero.lastReloadTime > WEAPON_RELOAD_TIME)
@@ -108,7 +108,6 @@ bool UpdateInventory(Hero & hero, vector<Inventory> & inventoryList, float & tim
 		{
 			inventoryList[hero.slotNo].quantity = 0;
 		}
-		return true;
 	}
 };
 
@@ -170,7 +169,7 @@ void UpdateHeroFrame(Hero & hero, float & time)
 	if (hero.state == TRANSFORMING)
 	{
 		hero.sprite.setTextureRect(IntRect(11 + 37 * int(hero.currentFrame), 484, 32, 45));
-		hero.currentFrame += 0.05;
+		hero.currentFrame += 0.05f;
 
 		if (hero.currentFrame > 7)
 		{
@@ -246,7 +245,7 @@ void UpdateHeroFrame(Hero & hero, float & time)
 				break;
 			}
 
-			hero.currentFrame += 0.2;
+			hero.currentFrame += 0.2f;
 
 			if (hero.currentFrame > 3)
 			{
@@ -300,7 +299,7 @@ void UpdateHeroFrame(Hero & hero, float & time)
 	else if (hero.state == DAMAGED)
 	{
 		hero.sprite.setTextureRect(IntRect(10 + 32 * int(hero.currentFrame), 179, 32, 45));
-		hero.currentFrame += 0.06;
+		hero.currentFrame += 0.06f;
 		if (hero.currentFrame > 2)
 		{
 			hero.currentFrame = 0;

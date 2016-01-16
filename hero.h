@@ -52,7 +52,7 @@ void UpdateDirection(Hero & hero);
 
 bool IsInventorySwitch(Hero & hero);
 
-bool UpdateInventory(Hero & hero, vector<Inventory> & inventoryList, float & time);
+void UpdateInventory(Hero & hero, vector<Inventory> & inventoryList, float & time);
 
 Inventory GetNewInventoryItem(Loot & loot, Sprite & items);
 
